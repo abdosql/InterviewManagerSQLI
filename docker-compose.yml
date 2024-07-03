@@ -1,0 +1,130 @@
+version: '3.7'
+
+services:
+    api:
+        container_name: "ReadSideService"
+        build:
+            context: .
+            dockerfile: ./docker/server/Dockerfile
+        expose:
+            - "9000"
+            - "9003"
+        ports:
+            - "9898:80"
+        working_dir: /var/www/html
+        volumes:
+            - ./api:/var/www/html
+            - ./docker/server/apache/sites-enabled:/etc/apache2/sites-enabled
+            - ./docker/server/php/php.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
+            - ./docker/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+        depends_on:
+            - db-mongodb
+        networks:
+            - inner_net
+    backend:
+        container_name: "WriteSideService"
+        build:
+            context: .
+            dockerfile: ./docker/server/Dockerfile
+        expose:
+            - "9000"
+            - "9003"
+        ports:
+            - "9595:80"
+        working_dir: /var/www/html
+        volumes:
+            - ./backend:/var/www/html
+            - ./docker/server/apache/sites-enabled:/etc/apache2/sites-enabled
+            - ./docker/server/php/php.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
+            - ./docker/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+        depends_on:
+            - sql-database
+        networks:
+            - inner_net
+#    server:
+#        container_name: "frontend_client2"
+#        build:
+#            context: .
+#            dockerfile: ./docker/server/Dockerfile
+#        expose:
+#            - "9000"
+#            - "9003"
+#        ports:
+#            - "80:80"
+#        working_dir: /var/www/html
+#        volumes:
+#            - ./source:/var/www/html
+#            - ./docker/server/apache/sites-enabled:/etc/apache2/sites-enabled
+#            - ./docker/server/php/php.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
+#            - ./docker/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+#        depends_on:
+#            - database
+#        networks:
+#            - inner_net
+    sql-database:
+        container_name: "mysql"
+        healthcheck:
+            test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+            interval: 5s
+            retries: 5
+        image: mysql:latest
+        volumes:
+            - mysql_data:/var/lib/mysql
+            - ./docker/db/mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: 'super1234'
+            MYSQL_USER: 'app_user'
+            MYSQL_PASSWORD: '1234'
+            MYSQL_DATABASE: 'mysql-db'
+        networks:
+            - inner_net
+    phpmyadmin:
+        container_name: "phpmyadmin"
+        image: phpmyadmin/phpmyadmin:5
+        environment:
+            PMA_HOST: database
+        ports:
+            - "8080:80"
+        depends_on:
+            - db-mongodb
+        networks:
+            - inner_net
+        volumes:
+            - mysql_admin_data:/var/www/html
+    db-mongodb:
+        image: mongo:6-jammy
+        environment:
+            - MONGO_INITDB_DATABASE=mongo-db
+            - MONGO_INITDB_ROOT_USERNAME=app_user
+            - MONGO_INITDB_ROOT_PASSWORD=1234
+        volumes:
+            - mongodb_data:/var/www/html
+        ports:
+            - "27017:27017"
+    # mailcatcher:
+    #     container_name: "smtp_server"
+    #     networks:
+    #         - inner_net
+    #     image: yappabe/mailcatcher
+    #     ports:
+    #         - 1025:1025
+    #         - 1080:1080
+    rabbitmq:
+        container_name: "rabbitmq_server"
+        image: rabbitmq:3-management-alpine
+        environment:
+            - RABBITMQ_DEFAULT_USER=app_user
+            - RABBITMQ_DEFAULT_PASS=1234
+        ports:
+            - 5672:5672 # port to use when writing
+            - 15672:15672 #port to use for UI admin
+        networks:
+            - inner_net
+volumes:
+    mysql_admin_data:
+    mongodb_data:
+    mysql_data:
+networks:
+    inner_net:
