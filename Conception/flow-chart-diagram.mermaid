@@ -1,0 +1,38 @@
+graph TD;
+    subgraph "Responsable d'entretien (RH)"
+        Planifier_entretiens_RH --> Modifier_détails_entretiens_RH;
+        Modifier_détails_entretiens_RH --> Gérer_agenda_évaluateurs_RH;
+        Modifier_détails_entretiens_RH --> Changer_statut_entretiens_RH;
+        Changer_statut_entretiens_RH --> Évaluer_prestation_entretien_RH;
+    end
+
+    subgraph "Évaluateur"
+        Lister_entretiens_évaluateur --> Accéder_détails_candidats_évaluateur;
+        Accéder_détails_candidats_évaluateur --> Saisir_appréciations_évaluateur;
+        Saisir_appréciations_évaluateur --> Valider_non_valider_candidature_évaluateur;
+    end
+
+    subgraph "API Platform (Lecture)"
+        Récupérer_liste_entretiens_API --> Lister_entretiens_évaluateur;
+        Récupérer_liste_entretiens_API --> Accéder_détails_candidats_évaluateur;
+        Récupérer_liste_entretiens_API --> Voir_prestation_entretien;
+    end
+
+    subgraph "API Platform (Écriture)"
+        Créer_mettre_à_jour_supprimer_entretiens_API --> Modifier_détails_entretiens_RH;
+        Créer_mettre_à_jour_supprimer_entretiens_API --> Changer_statut_entretiens_RH;
+    end
+
+    subgraph "Symfony (Backend)"
+        Gérer_agenda_évaluateurs_RH --> Planifier_entretiens_Symfony;
+        Planifier_entretiens_Symfony --> Créer_mettre_à_jour_supprimer_entretiens_API;
+        Changer_statut_entretiens_RH --> Écrire_entretiens_MySQL;
+    end
+
+    subgraph "Base de données MySQL"
+        Écrire_entretiens_MySQL --> Stockage_entretiens_MySQL;
+    end
+
+    subgraph "Base de données MongoDB"
+        Évaluer_prestation_entretien_RH --> Stockage_entretiens_MongoDB;
+    end
