@@ -1,0 +1,36 @@
+classDiagram
+    class Entretien {
+        +ObjectId id
+        +DateTime date
+        +ObjectId evaluateur_id
+        +ObjectId candidat_id
+        +ObjectId statut_id
+        +String[] appreciations
+    }
+    class Candidat {
+        +ObjectId id
+        +String nom
+        +String prenom
+        +String email
+        +String telephone
+    }
+    class Evaluateur {
+        +ObjectId id
+        +String nom
+        +String prenom
+        +String email
+    }
+    class Agenda {
+        +ObjectId id
+        +ObjectId evaluateur_id
+        +DateTime[] disponibilites
+    }
+    class StatutEntretien {
+        +ObjectId id
+        +String libelle
+    }
+
+    Entretien "1" -- "1" Evaluateur : a
+    Entretien "1" -- "1" Candidat : concerne
+    Entretien "1" -- "1" StatutEntretien : a
+    Evaluateur "1" -- "1" Agenda : possède
