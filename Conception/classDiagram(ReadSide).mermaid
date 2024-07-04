@@ -1,0 +1,51 @@
+classDiagram
+    class UserReadController {
+        +listEntretiens()
+        +getEntretienDetails(id: int)
+        +listCandidats()
+        +getCandidatDetails(id: int)
+        +listEvaluateurs()
+        +getEvaluateurDetails(id: int)
+    }
+
+    class UserReadService {
+        - entretienRepository: EntretienReadRepository
+        - candidatRepository: CandidatReadRepository
+        - evaluateurRepository: EvaluateurReadRepository
+
+        +findAllEntretiens(): List<Entretien>
+        +findEntretienById(id: int): Entretien
+        +findAllCandidats(): List<Candidat>
+        +findCandidatById(id: int): Candidat
+        +findAllEvaluateurs(): List<Evaluateur>
+        +findEvaluateurById(id: int): Evaluateur
+    }
+
+    class EntretienReadRepository {
+        +findAll(): List<Entretien>
+        +findById(id: int): Entretien
+    }
+
+    class CandidatReadRepository {
+        +findAll(): List<Candidat>
+        +findById(id: int): Candidat
+    }
+
+    class EvaluateurReadRepository {
+        +findAll(): List<Evaluateur>
+        +findById(id: int): Evaluateur
+    }
+
+    class MongoDBConnection {
+        +connect()
+        +disconnect()
+        +executeQuery(query: String): ResultSet
+    }
+
+    UserReadController --> UserReadService
+    UserReadService --> EntretienReadRepository
+    UserReadService --> CandidatReadRepository
+    UserReadService --> EvaluateurReadRepository
+    EntretienReadRepository --> MongoDBConnection
+    CandidatReadRepository --> MongoDBConnection
+    EvaluateurReadRepository --> MongoDBConnection

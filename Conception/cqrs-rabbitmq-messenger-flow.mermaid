@@ -1,0 +1,33 @@
+graph TD
+    A[Client] -->|HTTP Request| B[New Command]
+    B -->|Command| C[Command Handler]
+    C -->|Persist| D[(MySQL)]
+    C -->|Dispatch Event| E[Symfony Messenger]
+    E -->|Publish| F[RabbitMQ]
+    F -->|Consume| G[Symfony Messenger]
+    G -->|Handle Event| H[Event Handler]
+    H -->|Update| I[(MongoDB)]
+    J[Client] -->|HTTP Request| K[Read API]
+    K -->|Query| I
+
+    subgraph Write Project
+    B
+    C
+    D
+    E
+    end
+
+    subgraph Message Broker
+    F
+    end
+
+    subgraph Read Project
+    G
+    H
+    I
+    K
+    end
+
+    style Write Project fill:#f9f,stroke:#333,stroke-width:2px
+    style Read Project fill:#bbf,stroke:#333,stroke-width:2px
+    style Message Broker fill:#bfb,stroke:#333,stroke-width:2px

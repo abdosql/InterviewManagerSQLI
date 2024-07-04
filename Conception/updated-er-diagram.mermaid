@@ -1,0 +1,86 @@
+erDiagram
+    User ||--o{ notification : receives
+    User ||--|| Condidat : is
+    User ||--|| Evaluateur : is
+    User ||--|| Responsable : is
+    Condidat ||--|| CV : has
+    Condidat ||--o{ condidat_phase : undergoes
+    Condidat ||--o{ Entretien : participates
+    Evaluateur ||--o{ Entretien : conducts
+    Entretien ||--o{ Appreciation : receives
+    Entretien ||--|| Agenda : scheduled_in
+    Entretien ||--|| Entretien_Status : has
+
+    User {
+        int id PK
+        string first_name
+        string last_name
+        string email
+        string telephone
+        string username
+        string password
+        string role
+        string dType
+        int user_id FK
+    }
+    Condidat {
+        int id PK
+        string adresse
+        string CV
+        datetime date_embauche
+    }
+    CV {
+        int id PK
+        string file_path
+        int condidat_id FK
+    }
+    Evaluateur {
+        int id PK
+        int Column1
+        string specialisation
+    }
+    Entretien {
+        int id PK
+        datetime date_entretien
+        string lieu_entretien
+        int condidat_id FK
+        int evaluateur_id FK
+    }
+    Appreciation {
+        int id PK
+        string commentaire
+        int note
+        int entretien_id FK
+    }
+    Agenda {
+        int id PK
+        datetime date
+        datetime heure_debut
+        datetime heure_fin
+        string status
+        string description
+        int entretien_id FK
+    }
+    Responsable {
+        int id PK
+    }
+    notification {
+        int id PK
+        int contenu
+        datetime date_notification
+        int user_id FK
+    }
+    condidat_phase {
+        int id PK
+        string phase
+        datetime date_debut
+        datetime date_fin
+        string resultat
+        int condidat_id FK
+    }
+    Entretien_Status {
+        int id PK
+        string status
+        datetime status_date
+        int entretien_id FK
+    }

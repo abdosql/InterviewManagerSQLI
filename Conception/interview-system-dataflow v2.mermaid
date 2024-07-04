@@ -1,0 +1,30 @@
+graph TD
+    A[User] -->|Interacts with| B(Frontend Client)
+    B -->|Writes data| C{Write Side Service}
+    B -->|Reads data| D{Read Side Service}
+    
+    C -->|Stores data| E[(MySQL Database)]
+    C -->|Publishes events| F[RabbitMQ]
+    
+    F -->|Consumes events| G[Sync Service]
+    G -->|Updates| H[(MongoDB)]
+    
+    D -->|Reads from| H
+    
+    subgraph Write Side
+    C
+    E
+    end
+    
+    subgraph Read Side
+    D
+    H
+    end
+    
+    subgraph Message Queue
+    F
+    end
+    
+    subgraph Synchronization
+    G
+    end
