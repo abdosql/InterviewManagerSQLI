@@ -8,12 +8,8 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EvaluatorRepository::class)]
-class Evaluator
+class Evaluator extends User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     private ?string $specialization = null;
@@ -26,12 +22,8 @@ class Evaluator
 
     public function __construct()
     {
+        parent::__construct();
         $this->interviews = new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
     }
 
     public function getSpecialization(): ?string

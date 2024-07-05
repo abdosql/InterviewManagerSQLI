@@ -84,11 +84,11 @@ services:
         container_name: "phpmyadmin"
         image: phpmyadmin/phpmyadmin:5
         environment:
-            PMA_HOST: database
+            PMA_HOST: sql-database
         ports:
             - "8080:80"
         depends_on:
-            - db-mongodb
+            - sql-database
         networks:
             - inner_net
         volumes:

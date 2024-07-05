@@ -8,6 +8,10 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\InheritanceType("JOINED")]
+#[ORM\DiscriminatorColumn(name:'dType', type:'string')]
+#[ORM\DiscriminatorMap(['candidate' => Candidate::class, 'evaluator' => Evaluator::class, 'rh' => HRManager::class])]
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Table(name: '`user`')]
 class User
 {

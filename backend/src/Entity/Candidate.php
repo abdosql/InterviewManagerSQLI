@@ -9,12 +9,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CandidateRepository::class)]
-class Candidate
+class Candidate extends User
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     private ?string $adress = null;
@@ -36,13 +32,9 @@ class Candidate
 
     public function __construct()
     {
+        parent::__construct();
         $this->interviews = new ArrayCollection();
         $this->candidatePhases = new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
     }
 
     public function getAdress(): ?string
