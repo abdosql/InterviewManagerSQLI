@@ -1,51 +1,130 @@
 classDiagram
-    class UserReadController {
-        +listEntretiens()
-        +getEntretienDetails(id: int)
-        +listCandidats()
-        +getCandidatDetails(id: int)
-        +listEvaluateurs()
-        +getEvaluateurDetails(id: int)
+    class Client {
+        +sendHttpRequest()
     }
 
-    class UserReadService {
-        - entretienRepository: EntretienReadRepository
-        - candidatRepository: CandidatReadRepository
-        - evaluateurRepository: EvaluateurReadRepository
-
-        +findAllEntretiens(): List<Entretien>
-        +findEntretienById(id: int): Entretien
-        +findAllCandidats(): List<Candidat>
-        +findCandidatById(id: int): Candidat
-        +findAllEvaluateurs(): List<Evaluateur>
-        +findEvaluateurById(id: int): Evaluateur
+    class NewCommand {
+        +string candidateId
+        +string evaluatorId
+        +DateTimeImmutable dateTime
+        +string location
     }
 
-    class EntretienReadRepository {
-        +findAll(): List<Entretien>
-        +findById(id: int): Entretien
+    class ScheduleInterviewCommand {
+        +int candidateId
+        +int evaluatorId
+        +DateTimeImmutable dateTime
+        +string location
     }
 
-    class CandidatReadRepository {
-        +findAll(): List<Candidat>
-        +findById(id: int): Candidat
+    class CommandHandler {
+        +void __invoke(NewCommand $command)
+        +persistData()
+        +dispatchEvent()
     }
 
-    class EvaluateurReadRepository {
-        +findAll(): List<Evaluateur>
-        +findById(id: int): Evaluateur
+    class InterviewScheduledEvent {
+        +int interviewId
+        +int candidateId
+        +int evaluatorId
+        +string dateTime
+        +string location
+        +string status
     }
 
-    class MongoDBConnection {
-        +connect()
-        +disconnect()
-        +executeQuery(query: String): ResultSet
+    class EventHandler {
+        +void __invoke(Event $event)
+        +updateMongoDB()
     }
 
-    UserReadController --> UserReadService
-    UserReadService --> EntretienReadRepository
-    UserReadService --> CandidatReadRepository
-    UserReadService --> EvaluateurReadRepository
-    EntretienReadRepository --> MongoDBConnection
-    CandidatReadRepository --> MongoDBConnection
-    EvaluateurReadRepository --> MongoDBConnection
+    class EntityManager {
+        +persist()
+        +flush()
+        +getReference()
+    }
+
+    class DocumentManager {
+        +persist()
+        +flush()
+    }
+
+    class MessageBus {
+        +dispatch()
+    }
+
+    class RabbitMQ {
+        +publish()
+        +consume()
+    }
+
+    Client : +sendHttpRequest()
+    Client --> NewCommand : HTTP Request
+    NewCommand --> ScheduleInterviewCommand : Create Command
+    ScheduleInterviewCommand --> CommandHandler : Command
+    CommandHandler : +persistData()
+    CommandHandler : +dispatchEvent()
+    CommandHandler --> EntityManager : Persist
+    CommandHandler --> MessageBus : Dispatch Event
+    MessageBus --> RabbitMQ : Publish
+    RabbitMQ --> MessageBus : Consume
+    MessageBus --> EventHandler : Handle Event
+    EventHandler : +updateMongoDB()
+
+    class Event {
+        +string interviewId
+        +string candidateName
+        +string evaluatorName
+        +string dateTime
+        +string location
+        +string status
+    }
+
+    class Interview {
+        +int id
+        +Candidate candidate
+        +Evaluator evaluator
+        +DateTime dateTime
+        +string location
+        +string status
+    }
+
+    class Candidate {
+        +int id
+        +string name
+        +string email
+    }
+
+    class Evaluator {
+        +int id
+        +string name
+        +string email
+    }
+
+    class InterviewRepository {
+        +findByCandidate()
+        +findAll()
+    }
+
+    class InterviewReadModel {
+        +string id
+        +string candidateName
+        +string evaluatorName
+        +DateTime dateTime
+        +string location
+        +string status
+    }
+
+    class InterviewReadModelRepository {
+        +findByCandidate()
+        +findAll()
+    }
+
+    Client : -HTTP Request
+    NewCommand : -Create Command
+    ScheduleInterviewCommand : -Command
+    CommandHandler : -Persist
+    CommandHandler : -Dispatch Event
+    MessageBus : -Publish
+    RabbitMQ : -Consume
+    MessageBus : -Handle Event
+    EventHandler : -Update
