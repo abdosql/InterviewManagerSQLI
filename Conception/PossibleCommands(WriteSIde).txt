@@ -1,0 +1,121 @@
+# Write Side Commands and Events for Interview Management System
+
+## Commands
+
+### User Commands
+1. CreateUserCommand
+2. UpdateUserProfileCommand
+3. ChangeUserPasswordCommand
+4. DeleteUserCommand
+
+### Candidate Commands
+5. CreateCandidateCommand
+6. UpdateCandidateInfoCommand
+7. SetCandidateHireDateCommand
+
+### CV Commands
+8. UploadCVCommand
+9. UpdateCVCommand
+10. DeleteCVCommand
+
+### Evaluator Commands
+11. CreateEvaluatorCommand
+12. UpdateEvaluatorSpecializationCommand
+
+### HR Manager Commands
+13. CreateHRManagerCommand
+14. UpdateHRManagerInfoCommand
+
+### Interview Commands
+15. ScheduleInterviewCommand
+16. RescheduleInterviewCommand
+17. CancelInterviewCommand
+18. AssignEvaluatorToInterviewCommand
+19. AssignHRManagerToInterviewCommand
+
+### Appreciation Commands
+20. AddAppreciationCommand
+21. UpdateAppreciationCommand
+22. DeleteAppreciationCommand
+
+### Agenda Commands
+23. CreateAgendaCommand
+24. UpdateAgendaCommand
+25. DeleteAgendaCommand
+
+### Notification Commands
+26. SendNotificationCommand
+27. MarkNotificationAsReadCommand
+28. DeleteNotificationCommand
+
+### Candidate Phase Commands
+29. CreateCandidatePhaseCommand
+30. UpdateCandidatePhaseCommand
+31. CompleteCandidatePhaseCommand
+
+### Interview Status Commands
+32. UpdateInterviewStatusCommand
+
+## Events
+
+### User Events
+1. UserCreatedEvent
+2. UserProfileUpdatedEvent
+3. UserPasswordChangedEvent
+4. UserDeletedEvent
+
+### Candidate Events
+5. CandidateCreatedEvent
+6. CandidateInfoUpdatedEvent
+7. CandidateHireDateSetEvent
+
+### CV Events
+8. CVUploadedEvent
+9. CVUpdatedEvent
+10. CVDeletedEvent
+
+### Evaluator Events
+11. EvaluatorCreatedEvent
+12. EvaluatorSpecializationUpdatedEvent
+
+### HR Manager Events
+13. HRManagerCreatedEvent
+14. HRManagerInfoUpdatedEvent
+
+### Interview Events
+15. InterviewScheduledEvent
+16. InterviewRescheduledEvent
+17. InterviewCancelledEvent
+18. EvaluatorAssignedToInterviewEvent
+19. HRManagerAssignedToInterviewEvent
+
+### Appreciation Events
+20. AppreciationAddedEvent
+21. AppreciationUpdatedEvent
+22. AppreciationDeletedEvent
+
+### Agenda Events
+23. AgendaCreatedEvent
+24. AgendaUpdatedEvent
+25. AgendaDeletedEvent
+
+### Notification Events
+26. NotificationSentEvent
+27. NotificationMarkedAsReadEvent
+28. NotificationDeletedEvent
+
+### Candidate Phase Events
+29. CandidatePhaseCreatedEvent
+30. CandidatePhaseUpdatedEvent
+31. CandidatePhaseCompletedEvent
+
+### Interview Status Events
+32. InterviewStatusUpdatedEvent
+
+### Cross-entity Events
+33. CandidateAdvancedToNextPhaseEvent
+34. InterviewProcessCompletedEvent
+35. CandidateHiredEvent
+36. CandidateRejectedEvent
+37. EvaluatorAvailabilityChangedEvent
+38. HRManagerWorkloadChangedEvent
