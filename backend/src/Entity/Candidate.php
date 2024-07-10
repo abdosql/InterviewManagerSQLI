@@ -9,11 +9,14 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CandidateRepository::class)]
-class Candidate extends User
+class Candidate extends Person
 {
-
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
     #[ORM\Column(length: 255)]
-    private ?string $adress = null;
+    private ?string $address = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $hire_date = null;
@@ -32,19 +35,21 @@ class Candidate extends User
 
     public function __construct()
     {
-        parent::__construct();
         $this->interviews = new ArrayCollection();
         $this->candidatePhases = new ArrayCollection();
     }
-
-    public function getAdress(): ?string
+    public function getId(): ?int
     {
-        return $this->adress;
+        return $this->id;
+    }
+    public function getAddress(): ?string
+    {
+        return $this->address;
     }
 
-    public function setAdress(string $adress): static
+    public function setAddress(string $address): static
     {
-        $this->adress = $adress;
+        $this->address = $address;
 
         return $this;
     }

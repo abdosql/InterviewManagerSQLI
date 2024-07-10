@@ -28,7 +28,6 @@ class HRManager extends User
         $this->interviews = new ArrayCollection();
     }
 
-
     public function getDepartment(): ?string
     {
         return $this->department;
