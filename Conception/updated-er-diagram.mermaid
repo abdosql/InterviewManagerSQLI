@@ -1,6 +1,7 @@
 erDiagram
+    User ||--|| Person : is
     User ||--o{ Notification : has
-    User ||--|| Candidate : is
+    Person ||--|| Candidate : is
     User ||--|| Evaluator : is
     User ||--|| HR_Manager : is
     Candidate ||--|| CV : has
@@ -15,15 +16,17 @@ erDiagram
 
     User {
         int id PK
-        string first_name
-        string last_name
-        string email
-        string phone
         string username
         string password
         string role
         string type
         int user_id FK
+    }
+    Person {
+        string first_name
+        string last_name
+        string email
+        string phone
     }
     Candidate {
         int id PK

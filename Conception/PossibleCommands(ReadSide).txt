@@ -1,0 +1,88 @@
+# Possible Read Operations for Interview Management System
+
+1. User-related queries:
+   - GetUserById(id)
+   - GetUserByUsername(username)
+   - GetUserByEmail(email)
+   - GetAllUsers()
+   - GetUserNotifications(userId)
+
+2. Candidate-related queries:
+   - GetCandidateById(id)
+   - GetAllCandidates()
+   - GetCandidateCV(candidateId)
+   - GetCandidatePhases(candidateId)
+   - GetCandidateInterviews(candidateId)
+
+3. Evaluator-related queries:
+   - GetEvaluatorById(id)
+   - GetAllEvaluators()
+   - GetEvaluatorInterviews(evaluatorId)
+   - GetEvaluatorsBySpecialization(specialization)
+
+4. HR Manager-related queries:
+   - GetHRManagerById(id)
+   - GetAllHRManagers()
+   - GetHRManagerInterviews(hrManagerId)
+   - GetHRManagersByDepartment(department)
+
+5. Interview-related queries:
+   - GetInterviewById(id)
+   - GetAllInterviews()
+   - GetInterviewsByDate(date)
+   - GetInterviewsByLocation(location)
+   - GetInterviewAppreciations(interviewId)
+   - GetInterviewAgenda(interviewId)
+   - GetInterviewStatus(interviewId)
+   - GetInterviewsByCandidateId(candidateId)
+   - GetInterviewsByEvaluatorId(evaluatorId)
+   - GetInterviewsByHRManagerId(hrManagerId)
+
+6. Appreciation-related queries:
+   - GetAppreciationById(id)
+   - GetAllAppreciations()
+   - GetAppreciationsByInterviewId(interviewId)
+   - GetAppreciationsByScore(score)
+
+7. Agenda-related queries:
+   - GetAgendaById(id)
+   - GetAllAgendas()
+   - GetAgendaByInterviewId(interviewId)
+   - GetAgendaByDateRange(startDate, endDate)
+   - GetAgendaByStatus(status)
+
+8. Notification-related queries:
+   - GetNotificationById(id)
+   - GetAllNotifications()
+   - GetNotificationsByUserId(userId)
+   - GetNotificationsByDateRange(startDate, endDate)
+
+9. Candidate Phase-related queries:
+   - GetCandidatePhaseById(id)
+   - GetAllCandidatePhases()
+   - GetCandidatePhasesByCandidateId(candidateId)
+   - GetCandidatePhasesByPhase(phase)
+   - GetCandidatePhasesByDateRange(startDate, endDate)
+
+10. Interview Status-related queries:
+    - GetInterviewStatusById(id)
+    - GetAllInterviewStatuses()
+    - GetInterviewStatusesByInterviewId(interviewId)
+    - GetInterviewStatusesByStatus(status)
+    - GetInterviewStatusesByDateRange(startDate, endDate)
+
+11. CV-related queries:
+    - GetCVById(id)
+    - GetAllCVs()
+    - GetCVByCandidateId(candidateId)
+
+12. Cross-entity queries:
+    - GetUpcomingInterviews(date)
+    - GetPendingAppreciations()
+    - GetCandidatesInPhase(phase)
+    - GetEvaluatorsWithUpcomingInterviews(date)
+    - GetHRManagersWithPendingInterviews()
+    - GetRecentlyCompletedInterviews(date)
+    - GetTopRatedCandidates()
+    - GetMostActiveEvaluators(dateRange)
+    - GetInterviewStatisticsByDateRange(startDate, endDate)
