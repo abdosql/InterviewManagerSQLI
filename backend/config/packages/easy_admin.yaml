@@ -1,0 +1,10 @@
+easy_admin:
+#  design:
+#    menu:
+#      - { entity: 'User', icon: 'user' }
+#      # Define menu items as needed
+
+  entities:
+    User:
+      class: App\Entity\User
+      # Customize entity configuration as needed
