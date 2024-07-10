@@ -1,86 +1,92 @@
 erDiagram
-    User ||--o{ notification : receives
-    User ||--|| Condidat : is
-    User ||--|| Evaluateur : is
-    User ||--|| Responsable : is
-    Condidat ||--|| CV : has
-    Condidat ||--o{ condidat_phase : undergoes
-    Condidat ||--o{ Entretien : participates
-    Evaluateur ||--o{ Entretien : conducts
-    Entretien ||--o{ Appreciation : receives
-    Entretien ||--|| Agenda : scheduled_in
-    Entretien ||--|| Entretien_Status : has
+    User ||--|| Person : is
+    User ||--o{ Notification : has
+    Person ||--|| Candidate : is
+    User ||--|| Evaluator : is
+    User ||--|| HR_Manager : is
+    Candidate ||--|| CV : has
+    Candidate ||--o{ Candidate_Phase : has
+    Candidate ||--o{ Interview : participates
+    Evaluator }o--o{ Interview : conducts
+    Interview ||--o{ Appreciation : has
+    Interview ||--|| Agenda : has
+    Interview ||--|| Interview_Status : has
+    HR_Manager ||--o{ Interview : manages
+    HR_Manager }o--o{ Evaluator : collaborates
 
     User {
         int id PK
-        string first_name
-        string last_name
-        string email
-        string telephone
         string username
         string password
         string role
-        string dType
+        string type
         int user_id FK
     }
-    Condidat {
+    Person {
+        string first_name
+        string last_name
+        string email
+        string phone
+    }
+    Candidate {
         int id PK
-        string adresse
-        string CV
-        datetime date_embauche
+        string address
+        datetime hire_date
     }
     CV {
         int id PK
         string file_path
-        int condidat_id FK
+        int candidate_id FK
     }
-    Evaluateur {
+    Evaluator {
         int id PK
-        int Column1
-        string specialisation
+        string specialization
     }
-    Entretien {
+    Interview {
         int id PK
-        datetime date_entretien
-        string lieu_entretien
-        int condidat_id FK
-        int evaluateur_id FK
+        datetime interview_date
+        string interview_location
+        int candidate_id FK
+        int evaluator_id FK
+        int hr_manager_id FK
     }
     Appreciation {
         int id PK
-        string commentaire
-        int note
-        int entretien_id FK
+        string comment
+        int score
+        int interview_id FK
     }
     Agenda {
         int id PK
         datetime date
-        datetime heure_debut
-        datetime heure_fin
+        datetime start_time
+        datetime end_time
         string status
         string description
-        int entretien_id FK
+        int interview_id FK
     }
-    Responsable {
+    HR_Manager {
         int id PK
+        string department
+        string position
     }
-    notification {
+    Notification {
         int id PK
-        int contenu
-        datetime date_notification
+        string content
+        datetime notification_date
         int user_id FK
     }
-    condidat_phase {
+    Candidate_Phase {
         int id PK
         string phase
-        datetime date_debut
-        datetime date_fin
-        string resultat
-        int condidat_id FK
+        datetime start_date
+        datetime end_date
+        string result
+        int candidate_id FK
     }
-    Entretien_Status {
+    Interview_Status {
         int id PK
         string status
         datetime status_date
-        int entretien_id FK
+        int interview_id FK
     }
