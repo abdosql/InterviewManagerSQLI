@@ -17,8 +17,7 @@ class Candidate extends Person
     private ?int $id = null;
     #[ORM\Column(length: 255)]
     private ?string $address = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $hire_date = null;
 
     /**
@@ -32,6 +31,9 @@ class Candidate extends Person
      */
     #[ORM\OneToMany(targetEntity: CandidatePhase::class, mappedBy: 'candidate')]
     private Collection $candidatePhases;
+
+    #[ORM\OneToOne(inversedBy: 'candidate', cascade: ['persist', 'remove'])]
+    private ?Resume $resume = null;
 
     public function __construct()
     {
@@ -122,6 +124,20 @@ class Candidate extends Person
                 $candidatePhase->setCandidate(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getResume(): ?Resume
+    {
+        if ($this->resume === null) {
+            $this->resume = new Resume();
+        }
+        return $this->resume;    }
+
+    public function setResume(?Resume $resume): static
+    {
+        $this->resume = $resume;
 
         return $this;
     }
