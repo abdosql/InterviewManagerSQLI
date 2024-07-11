@@ -3,20 +3,26 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\MappedSuperclass]
 abstract class Person
 {
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'First name should not be blank')]
     protected ?string $first_name = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Last name should not be blank')]
     protected ?string $last_name = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Phone number should not be blank')]
     protected ?string $phone = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
+    #[Assert\NotBlank(message: 'Email should not be blank')]
+    #[Assert\Email(message: 'The email "{{ value }}" is not a valid email.')]
     protected ?string $email = null;
 
     public function getFirstName(): ?string

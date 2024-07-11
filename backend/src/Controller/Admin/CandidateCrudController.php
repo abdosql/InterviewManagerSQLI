@@ -51,9 +51,8 @@ class CandidateCrudController extends AbstractCrudController
 
     private function handleResumeUpload(Candidate $candidate): void
     {
-        $resumeFile = $this->getContext()->getRequest()->files->get('Candidate')['resume_filePath'];
 
-        if ($this->resumeUploadService->handleFileUpload($candidate, $resumeFile))
+        if ($this->resumeUploadService->handleFileUpload($candidate, $this->getContext()))
         {
             $entityManager = $this->container->get('doctrine')->getManagerForClass(Candidate::class);
             $entityManager->persist($candidate);
