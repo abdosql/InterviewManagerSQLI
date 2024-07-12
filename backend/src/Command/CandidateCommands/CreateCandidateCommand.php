@@ -3,6 +3,7 @@
 namespace App\Command\CandidateCommands;
 
 use DateTimeInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 readonly class CreateCandidateCommand
 {
@@ -12,6 +13,7 @@ readonly class CreateCandidateCommand
         public string             $phone,
         public string             $email,
         public string             $address,
-        public ?DateTimeInterface $hireDate = null
+        public string $resumeFilePath,
+        public ?DateTimeInterface $hireDate = null,
     ) {}
 }

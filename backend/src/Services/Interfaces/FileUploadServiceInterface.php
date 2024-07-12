@@ -9,5 +9,5 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 interface FileUploadServiceInterface
 {
-    public function handleFileUpload(Candidate $candidate,$context): bool;
+    public function handleFileUpload(Candidate $candidate,$file): string;
 }

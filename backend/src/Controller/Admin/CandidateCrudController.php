@@ -2,18 +2,24 @@
 
 namespace App\Controller\Admin;
 
+use App\Command\CandidateCommands\CreateCandidateCommand;
 use App\EasyAdmin\Fields\CVUploadField;
 use App\Entity\Candidate;
+use App\Event\CandidateEvents\CandidateCreatedEvent;
 use App\Services\Interfaces\FileUploadServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class CandidateCrudController extends AbstractCrudController
 {
-    public function __construct(private FileUploadServiceInterface $resumeUploadService)
+
+    public function __construct(private MessageBusInterface $messageBus, private FileUploadServiceInterface $resumeUploadService)
     {
     }
 
@@ -43,21 +49,31 @@ class CandidateCrudController extends AbstractCrudController
 
     }
 
+    /**
+     * @throws ExceptionInterface
+     */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        parent::persistEntity($entityManager, $entityInstance);
-        $this->handleResumeUpload($entityInstance);
+        $this->handleCommand($entityInstance);
     }
 
-    private function handleResumeUpload(Candidate $candidate): void
+    /**
+     * @throws ExceptionInterface
+     */
+    private function handleCommand(Candidate $candidate): void
     {
+        $file = $this->getContext()->getRequest()->files->get('Candidate')['resume_filePath'];
+        $filePath = $this->resumeUploadService->handleFileUpload($candidate,$file);
 
-        if ($this->resumeUploadService->handleFileUpload($candidate, $this->getContext()))
-        {
-            $entityManager = $this->container->get('doctrine')->getManagerForClass(Candidate::class);
-            $entityManager->persist($candidate);
-            $entityManager->flush();
-        };
+        $command = new CreateCandidateCommand(
+            $candidate->getFirstName(),
+            $candidate->getLastName(),
+            $candidate->getPhone(),
+            $candidate->getEmail(),
+            $candidate->getAddress(),
+            $filePath,
+        );
+        $this->messageBus->dispatch($command);
     }
 
 }

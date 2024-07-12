@@ -18,9 +18,8 @@ final readonly class ResumeUploadService implements FileUploadServiceInterface
     ) {
     }
 
-    public function handleFileUpload(Candidate $candidate, $context): bool
+    public function handleFileUpload(Candidate $candidate, $file): string
     {
-        $file = $context->getRequest()->files->get('Candidate')['resume_filePath'];
         try {
             if (!$file instanceof UploadedFile) {
                 throw new FileException('Invalid file uploaded');
@@ -29,29 +28,20 @@ final readonly class ResumeUploadService implements FileUploadServiceInterface
             if (!in_array($file->getMimeType(), $allowMineTypes)) {
                 throw new FileException('Invalid file type. Only PDF, DOCX, and TXT are allowed.');
             }
-
+            $fileName = \uniqid() . '.' . $file->guessExtension();
+            $fullUploadPath = $this->projectDir . '/' . $this->uploadDir;
+            $file->move($fullUploadPath, $fileName);
+            $filePath = '/' . $fileName;
+            if (!$candidate->getResume()){
+                $resume = new Resume();
+                $resume->setCandidate($candidate);
+                $resume->setFilePath($filePath);
+                $candidate->setResume($resume);
+            }
+            return $filePath;
         }catch (FileException $e) {
             throw new FileException($e->getMessage());
         }
-        $fileName = \uniqid() . '.' . $file->guessExtension();
-        $fullUploadPath = $this->projectDir . '/' . $this->uploadDir;
 
-        try {
-            $file->move($fullUploadPath, $fileName);
-        } catch (FileException $e) {
-            throw new FileException($e->getMessage());
-        }
-
-        $filePath = '/' . $fileName;
-
-        if (!$candidate->getResume()) {
-            $resume = new Resume();
-            $resume->setCandidate($candidate);
-            $candidate->setResume($resume);
-        }
-
-        $candidate->getResume()->setFilePath($filePath);
-
-        return true;
     }
 }
