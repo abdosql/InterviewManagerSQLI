@@ -4,11 +4,11 @@ namespace App\CommandHandler\CandidateCommandHandlers;
 
 use App\Command\CandidateCommands\CreateCandidateCommand;
 use App\Entity\Candidate;
-use App\Event\CandidateEvents\CandidateCreatedEvent;
-use App\Services\Interfaces\FileUploadServiceInterface;
+use App\Message\CandidateMessages\CandidateCreatedMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
@@ -17,7 +17,6 @@ class CreateCandidateCommandHandler
     public function __construct(
         private EntityManagerInterface $entityManager,
         private MessageBusInterface $messageBus,
-        private FileUploadServiceInterface $resumeUploadService
     ) {}
 
     /**
@@ -41,7 +40,7 @@ class CreateCandidateCommandHandler
         $this->entityManager->persist($candidate);
         $this->entityManager->flush();
 
-        $event = new CandidateCreatedEvent(
+        $message = new CandidateCreatedMessage(
             $candidate->getId(),
             $candidate->getFirstName(),
             $candidate->getLastName(),
@@ -52,6 +51,10 @@ class CreateCandidateCommandHandler
             $candidate->getResume()->getFilePath()
         );
 
-        $this->messageBus->dispatch($event);
+        try {
+            $this->messageBus->dispatch($message);
+        }catch (TransportException $e) {
+            throw new \RuntimeException($e->getMessage());
+        }
     }
 }

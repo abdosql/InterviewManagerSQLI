@@ -5,23 +5,22 @@ namespace App\Controller\Admin;
 use App\Command\CandidateCommands\CreateCandidateCommand;
 use App\EasyAdmin\Fields\CVUploadField;
 use App\Entity\Candidate;
-use App\Event\CandidateEvents\CandidateCreatedEvent;
 use App\Services\Interfaces\FileUploadServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class CandidateCrudController extends AbstractCrudController
 {
 
-    public function __construct(private MessageBusInterface $messageBus, private FileUploadServiceInterface $resumeUploadService)
-    {
-    }
+    public function __construct(
+        private MessageBusInterface $messageBus,
+        private FileUploadServiceInterface $resumeUploadService)
+    {}
 
     public static function getEntityFqcn(): string
     {
@@ -50,30 +49,36 @@ class CandidateCrudController extends AbstractCrudController
     }
 
     /**
-     * @throws ExceptionInterface
+     * @param EntityManagerInterface $entityManager
+     * @param $entityInstance
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        $this->handleCommand($entityInstance);
+        $this->handleResumeUpload($entityInstance);
     }
 
     /**
-     * @throws ExceptionInterface
+     * @param Candidate $candidate
+     * @throws
      */
-    private function handleCommand(Candidate $candidate): void
+    private function handleResumeUpload(Candidate $candidate): void
     {
-        $file = $this->getContext()->getRequest()->files->get('Candidate')['resume_filePath'];
-        $filePath = $this->resumeUploadService->handleFileUpload($candidate,$file);
-
-        $command = new CreateCandidateCommand(
-            $candidate->getFirstName(),
-            $candidate->getLastName(),
-            $candidate->getPhone(),
-            $candidate->getEmail(),
-            $candidate->getAddress(),
-            $filePath,
-        );
-        $this->messageBus->dispatch($command);
+        try {
+            $filePath = $this->resumeUploadService->handleFileUpload(
+                $this->getContext()->getRequest()->files->get('Candidate')['resume_filePath']
+            );
+            $command = new CreateCandidateCommand(
+                $candidate->getFirstName(),
+                $candidate->getLastName(),
+                $candidate->getPhone(),
+                $candidate->getEmail(),
+                $candidate->getAddress(),
+                $filePath
+            );
+            $this->messageBus->dispatch($command);
+        } catch (TransportException $e) {
+            throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
+        }
     }
 
 }

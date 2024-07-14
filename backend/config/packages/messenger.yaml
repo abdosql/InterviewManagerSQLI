@@ -5,20 +5,18 @@ framework:
         # failure_transport: failed
         buses:
             command.bus: ~
-            query.bus: ~
+            event.bus: ~
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
-            # async: '%env(MESSENGER_TRANSPORT_DSN)%'
             # failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
             async: '%env(MESSENGER_TRANSPORT_DSN)%'
-
+            sync: 'sync://'
 
         routing:
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
-            'App\Command\CandidateCommands\CreateCandidateCommand': async
-            'App\Event\CandidateEvents\CandidateCreatedEvent': async
+            'App\Command\*': sync
+            'App\Messages\*': async
 # when@test:
 #    framework:
 #        messenger:

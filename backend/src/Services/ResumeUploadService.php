@@ -15,10 +15,10 @@ final readonly class ResumeUploadService implements FileUploadServiceInterface
     public function __construct(
         private string $projectDir,
         private string $uploadDir,
-    ) {
-    }
+    )
+    {}
 
-    public function handleFileUpload(Candidate $candidate, $file): string
+    public function handleFileUpload($file): string
     {
         try {
             if (!$file instanceof UploadedFile) {
@@ -31,14 +31,7 @@ final readonly class ResumeUploadService implements FileUploadServiceInterface
             $fileName = \uniqid() . '.' . $file->guessExtension();
             $fullUploadPath = $this->projectDir . '/' . $this->uploadDir;
             $file->move($fullUploadPath, $fileName);
-            $filePath = '/' . $fileName;
-            if (!$candidate->getResume()){
-                $resume = new Resume();
-                $resume->setCandidate($candidate);
-                $resume->setFilePath($filePath);
-                $candidate->setResume($resume);
-            }
-            return $filePath;
+            return '/' . $fileName;
         }catch (FileException $e) {
             throw new FileException($e->getMessage());
         }

@@ -9,5 +9,5 @@
 /vendor/
 /node_modules
 /public/assets
-/public/uploads/*
+/public/uploads/
 ###< symfony/framework-bundle ###
