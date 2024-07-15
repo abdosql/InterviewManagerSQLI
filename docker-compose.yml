@@ -103,6 +103,8 @@ services:
             - mongodb_data:/var/www/html
         ports:
             - "27017:27017"
+        networks:
+            - inner_net
     # mailcatcher:
     #     container_name: "smtp_server"
     #     networks:

@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Command\CandidateCommands\CreateCandidateCommand;
+use App\CommandHandler\CandidateCommandHandlers\CreateCandidateCommandHandler;
 use App\EasyAdmin\Fields\CVUploadField;
 use App\Entity\Candidate;
 use App\Services\Interfaces\FileUploadServiceInterface;
@@ -18,8 +19,9 @@ class CandidateCrudController extends AbstractCrudController
 {
 
     public function __construct(
-        private MessageBusInterface $messageBus,
-        private FileUploadServiceInterface $resumeUploadService)
+        private FileUploadServiceInterface $resumeUploadService,
+        private CreateCandidateCommandHandler $createCandidateCommandHandler
+    )
     {}
 
     public static function getEntityFqcn(): string
@@ -75,7 +77,7 @@ class CandidateCrudController extends AbstractCrudController
                 $candidate->getAddress(),
                 $filePath
             );
-            $this->messageBus->dispatch($command);
+            $this->createCandidateCommandHandler->handle($command);
         } catch (TransportException $e) {
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }

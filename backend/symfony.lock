@@ -38,6 +38,15 @@
             "./migrations/.gitignore"
         ]
     },
+    "doctrine/mongodb-odm-bundle": {
+        "version": "5.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "5.0",
+            "ref": "ed0a2da4b9351025c9e6e3837a0677d73f20e424"
+        }
+    },
     "easycorp/easyadmin-bundle": {
         "version": "4.10",
         "recipe": {
