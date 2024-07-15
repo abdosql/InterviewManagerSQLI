@@ -27,11 +27,34 @@ services:
             $projectDir: '%kernel.project_dir%'
             $uploadDir: '%env(UPLOAD_DIR)%'
 
-    # Example handler service
     App\MessageHandler\CandidateMessageHandlers\CandidateCreatedMessageHandler:
         arguments:
             $documentManager: '@Doctrine\ODM\MongoDB\DocumentManager'
+    #configuring the service locator (:
+    App\Transformation\Strategy\CandidateTransformationStrategy:
+        tags:
+            - { name: 'app.transform_to_document_strategy', type: 'candidate' }
+            - { name: 'app.transform_to_entity_strategy', type: 'candidate' }
 
+    app.transform_to_document_strategy_locator:
+        class: Symfony\Component\DependencyInjection\ServiceLocator
+        arguments:
+            -
+                candidate: '@App\Transformation\Strategy\CandidateTransformationStrategy'
 
+    app.transform_to_entity_strategy_locator:
+        class: Symfony\Component\DependencyInjection\ServiceLocator
+        arguments:
+            -
+                candidate: '@App\Transformation\Strategy\CandidateTransformationStrategy'
+
+    App\Transformation\Factory\TransformationStrategyFactory:
+        arguments:
+            $documentStrategies: '@app.transform_to_document_strategy_locator'
+            $entityStrategies: '@app.transform_to_entity_strategy_locator'
+
+    App\Adapter\DataTransformationAdapter:
+        arguments:
+            $transformationStrategyFactory: '@App\Transformation\Factory\TransformationStrategyFactory'
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

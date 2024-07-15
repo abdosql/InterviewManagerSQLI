@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\CandidateMessageHandlers;
 
+use App\Adapter\DataTransformationAdapter;
 use App\Entity\Candidate;
 use App\Factory\DocumentFactory\CandidateFactory;
 use App\Message\CandidateMessages\CandidateCreatedMessage;
@@ -18,6 +19,7 @@ class CandidateCreatedMessageHandler
     public function __construct(
         private DocumentManager $documentManager,
         private EntityManagerInterface $entityManager,
+        private DataTransformationAdapter $transformationAdapter
     )
     {
     }
@@ -27,9 +29,9 @@ class CandidateCreatedMessageHandler
      */
     public function __invoke(CandidateCreatedMessage $message): void
     {
-        $candidate = $this->entityManager->getRepository(Candidate::class)->find($message->getId());
-        $candidateDocument = CandidateFactory::createDocumentFromEntity($candidate);
+        $candidateEntity = $this->getCandidateEntityFromMessage($message);
 
+        $candidateDocument = $this->transformationAdapter->transformToDocument($candidateEntity, 'candidate');
         $this->documentManager->persist($candidateDocument);
         $this->documentManager->flush();
 
@@ -38,5 +40,11 @@ class CandidateCreatedMessageHandler
         $query = $queryBuilder->getQuery();
         $candidates = $query->execute()->toArray(); // Fetch all candidates as an array
         dd($candidates); // Use dump() instead of dd() to continue execution after dumping
+    }
+
+    public function getCandidateEntityFromMessage(CandidateCreatedMessage $message): Candidate
+    {
+        return $this->entityManager->getRepository(Candidate::class)->find($message->getId());
+
     }
 }

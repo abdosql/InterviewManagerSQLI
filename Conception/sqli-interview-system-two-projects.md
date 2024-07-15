@@ -1,8 +1,8 @@
-# Simplified SQLI Interview Management System: CQRS Implementation
+# Candidate Management System: Revised CQRS Implementation
 
 ## Project Structure
 
-The system is divided into two separate Symfony projects, implementing a CQRS (Command Query Responsibility Segregation) architecture:
+The system is divided into two separate projects, implementing a CQRS (Command Query Responsibility Segregation) architecture:
 
 1. Write Project (MySQL)
 2. Read Project (MongoDB)
@@ -13,13 +13,23 @@ The system is divided into two separate Symfony projects, implementing a CQRS (C
 write-project/
 ├── src/
 │   ├── Command/
+│   │   └── CandidateCommands/
+│   │       └── CreateCandidateCommand.php
 │   ├── CommandHandler/
+│   │   └── CandidateCommandHandlers/
+│   │       └── CreateCandidateCommandHandler.php
 │   ├── Entity/
-│   ├── Event/
-│   ├── EventDispatcher/
-│   ├── Repository/
-│   ├── Controller/
-│   └── Service/
+│   │   └── Candidate.php
+│   ├── Message/
+│   │   └── CandidateMessages/
+│   │       └── CandidateCreatedMessage.php
+│   ├── MessageHandler/
+│   │   └── CandidateMessageHandlers/
+│   │       └── CandidateCreatedMessageHandler.php
+│   ├── Factory/
+│   │   └── DocumentFactory/
+│   │       └── CandidateFactory.php
+│   └── Controller/
 ├── config/
 │   ├── packages/
 │   │   ├── doctrine.yaml
@@ -34,10 +44,14 @@ write-project/
 read-project/
 ├── src/
 │   ├── Document/
+│   │   ├── CandidateDocument.php
+│   │   └── ResumeDocument.php
 │   ├── Repository/
-│   ├── EventHandler/
+│   │   └── CandidateRepository.php
 │   ├── Controller/
+│   │   └── CandidateController.php
 │   └── Service/
+│       └── CandidateService.php
 ├── config/
 │   ├── packages/
 │   │   ├── doctrine_mongodb.yaml
@@ -50,260 +64,235 @@ read-project/
 
 ### 1. Write Project (MySQL)
 
-#### Entities
-
-```php
-// write-project/src/Entity/Interview.php
-namespace App\Entity;
-
-use Doctrine\ORM\Mapping as ORM;
-
-#[ORM\Entity]
-class Interview
-{
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    private $candidateName;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    private $evaluatorName;
-
-    #[ORM\Column(type: 'datetime')]
-    private $dateTime;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    private $location;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    private $status;
-
-    // ... getters and setters
-}
-```
+The Write Project remains as you've implemented it. Here's a summary of its key components:
 
 #### Commands
 
 ```php
-// write-project/src/Command/ScheduleInterviewCommand.php
-namespace App\Command;
+// write-project/src/Command/CandidateCommands/CreateCandidateCommand.php
+namespace App\Command\CandidateCommands;
 
-class ScheduleInterviewCommand
+use App\Entity\Candidate;
+use Doctrine\ORM\EntityManagerInterface;
+
+readonly class CreateCandidateCommand
 {
-    public function __construct(
-        public readonly string $candidateName,
-        public readonly string $evaluatorName,
-        public readonly \DateTimeImmutable $dateTime,
-        public readonly string $location
-    ) {}
+    // ... (implementation as provided)
 }
 ```
 
 #### Command Handlers
 
 ```php
-// write-project/src/CommandHandler/ScheduleInterviewCommandHandler.php
-namespace App\CommandHandler;
+// write-project/src/CommandHandler/CandidateCommandHandlers/CreateCandidateCommandHandler.php
+namespace App\CommandHandler\CandidateCommandHandlers;
 
-use App\Command\ScheduleInterviewCommand;
-use App\Entity\Interview;
-use App\Event\InterviewScheduledEvent;
-use App\EventDispatcher\EventDispatcher;
-use Doctrine\ORM\EntityManagerInterface;
-
-class ScheduleInterviewCommandHandler
-{
-    public function __construct(
-        private EntityManagerInterface $entityManager,
-        private EventDispatcher $eventDispatcher
-    ) {}
-
-    public function __invoke(ScheduleInterviewCommand $command): void
-    {
-        $interview = new Interview();
-        $interview->setCandidateName($command->candidateName);
-        $interview->setEvaluatorName($command->evaluatorName);
-        $interview->setDateTime($command->dateTime);
-        $interview->setLocation($command->location);
-        $interview->setStatus('Scheduled');
-
-        $this->entityManager->persist($interview);
-        $this->entityManager->flush();
-
-        $event = new InterviewScheduledEvent(
-            $interview->getId(),
-            $interview->getCandidateName(),
-            $interview->getEvaluatorName(),
-            $interview->getDateTime(),
-            $interview->getLocation()
-        );
-
-        $this->eventDispatcher->dispatch($event);
-    }
-}
-```
-
-#### Events
-
-```php
-// write-project/src/Event/InterviewScheduledEvent.php
-namespace App\Event;
-
-class InterviewScheduledEvent
-{
-    public function __construct(
-        public readonly int $interviewId,
-        public readonly string $candidateName,
-        public readonly string $evaluatorName,
-        public readonly \DateTimeImmutable $dateTime,
-        public readonly string $location
-    ) {}
-}
-```
-
-#### Event Dispatcher
-
-```php
-// write-project/src/EventDispatcher/EventDispatcher.php
-namespace App\EventDispatcher;
-
+use App\Command\CandidateCommands\CreateCandidateCommand;
+use App\Message\CandidateMessages\CandidateCreatedMessage;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class EventDispatcher
+readonly class CreateCandidateCommandHandler
 {
-    public function __construct(private MessageBusInterface $eventBus) {}
+    // ... (implementation as provided)
+}
+```
 
-    public function dispatch($event): void
-    {
-        $this->eventBus->dispatch($event);
-    }
+#### Messages
+
+```php
+// write-project/src/Message/CandidateMessages/CandidateCreatedMessage.php
+namespace App\Message\CandidateMessages;
+
+readonly class CandidateCreatedMessage
+{
+    // ... (implementation as provided)
+}
+```
+
+#### Message Handlers
+
+```php
+// write-project/src/MessageHandler/CandidateMessageHandlers/CandidateCreatedMessageHandler.php
+namespace App\MessageHandler\CandidateMessageHandlers;
+
+use App\Entity\Candidate;
+use App\Factory\DocumentFactory\CandidateFactory;
+use App\Message\CandidateMessages\CandidateCreatedMessage;
+use App\Document\CandidateDocument;
+use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class CandidateCreatedMessageHandler
+{
+    // ... (implementation as provided)
+}
+```
+
+#### Factory
+
+```php
+// write-project/src/Factory/DocumentFactory/CandidateFactory.php
+namespace App\Factory\DocumentFactory;
+
+use App\Document\CandidateDocument;
+use App\Document\ResumeDocument;
+use App\Entity\Candidate;
+
+class CandidateFactory
+{
+    // ... (implementation as provided)
 }
 ```
 
 ### 2. Read Project (MongoDB)
 
-#### Documents (Read Models)
+The Read Project focuses solely on querying MongoDB. Here's how it could be structured:
+
+#### Documents
 
 ```php
-// read-project/src/Document/InterviewReadModel.php
+// read-project/src/Document/CandidateDocument.php
 namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
 
 #[MongoDB\Document]
-#[ApiResource(
-    operations: [
-        new Get(),
-        new GetCollection()
-    ]
-)]
-class InterviewReadModel
+class CandidateDocument
 {
     #[MongoDB\Id]
     private $id;
 
-    #[MongoDB\Field(type: 'string')]
-    private $candidateName;
+    #[MongoDB\Field(type: 'integer')]
+    private $entityId;
 
     #[MongoDB\Field(type: 'string')]
-    private $evaluatorName;
+    private $firstName;
+
+    #[MongoDB\Field(type: 'string')]
+    private $lastName;
+
+    #[MongoDB\Field(type: 'string')]
+    private $phone;
+
+    #[MongoDB\Field(type: 'string')]
+    private $email;
+
+    #[MongoDB\Field(type: 'string')]
+    private $address;
 
     #[MongoDB\Field(type: 'date')]
-    private $dateTime;
+    private $hireDate;
 
-    #[MongoDB\Field(type: 'string')]
-    private $location;
-
-    #[MongoDB\Field(type: 'string')]
-    private $status;
+    #[MongoDB\EmbedOne(targetDocument: ResumeDocument::class)]
+    private $resume;
 
     // ... getters and setters
 }
 ```
 
-#### Event Handlers
+#### Repository
 
 ```php
-// read-project/src/EventHandler/InterviewScheduledEventHandler.php
-namespace App\EventHandler;
+// read-project/src/Repository/CandidateRepository.php
+namespace App\Repository;
 
-use App\Document\InterviewReadModel;
-use App\Event\InterviewScheduledEvent;
-use Doctrine\ODM\MongoDB\DocumentManager;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use App\Document\CandidateDocument;
+use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 
-class InterviewScheduledEventHandler
+class CandidateRepository extends DocumentRepository
 {
-    public function __construct(private DocumentManager $documentManager) {}
-
-    #[AsMessageHandler]
-    public function __invoke(InterviewScheduledEvent $event): void
+    public function findAllCandidates()
     {
-        $interviewReadModel = new InterviewReadModel();
-        $interviewReadModel->setId($event->interviewId);
-        $interviewReadModel->setCandidateName($event->candidateName);
-        $interviewReadModel->setEvaluatorName($event->evaluatorName);
-        $interviewReadModel->setDateTime($event->dateTime);
-        $interviewReadModel->setLocation($event->location);
-        $interviewReadModel->setStatus('Scheduled');
+        return $this->createQueryBuilder()
+            ->sort('lastName', 'ASC')
+            ->getQuery()
+            ->execute();
+    }
 
-        $this->documentManager->persist($interviewReadModel);
-        $this->documentManager->flush();
+    public function findCandidateById($id)
+    {
+        return $this->createQueryBuilder()
+            ->field('entityId')->equals($id)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
+    // Add more query methods as needed
+}
+```
+
+#### Service
+
+```php
+// read-project/src/Service/CandidateService.php
+namespace App\Service;
+
+use App\Repository\CandidateRepository;
+
+class CandidateService
+{
+    private $candidateRepository;
+
+    public function __construct(CandidateRepository $candidateRepository)
+    {
+        $this->candidateRepository = $candidateRepository;
+    }
+
+    public function getAllCandidates()
+    {
+        return $this->candidateRepository->findAllCandidates();
+    }
+
+    public function getCandidateById($id)
+    {
+        return $this->candidateRepository->findCandidateById($id);
+    }
+
+    // Add more business logic methods as needed
+}
+```
+
+#### Controller
+
+```php
+// read-project/src/Controller/CandidateController.php
+namespace App\Controller;
+
+use App\Service\CandidateService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
+
+class CandidateController extends AbstractController
+{
+    private $candidateService;
+
+    public function __construct(CandidateService $candidateService)
+    {
+        $this->candidateService = $candidateService;
+    }
+
+    #[Route('/api/candidates', name: 'get_all_candidates', methods: ['GET'])]
+    public function getAllCandidates(): JsonResponse
+    {
+        $candidates = $this->candidateService->getAllCandidates();
+        return $this->json($candidates);
+    }
+
+    #[Route('/api/candidates/{id}', name: 'get_candidate', methods: ['GET'])]
+    public function getCandidateById($id): JsonResponse
+    {
+        $candidate = $this->candidateService->getCandidateById($id);
+        if (!$candidate) {
+            return $this->json(['message' => 'Candidate not found'], 404);
+        }
+        return $this->json($candidate);
     }
 }
 ```
 
-## Synchronization Between Projects
+This revised implementation clearly separates the Write Project (which you provided) from the Read Project. The Read Project is focused solely on querying MongoDB to retrieve candidate information, which aligns with the CQRS pattern.
 
-1. The Write Project dispatches events to RabbitMQ using Symfony Messenger.
-2. The Read Project consumes these events and updates the MongoDB database accordingly.
-
-## Security
-
-Implement security in both projects:
-
-1. Write Project: Use Symfony's security component to secure command endpoints.
-    - Implement JWT authentication for API endpoints.
-    - Use role-based access control (RBAC) to restrict access to certain commands.
-
-2. Read Project: Use API Platform's built-in security features to secure read endpoints.
-    - Implement OAuth2 authentication for read API.
-    - Use field-level security to restrict access to sensitive information based on user roles.
-
-## Performance Optimizations
-
-1. Write Project:
-    - Implement command queueing for better throughput during high load.
-    - Use database indexing strategies for faster writes and reads.
-
-2. Read Project:
-    - Implement caching mechanisms (e.g., Redis) for frequently accessed read models.
-    - Use MongoDB's aggregation pipeline for complex queries.
-
-## Monitoring and Logging
-
-1. Implement centralized logging using ELK stack (Elasticsearch, Logstash, Kibana).
-2. Use tools like Prometheus and Grafana for monitoring system metrics.
-
-## Testing
-
-1. Write Project:
-    - Implement unit tests for command handlers and services.
-    - Use integration tests to ensure proper event dispatching.
-
-2. Read Project:
-    - Implement unit tests for event handlers and services.
-    - Use integration tests to verify proper updating of read models.
-
-## Deployment
-
-1. Use Docker for containerization of both projects.
-2. Implement CI/CD pipelines for automated testing and deployment.
-
-This simplified implementation provides a clear separation between write and read operations, allowing for independent scaling and optimization of each side of the system. It maintains the core benefits of CQRS while reducing the complexity associated with advanced domain modeling techniques.
+The Write Project handles the creation and updates of candidates, dispatching messages when changes occur. The Read Project provides an API to query the candidate data stored in MongoDB, which is updated based on the messages dispatched by the Write Project.

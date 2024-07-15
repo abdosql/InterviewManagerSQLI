@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Transformation\Factory;
+
+use App\Transformation\TransformToDocumentStrategyInterface;
+use App\Transformation\TransformToEntityStrategyInterface;
+use Symfony\Component\DependencyInjection\ServiceLocator;
+
+class TransformationStrategyFactory
+{
+    public function __construct(
+        private ServiceLocator $documentStrategies,
+        private ServiceLocator $entityStrategies
+    ){}
+
+    public function getTransformToEntityStrategy($type): TransformToEntityStrategyInterface
+    {
+        if (!$this->entityStrategies->has($type)){
+            throw new \InvalidArgumentException('Unknown transformation type: ' . $type);
+        }
+        return $this->entityStrategies->get($type);
+    }
+    public function getTransformToDocumentStrategy($type): TransformToDocumentStrategyInterface
+    {
+        if (!$this->documentStrategies->has($type)){
+            throw new \InvalidArgumentException('Unknown transformation type: ' . $type);
+        }
+        return $this->documentStrategies->get($type);
+    }
+}
