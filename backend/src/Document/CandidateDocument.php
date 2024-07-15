@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 #[MongoDB\Document(collection: "candidates", repositoryClass: CandidateRepository::class)]
-class Candidate
+class CandidateDocument extends PersonDocument
 {
     #[MongoDB\Id]
     private $id;
@@ -16,17 +16,17 @@ class Candidate
     #[MongoDB\Field(type: "string")]
     private ?string $address;
 
-    #[MongoDB\Field(type: "date")]
-    private ?\DateTimeInterface $hireDate;
+    #[MongoDB\Field(type: "date", nullable: true)]
+    private ?\DateTimeInterface $hireDate = null;
 
-    #[MongoDB\ReferenceMany(targetDocument: Interview::class, mappedBy: "candidate")]
+    #[MongoDB\ReferenceMany(targetDocument: InterviewDocument::class, mappedBy: "candidate")]
     private ArrayCollection $interviews;
 
-    #[MongoDB\ReferenceMany(targetDocument: CandidatePhase::class, mappedBy: "candidate")]
+    #[MongoDB\ReferenceMany(targetDocument: CandidatePhaseDocument::class, mappedBy: "candidate")]
     private ArrayCollection $candidatePhases;
 
-    #[MongoDB\ReferenceOne(targetDocument: Resume::class)]
-    private ?Resume $resume;
+    #[MongoDB\ReferenceOne(targetDocument: ResumeDocument::class, cascade: ["persist"])]
+    private ?ResumeDocument $resume;
 
     public function __construct()
     {
@@ -55,7 +55,7 @@ class Candidate
         return $this->hireDate;
     }
 
-    public function setHireDate(\DateTimeInterface $hireDate): self
+    public function setHireDate(?\DateTimeInterface $hireDate): self
     {
         $this->hireDate = $hireDate;
         return $this;
@@ -66,7 +66,7 @@ class Candidate
         return $this->interviews;
     }
 
-    public function addInterview(Interview $interview): self
+    public function addInterview(InterviewDocument $interview): self
     {
         if (!$this->interviews->contains($interview)) {
             $this->interviews->add($interview);
@@ -75,7 +75,7 @@ class Candidate
         return $this;
     }
 
-    public function removeInterview(Interview $interview): self
+    public function removeInterview(InterviewDocument $interview): self
     {
         if ($this->interviews->removeElement($interview)) {
             if ($interview->getCandidate() === $this) {
@@ -90,7 +90,7 @@ class Candidate
         return $this->candidatePhases;
     }
 
-    public function addCandidatePhase(CandidatePhase $candidatePhase): self
+    public function addCandidatePhase(CandidatePhaseDocument $candidatePhase): self
     {
         if (!$this->candidatePhases->contains($candidatePhase)) {
             $this->candidatePhases->add($candidatePhase);
@@ -99,7 +99,7 @@ class Candidate
         return $this;
     }
 
-    public function removeCandidatePhase(CandidatePhase $candidatePhase): self
+    public function removeCandidatePhase(CandidatePhaseDocument $candidatePhase): self
     {
         if ($this->candidatePhases->removeElement($candidatePhase)) {
             if ($candidatePhase->getCandidate() === $this) {
@@ -109,12 +109,15 @@ class Candidate
         return $this;
     }
 
-    public function getResume(): ?Resume
+    public function getResume(): ?ResumeDocument
     {
+        if ($this->resume === null) {
+            $this->resume = new ResumeDocument();
+        }
         return $this->resume;
     }
 
-    public function setResume(?Resume $resume): self
+    public function setResume(?ResumeDocument $resume): self
     {
         $this->resume = $resume;
         return $this;

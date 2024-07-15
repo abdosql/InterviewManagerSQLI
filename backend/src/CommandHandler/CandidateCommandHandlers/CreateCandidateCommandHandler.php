@@ -3,17 +3,15 @@
 namespace App\CommandHandler\CandidateCommandHandlers;
 
 use App\Command\CandidateCommands\CreateCandidateCommand;
-use App\Entity\Candidate;
 use App\Message\CandidateMessages\CandidateCreatedMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class CreateCandidateCommandHandler
+readonly class CreateCandidateCommandHandler
 {
     public function __construct(
-        private EntityManagerInterface $entityManager,
         private MessageBusInterface $messageBus,
     ) {}
 
@@ -22,31 +20,9 @@ class CreateCandidateCommandHandler
      */
     public function handle(CreateCandidateCommand $command): void
     {
-        $candidate = new Candidate();
-        $candidate->setFirstName($command->firstName);
-        $candidate->setLastName($command->lastName);
-        $candidate->setPhone($command->phone);
-        $candidate->setEmail($command->email);
-        $candidate->setAddress($command->address);
-        if ($command->hireDate) {
-            $candidate->setHireDate($command->hireDate);
-        }
-        if ($command->resumeFilePath){
-            $candidate->getResume()->setFilePath($command->resumeFilePath);
-        }
-
-        $this->entityManager->persist($candidate);
-        $this->entityManager->flush();
-
+        $candidate = ($command)();
         $message = new CandidateCreatedMessage(
-            $candidate->getId(),
-            $candidate->getFirstName(),
-            $candidate->getLastName(),
-            $candidate->getPhone(),
-            $candidate->getEmail(),
-            $candidate->getAddress(),
-            $candidate->getHireDate(),
-            $candidate->getResume()->getFilePath()
+            $candidate->getId()
         );
 
         try {

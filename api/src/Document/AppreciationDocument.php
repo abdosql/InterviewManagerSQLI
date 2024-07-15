@@ -5,7 +5,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[MongoDB\Document(collection: "appreciations")]
-class Appreciation
+class AppreciationDocument
 {
     #[MongoDB\Id]
     private $id;
@@ -16,7 +16,7 @@ class Appreciation
     #[MongoDB\Field(type: "int")]
     private $score;
 
-    #[MongoDB\ReferenceOne(targetDocument: Interview::class, inversedBy: "appreciations")]
+    #[MongoDB\ReferenceOne(targetDocument: InterviewDocument::class, inversedBy: "appreciations")]
     private $interview;
 
     public function getId(): ?string
@@ -46,12 +46,12 @@ class Appreciation
         return $this;
     }
 
-    public function getInterview(): ?Interview
+    public function getInterview(): ?InterviewDocument
     {
         return $this->interview;
     }
 
-    public function setInterview(?Interview $interview): self
+    public function setInterview(?InterviewDocument $interview): self
     {
         $this->interview = $interview;
         return $this;

@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[MongoDB\Document(collection: "interviews")]
-class Interview
+class InterviewDocument
 {
     #[MongoDB\Id]
     private $id;
@@ -18,16 +18,16 @@ class Interview
     #[MongoDB\Field(type: "string")]
     private $interviewLocation;
 
-    #[MongoDB\ReferenceOne(targetDocument: Candidate::class, inversedBy: "interviews")]
+    #[MongoDB\ReferenceOne(targetDocument: CandidateDocument::class, inversedBy: "interviews")]
     private $candidate;
 
-    #[MongoDB\ReferenceOne(targetDocument: Evaluator::class, inversedBy: "interviews")]
+    #[MongoDB\ReferenceOne(targetDocument: EvaluatorDocument::class, inversedBy: "interviews")]
     private $evaluator;
 
-    #[MongoDB\ReferenceOne(targetDocument: HRManager::class, inversedBy: "interviews")]
+    #[MongoDB\ReferenceOne(targetDocument: HRManagerDocument::class, inversedBy: "interviews")]
     private $hrManager;
 
-    #[MongoDB\ReferenceMany(targetDocument: Appreciation::class, mappedBy: "interview")]
+    #[MongoDB\ReferenceMany(targetDocument: AppreciationDocument::class, mappedBy: "interview")]
     private $appreciations;
 
     public function __construct()
@@ -62,34 +62,34 @@ class Interview
         return $this;
     }
 
-    public function getCandidate(): ?Candidate
+    public function getCandidate(): ?CandidateDocument
     {
         return $this->candidate;
     }
 
-    public function setCandidate(?Candidate $candidate): self
+    public function setCandidate(?CandidateDocument $candidate): self
     {
         $this->candidate = $candidate;
         return $this;
     }
 
-    public function getEvaluator(): ?Evaluator
+    public function getEvaluator(): ?EvaluatorDocument
     {
         return $this->evaluator;
     }
 
-    public function setEvaluator(?Evaluator $evaluator): self
+    public function setEvaluator(?EvaluatorDocument $evaluator): self
     {
         $this->evaluator = $evaluator;
         return $this;
     }
 
-    public function getHrManager(): ?HRManager
+    public function getHrManager(): ?HRManagerDocument
     {
         return $this->hrManager;
     }
 
-    public function setHrManager(?HRManager $hrManager): self
+    public function setHrManager(?HRManagerDocument $hrManager): self
     {
         $this->hrManager = $hrManager;
         return $this;
@@ -100,7 +100,7 @@ class Interview
         return $this->appreciations;
     }
 
-    public function addAppreciation(Appreciation $appreciation): self
+    public function addAppreciation(AppreciationDocument $appreciation): self
     {
         if (!$this->appreciations->contains($appreciation)) {
             $this->appreciations[] = $appreciation;
@@ -109,7 +109,7 @@ class Interview
         return $this;
     }
 
-    public function removeAppreciation(Appreciation $appreciation): self
+    public function removeAppreciation(AppreciationDocument $appreciation): self
     {
         if ($this->appreciations->removeElement($appreciation)) {
             if ($appreciation->getInterview() === $this) {

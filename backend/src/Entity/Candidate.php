@@ -133,7 +133,8 @@ class Candidate extends Person
         if ($this->resume === null) {
             $this->resume = new Resume();
         }
-        return $this->resume;    }
+        return $this->resume;
+    }
 
     public function setResume(?Resume $resume): static
     {

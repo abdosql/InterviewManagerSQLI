@@ -2,18 +2,23 @@
 
 namespace App\Command\CandidateCommands;
 
-use DateTimeInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use App\Entity\Candidate;
+use Doctrine\ORM\EntityManagerInterface;
 
 readonly class CreateCandidateCommand
 {
-    public function __construct(
-        public string             $firstName,
-        public string             $lastName,
-        public string             $phone,
-        public string             $email,
-        public string             $address,
-        public string $resumeFilePath,
-        public ?DateTimeInterface $hireDate = null,
-    ) {}
+    protected Candidate $candidate;
+    private EntityManagerInterface $entityManager;
+    public function __construct(EntityManagerInterface $entityManager, $candidate) {
+        $this->candidate = $candidate;
+        $this->entityManager = $entityManager;
+    }
+
+    public function __invoke(): Candidate
+    {
+        $this->entityManager->persist($this->candidate);
+        $this->entityManager->flush();
+        return $this->candidate;
+
+    }
 }

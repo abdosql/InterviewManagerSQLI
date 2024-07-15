@@ -7,12 +7,12 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[MongoDB\Document(collection: "users")]
-class Evaluator extends User
+class EvaluatorDocument extends UserDocument
 {
     #[MongoDB\Field(type: "string")]
     private $specialization;
 
-    #[MongoDB\ReferenceMany(targetDocument: Interview::class, mappedBy: "evaluator")]
+    #[MongoDB\ReferenceMany(targetDocument: InterviewDocument::class, mappedBy: "evaluator")]
     private $interviews;
 
     public function __construct()
@@ -37,7 +37,7 @@ class Evaluator extends User
         return $this->interviews;
     }
 
-    public function addInterview(Interview $interview): self
+    public function addInterview(InterviewDocument $interview): self
     {
         if (!$this->interviews->contains($interview)) {
             $this->interviews->add($interview);
@@ -46,7 +46,7 @@ class Evaluator extends User
         return $this;
     }
 
-    public function removeInterview(Interview $interview): self
+    public function removeInterview(InterviewDocument $interview): self
     {
         if ($this->interviews->removeElement($interview)) {
             if ($interview->getEvaluator() === $this) {

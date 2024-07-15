@@ -6,7 +6,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[MongoDB\EmbeddedDocument]
-class Person
+abstract class PersonDocument
 {
     #[MongoDB\Field(type: "string")]
     #[Assert\NotBlank(message: "First name should not be blank")]
@@ -21,9 +21,10 @@ class Person
     protected ?string $phone;
 
     #[MongoDB\Field(type: "string")]
-    #[Assert\NotBlank(message: "Email should not be blank")]
-    #[Assert\Email(message: "The email '{{ value }}' is not a valid email.")]
-    protected ?string $email;
+    #[MongoDB\Index(unique: true)]
+    #[Assert\NotBlank(message: 'Email should not be blank')]
+    #[Assert\Email(message: 'The email "{{ value }}" is not a valid email.')]
+    protected ?string $email = null;
 
     #[MongoDB\Field(type: "int")]
     protected ?int $entityId;
@@ -78,7 +79,7 @@ class Person
 
     /**
      * @param int|null $entityId
-     * @return Person
+     * @return PersonDocument
      */
     public function setEntityId(?int $entityId): self
     {

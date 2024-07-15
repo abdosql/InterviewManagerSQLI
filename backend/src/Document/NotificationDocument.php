@@ -5,7 +5,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[MongoDB\Document(collection: "notifications")]
-class Notification
+class NotificationDocument
 {
     #[MongoDB\Id]
     private $id;
@@ -16,7 +16,7 @@ class Notification
     #[MongoDB\Field(type: "date")]
     private $notificationDate;
 
-    #[MongoDB\ReferenceOne(targetDocument: User::class, inversedBy: "notifications")]
+    #[MongoDB\ReferenceOne(targetDocument: UserDocument::class, inversedBy: "notifications")]
     private $user;
 
     public function getId(): ?string
@@ -46,12 +46,12 @@ class Notification
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getUser(): ?UserDocument
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?UserDocument $user): self
     {
         $this->user = $user;
         return $this;

@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[MongoDB\Document(collection: "users")]
-class HRManager extends User
+class HRManagerDocument extends UserDocument
 {
     #[MongoDB\Field(type: "string")]
     private $department;
@@ -15,7 +15,7 @@ class HRManager extends User
     #[MongoDB\Field(type: "string")]
     private $position;
 
-    #[MongoDB\ReferenceMany(targetDocument: Interview::class, mappedBy: "hrManager")]
+    #[MongoDB\ReferenceMany(targetDocument: InterviewDocument::class, mappedBy: "hrManager")]
     private $interviews;
 
     public function __construct()
@@ -51,7 +51,7 @@ class HRManager extends User
         return $this->interviews;
     }
 
-    public function addInterview(Interview $interview): self
+    public function addInterview(InterviewDocument $interview): self
     {
         if (!$this->interviews->contains($interview)) {
             $this->interviews->add($interview);
@@ -60,7 +60,7 @@ class HRManager extends User
         return $this;
     }
 
-    public function removeInterview(Interview $interview): self
+    public function removeInterview(InterviewDocument $interview): self
     {
         if ($this->interviews->removeElement($interview)) {
             if ($interview->getHrManager() === $this) {

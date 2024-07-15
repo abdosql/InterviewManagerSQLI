@@ -9,8 +9,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 #[MongoDB\Document(collection: "users")]
 #[MongoDB\InheritanceType("SINGLE_COLLECTION")]
 #[MongoDB\DiscriminatorField("dType")]
-#[MongoDB\DiscriminatorMap(["evaluator" => Evaluator::class, "rh" => HRManager::class, "user" => User::class])]
-class User extends Person
+#[MongoDB\DiscriminatorMap(["evaluator" => EvaluatorDocument::class, "rh" => HRManagerDocument::class, "user" => UserDocument::class])]
+class UserDocument extends PersonDocument
 {
     #[MongoDB\Id]
     protected ?string $id;
@@ -24,7 +24,7 @@ class User extends Person
     #[MongoDB\Field(type: "collection")]
     protected array $roles = [];
 
-    #[MongoDB\ReferenceMany(targetDocument: Notification::class, mappedBy: "user")]
+    #[MongoDB\ReferenceMany(targetDocument: NotificationDocument::class, mappedBy: "user")]
     protected ArrayCollection $notifications;
 
     public function __construct()
@@ -77,7 +77,7 @@ class User extends Person
         return $this->notifications;
     }
 
-    public function addNotification(Notification $notification): self
+    public function addNotification(NotificationDocument $notification): self
     {
         if (!$this->notifications->contains($notification)) {
             $this->notifications[] = $notification;
@@ -86,7 +86,7 @@ class User extends Person
         return $this;
     }
 
-    public function removeNotification(Notification $notification): self
+    public function removeNotification(NotificationDocument $notification): self
     {
         if ($this->notifications->removeElement($notification)) {
             if ($notification->getUser() === $this) {

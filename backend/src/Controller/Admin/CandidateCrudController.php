@@ -56,27 +56,21 @@ class CandidateCrudController extends AbstractCrudController
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        $this->handleResumeUpload($entityInstance);
+        $this->createCandidate($entityManager,$entityInstance);
     }
 
     /**
      * @param Candidate $candidate
      * @throws
      */
-    private function handleResumeUpload(Candidate $candidate): void
+    private function createCandidate(EntityManagerInterface $entityManager, Candidate $candidate): void
     {
         try {
             $filePath = $this->resumeUploadService->handleFileUpload(
                 $this->getContext()->getRequest()->files->get('Candidate')['resume_filePath']
             );
-            $command = new CreateCandidateCommand(
-                $candidate->getFirstName(),
-                $candidate->getLastName(),
-                $candidate->getPhone(),
-                $candidate->getEmail(),
-                $candidate->getAddress(),
-                $filePath
-            );
+            $candidate->getResume()->setFilePath($filePath);
+            $command = new CreateCandidateCommand($entityManager, $candidate);
             $this->createCandidateCommandHandler->handle($command);
         } catch (TransportException $e) {
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);

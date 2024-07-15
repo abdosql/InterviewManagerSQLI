@@ -5,7 +5,7 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[MongoDB\Document(collection: "candidate_phases")]
-class CandidatePhase
+class CandidatePhaseDocument
 {
     #[MongoDB\Id]
     private $id;
@@ -22,7 +22,7 @@ class CandidatePhase
     #[MongoDB\Field(type: "string")]
     private $result;
 
-    #[MongoDB\ReferenceOne(targetDocument: Candidate::class, inversedBy: "candidatePhases")]
+    #[MongoDB\ReferenceOne(targetDocument: CandidateDocument::class, inversedBy: "candidatePhases")]
     private $candidate;
 
     public function getId(): ?string
@@ -74,12 +74,12 @@ class CandidatePhase
         return $this;
     }
 
-    public function getCandidate(): ?Candidate
+    public function getCandidate(): ?CandidateDocument
     {
         return $this->candidate;
     }
 
-    public function setCandidate(?Candidate $candidate): self
+    public function setCandidate(?CandidateDocument $candidate): self
     {
         $this->candidate = $candidate;
         return $this;
