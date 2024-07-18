@@ -2,15 +2,15 @@
 
 namespace App\Handler\CommandHandler\CandidateCommandHandlers;
 
-use App\Command\CandidateCommands\CreateCandidateCommand;
+use App\Command\CandidateCommands\DeleteCandidateCommand;
 use App\Command\CandidateCommands\UpdateCandidateCommand;
 use App\Handler\CommandHandler\CommandHandlerInterface;
-use App\Message\CandidateMessages\CandidateCreatedMessage;
+use App\Message\CandidateMessages\CandidateUpdatedMessage;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-readonly class CreateCandidateCommandHandler implements CommandHandlerInterface
+class DeleteCandidateCommandHandler implements CommandHandlerInterface
 {
     public function __construct(
         private MessageBusInterface $messageBus,
@@ -22,11 +22,11 @@ readonly class CreateCandidateCommandHandler implements CommandHandlerInterface
      */
     public function execute(object $command): void
     {
-        if (!$command instanceof CreateCandidateCommand){
+        if (!$command instanceof DeleteCandidateCommand){
             throw new \InvalidArgumentException('Invalid command');
         }
         $candidate = ($command)();
-        $message = new CandidateCreatedMessage(
+        $message = new CandidateUpdatedMessage(
             $candidate->getId()
         );
 

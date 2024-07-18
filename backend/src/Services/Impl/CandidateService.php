@@ -35,15 +35,19 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
         }
         $candidateDocument = $this->findDocumentByEntity($id);
         if (!$candidateDocument){
-            throw new MongoDBException("    Candidate not found");
+            throw new MongoDBException("Candidate not found");
         }
         $candidateDocument->setDocument($document);
         $this->documentManager->flush();
     }
 
-    public function deleteDocument($id): void
+    /**
+     * @throws MongoDBException
+     */
+    public function deleteDocument(int $entityId): void
     {
-        // TODO: Implement deleteDocument() method.
+        $this->documentManager->remove($this->findDocumentByEntity($entityId));
+        $this->documentManager->flush();
     }
 
     public function findDocument($id)
@@ -70,9 +74,10 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
         $this->entityManager->flush();
     }
 
-    public function deleteEntity($id): void
+    public function deleteEntity(int $entityId): void
     {
-        // TODO: Implement deleteEntity() method.
+        $this->entityManager->remove($this->findEntity($entityId));
+        $this->entityManager->flush();
     }
 
     public function findEntity(int $id): Candidate
@@ -82,7 +87,7 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
 
     public function findAllEntities(): array
     {
-        // TODO: Implement findAllEntities() method.
+        return $this->entityManager->getRepository(Candidate::class)->findAll();
     }
 
     public function findDocumentByEntity(int $entityId): object

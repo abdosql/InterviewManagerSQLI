@@ -6,7 +6,7 @@ interface DocumentPersistenceServiceInterface
 {
     public function saveDocument(object $document): void;
     public function updateDocument(int $id, object $document): void;
-    public function deleteDocument($id): void;
+    public function deleteDocument(int $entityId): void;
     public function findDocumentByEntity(int $entityId): object;
     public function findDocument($id);
     public function findAllDocuments(): array;

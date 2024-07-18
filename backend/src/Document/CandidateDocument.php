@@ -25,7 +25,7 @@ class CandidateDocument extends PersonDocument
     #[MongoDB\ReferenceMany(targetDocument: CandidatePhaseDocument::class, mappedBy: "candidate")]
     private ArrayCollection $candidatePhases;
 
-    #[MongoDB\ReferenceOne(targetDocument: ResumeDocument::class, cascade: ["persist", "update"])]
+    #[MongoDB\ReferenceOne(targetDocument: ResumeDocument::class, cascade: ["persist", "delete", "update"])]
     private ?ResumeDocument $resume;
 
     public function __construct()

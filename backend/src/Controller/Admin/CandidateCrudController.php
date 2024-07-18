@@ -7,10 +7,12 @@
 namespace App\Controller\Admin;
 
 use App\Command\CandidateCommands\CreateCandidateCommand;
+use App\Command\CandidateCommands\DeleteCandidateCommand;
 use App\Command\CandidateCommands\UpdateCandidateCommand;
 use App\EasyAdmin\Fields\ResumeUploadField;
 use App\Entity\Candidate;
 use App\Handler\CommandHandler\CandidateCommandHandlers\CreateCandidateCommandHandler;
+use App\Handler\CommandHandler\CandidateCommandHandlers\DeleteCandidateCommandHandler;
 use App\Handler\CommandHandler\CandidateCommandHandlers\UpdateCandidateCommandHandler;
 use App\Services\FileUploadServiceInterface;
 use App\Services\Impl\CandidateService;
@@ -31,6 +33,7 @@ class CandidateCrudController extends AbstractCrudController
     public function __construct(
         private CreateCandidateCommandHandler $createCandidateCommandHandler,
         private UpdateCandidateCommandHandler $updateCandidateCommandHandler,
+        private DeleteCandidateCommandHandler $deleteCandidateCommandHandler,
         private FileUploadServiceInterface $resumeUploadService,
         private CandidateService $candidateService,
     )
@@ -43,6 +46,7 @@ class CandidateCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+//        dd($this->candidateService->findDocumentByEntity(1));
         yield IdField::new('id')->hideOnForm();
         yield FormField::addPanel('Personal information');
         yield TextField::new('firstName')
@@ -85,6 +89,15 @@ class CandidateCrudController extends AbstractCrudController
     }
 
     /**
+     * @throws ExceptionInterface
+     */
+    public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        $this->deleteCandidate($entityInstance);
+        $this->addFlash('success', 'Candidate deletion initiated.');
+    }
+
+    /**
      * @param Candidate $candidate
      * @throws ExceptionInterface
      * @throws \Exception
@@ -99,20 +112,32 @@ class CandidateCrudController extends AbstractCrudController
                 }
                 $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
                 $command = new CreateCandidateCommand($candidate, $this->candidateService);
-                $this->createCandidateCommandHandler->handle($command);
+                $this->createCandidateCommandHandler->execute($command);
             } else {
-
                 if(isset($file)){
-
                     if (!$file instanceof UploadedFile){
                         throw new \Exception(   'Resume file is required for new Candidate');
                     }
                     $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
                 };
                 $command = new UpdateCandidateCommand($candidate, $this->candidateService);
-                $this->updateCandidateCommandHandler->handle($command);
+                $this->updateCandidateCommandHandler->execute($command);
             }
         } catch (TransportException $e) {
+            throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
+        }
+    }
+
+    /**
+     * @param Candidate $candidate
+     * @throws ExceptionInterface
+     */
+    public function deleteCandidate(Candidate $candidate): void
+    {
+        try {
+            $command = new DeleteCandidateCommand($candidate, $this->candidateService);
+            $this->deleteCandidateCommandHandler->execute($command);
+        }catch (TransportException $e){
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }
     }
