@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\ResumeRepository;
+use App\Repository\EntityRepository\ResumeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ResumeRepository::class)]

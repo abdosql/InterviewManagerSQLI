@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\EntityRepository;
 
 use App\Entity\Resume;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

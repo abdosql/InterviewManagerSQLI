@@ -2,12 +2,12 @@
 
 namespace App\Document;
 
-use App\Repository\Documents\CandidateRepository;
+use App\Repository\DocumentRepository\CandidateDocumentRepository;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-#[MongoDB\Document(collection: "candidates", repositoryClass: CandidateRepository::class)]
+#[MongoDB\Document(collection: "candidates", repositoryClass: CandidateDocumentRepository::class)]
 class CandidateDocument extends PersonDocument
 {
     #[MongoDB\Id]
@@ -25,7 +25,7 @@ class CandidateDocument extends PersonDocument
     #[MongoDB\ReferenceMany(targetDocument: CandidatePhaseDocument::class, mappedBy: "candidate")]
     private ArrayCollection $candidatePhases;
 
-    #[MongoDB\ReferenceOne(targetDocument: ResumeDocument::class, cascade: ["persist"])]
+    #[MongoDB\ReferenceOne(targetDocument: ResumeDocument::class, cascade: ["persist", "update"])]
     private ?ResumeDocument $resume;
 
     public function __construct()
@@ -121,5 +121,23 @@ class CandidateDocument extends PersonDocument
     {
         $this->resume = $resume;
         return $this;
+    }
+
+    public function setDocument(CandidateDocument $candidateDocument): void
+    {
+        $this->setFirstName($candidateDocument->getFirstName());
+        $this->setLastName($candidateDocument->getLastName());
+        $this->setEmail($candidateDocument->getEmail());
+        $this->setPhone($candidateDocument->getPhone());
+        $this->setAddress($candidateDocument->getAddress());
+        $this->setHireDate($candidateDocument->getHireDate());
+        $this->setResumeDocument($candidateDocument->getResume());
+    }
+
+    public function setResumeDocument(ResumeDocument $resumeDocument): void
+    {
+        $resume = $this->getResume();
+        $resume->setEntityId($resumeDocument->getEntityId());
+        $resume->setFilePath($resumeDocument->getFilePath());
     }
 }

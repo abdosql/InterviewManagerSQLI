@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\InterviewRepository;
+use App\Repository\EntityRepository\InterviewRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

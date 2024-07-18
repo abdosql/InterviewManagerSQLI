@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\InterviewStatusRepository;
+use App\Repository\EntityRepository\InterviewStatusRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 

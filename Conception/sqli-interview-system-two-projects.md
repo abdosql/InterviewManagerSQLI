@@ -229,7 +229,7 @@ class CandidateRepository extends DocumentRepository
 // read-project/src/Service/CandidateService.php
 namespace App\Service;
 
-use App\Repository\CandidateRepository;
+use App\Repository\EntityRepository\CandidateRepository;
 
 class CandidateService
 {

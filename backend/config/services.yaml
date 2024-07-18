@@ -18,18 +18,22 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
+            - '../src/Document/'
             - '../src/Kernel.php'
+
+    App\Repository\EntityRepository\CandidateRepository:
+        arguments:
+            $registry: '@doctrine'
+
     App\Controller\CandidateCrudController:
         arguments:
-            - $resumeUploadService : '@App\Services\ResumeUploadService'
-    App\Services\ResumeUploadService:
+            - $resumeUploadService : '@App\Services\Impl\ResumeUploadService'
+    App\Services\Impl\ResumeUploadService:
         arguments:
             $projectDir: '%kernel.project_dir%'
             $uploadDir: '%env(UPLOAD_DIR)%'
 
-    App\MessageHandler\CandidateMessageHandlers\CandidateCreatedMessageHandler:
-        arguments:
-            $documentManager: '@Doctrine\ODM\MongoDB\DocumentManager'
+################################################################
     #configuring the service locator (:
     App\Transformation\Strategy\CandidateTransformationStrategy:
         tags:

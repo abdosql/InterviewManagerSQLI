@@ -1,10 +1,9 @@
 <?php
 
-namespace App\CommandHandler\CandidateCommandHandlers;
+namespace App\Handler\CommandHandler\CandidateCommandHandlers;
 
 use App\Command\CandidateCommands\CreateCandidateCommand;
 use App\Message\CandidateMessages\CandidateCreatedMessage;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;

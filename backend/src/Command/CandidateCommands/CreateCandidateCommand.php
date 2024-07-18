@@ -3,22 +3,20 @@
 namespace App\Command\CandidateCommands;
 
 use App\Entity\Candidate;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Services\Impl\CandidateService;
 
 readonly class CreateCandidateCommand
 {
     protected Candidate $candidate;
-    private EntityManagerInterface $entityManager;
-    public function __construct(EntityManagerInterface $entityManager, $candidate) {
+    private CandidateService $candidateService;
+    public function __construct($candidate, CandidateService $candidateService) {
         $this->candidate = $candidate;
-        $this->entityManager = $entityManager;
+        $this->candidateService = $candidateService;
     }
 
     public function __invoke(): Candidate
     {
-        $this->entityManager->persist($this->candidate);
-        $this->entityManager->flush();
+        $this->candidateService->saveEntity($this->candidate);
         return $this->candidate;
-
     }
 }

@@ -1,23 +1,23 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repository\EntityRepository;
 
-use App\Entity\Candidate;
+use App\Entity\CandidatePhase;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Candidate>
+ * @extends ServiceEntityRepository<CandidatePhase>
  */
-class CandidateRepository extends ServiceEntityRepository
+class CandidatePhaseRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Candidate::class);
+        parent::__construct($registry, CandidatePhase::class);
     }
 
     //    /**
-    //     * @return Candidate[] Returns an array of Candidate objects
+    //     * @return CandidatePhase[] Returns an array of CandidatePhase objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class CandidateRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Candidate
+    //    public function findOneBySomeField($value): ?CandidatePhase
     //    {
     //        return $this->createQueryBuilder('c')
     //            ->andWhere('c.exampleField = :val')

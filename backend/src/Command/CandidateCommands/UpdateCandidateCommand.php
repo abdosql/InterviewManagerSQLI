@@ -3,22 +3,27 @@
 namespace App\Command\CandidateCommands;
 
 use App\Entity\Candidate;
+use App\Services\Impl\CandidateService;
 use Doctrine\ORM\EntityManagerInterface;
 
 readonly class UpdateCandidateCommand
 {
     protected Candidate $candidate;
-    private EntityManagerInterface $entityManager;
-    public function __construct(EntityManagerInterface $entityManager, $candidate) {
+    private CandidateService $candidateService;
+    public function __construct($candidate, CandidateService $candidateService) {
         $this->candidate = $candidate;
-        $this->entityManager = $entityManager;
+        $this->candidateService = $candidateService;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function __invoke(): Candidate
     {
-        $this->entityManager->persist($this->candidate);
-        $this->entityManager->flush();
+        if ($this->candidate->getId() == null) {
+            throw new \Exception('Candidate ID is required');
+        }
+        $this->candidateService->updateEntity($this->candidate);
         return $this->candidate;
-
     }
 }
