@@ -2,10 +2,11 @@
 
 namespace App\Command\CandidateCommands;
 
+use App\Command\CommandInterface;
 use App\Entity\Candidate;
 use App\Services\Impl\CandidateService;
 
-readonly class CreateCandidateCommand
+readonly class CreateCandidateCommand implements CommandInterface
 {
     protected Candidate $candidate;
     private CandidateService $candidateService;
@@ -14,8 +15,14 @@ readonly class CreateCandidateCommand
         $this->candidateService = $candidateService;
     }
 
-    public function __invoke(): Candidate
+    /**
+     * @throws \Exception
+     */
+    public function execute(): Candidate
     {
+        if ($this->candidate->getId() == null) {
+            throw new \Exception('Candidate ID is required');
+        }
         $this->candidateService->saveEntity($this->candidate);
         return $this->candidate;
     }

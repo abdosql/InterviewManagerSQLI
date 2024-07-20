@@ -4,5 +4,5 @@ namespace App\Handler\CommandHandler;
 
 interface CommandHandlerInterface
 {
-    public function execute(object $command): void;
+    public function handle(object $command): void;
 }

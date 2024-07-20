@@ -2,11 +2,12 @@
 
 namespace App\Command\CandidateCommands;
 
+use App\Command\CommandInterface;
 use App\Entity\Candidate;
 use App\Services\Impl\CandidateService;
 use Doctrine\ORM\EntityManagerInterface;
 
-readonly class UpdateCandidateCommand
+readonly class UpdateCandidateCommand implements CommandInterface
 {
     protected Candidate $candidate;
     private CandidateService $candidateService;
@@ -18,7 +19,7 @@ readonly class UpdateCandidateCommand
     /**
      * @throws \Exception
      */
-    public function __invoke(): Candidate
+    public function execute(): Candidate
     {
         if ($this->candidate->getId() == null) {
             throw new \Exception('Candidate ID is required');
