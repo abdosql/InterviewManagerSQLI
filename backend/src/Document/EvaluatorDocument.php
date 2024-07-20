@@ -6,7 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
-#[MongoDB\Document(collection: "users")]
+#[MongoDB\Document(collection: "evaluators")]
 class EvaluatorDocument extends UserDocument
 {
     #[MongoDB\Field(type: "string")]

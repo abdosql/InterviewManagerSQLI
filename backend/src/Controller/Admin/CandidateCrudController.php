@@ -112,7 +112,7 @@ class CandidateCrudController extends AbstractCrudController
                 }
                 $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
                 $command = new CreateCandidateCommand($candidate, $this->candidateService);
-                $this->createCandidateCommandHandler->execute($command);
+                $this->createCandidateCommandHandler->handle($command);
             } else {
                 if(isset($file)){
                     if (!$file instanceof UploadedFile){
@@ -121,7 +121,7 @@ class CandidateCrudController extends AbstractCrudController
                     $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
                 };
                 $command = new UpdateCandidateCommand($candidate, $this->candidateService);
-                $this->updateCandidateCommandHandler->execute($command);
+                $this->updateCandidateCommandHandler->handle($command);
             }
         } catch (TransportException $e) {
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
@@ -136,7 +136,7 @@ class CandidateCrudController extends AbstractCrudController
     {
         try {
             $command = new DeleteCandidateCommand($candidate, $this->candidateService);
-            $this->deleteCandidateCommandHandler->execute($command);
+            $this->deleteCandidateCommandHandler->handle($command);
         }catch (TransportException $e){
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }

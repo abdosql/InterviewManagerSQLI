@@ -36,4 +36,6 @@ readonly class CreateCandidateCommandHandler implements CommandHandlerInterface
             throw new \RuntimeException($e->getMessage());
         }
     }
+
+
 }

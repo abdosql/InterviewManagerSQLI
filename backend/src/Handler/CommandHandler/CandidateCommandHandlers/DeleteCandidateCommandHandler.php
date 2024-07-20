@@ -3,9 +3,8 @@
 namespace App\Handler\CommandHandler\CandidateCommandHandlers;
 
 use App\Command\CandidateCommands\DeleteCandidateCommand;
-use App\Command\CandidateCommands\UpdateCandidateCommand;
 use App\Handler\CommandHandler\CommandHandlerInterface;
-use App\Message\CandidateMessages\CandidateUpdatedMessage;
+use App\Message\CandidateMessages\CandidateDeletedMessage;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -26,7 +25,7 @@ class DeleteCandidateCommandHandler implements CommandHandlerInterface
             throw new \InvalidArgumentException('Invalid command');
         }
         $candidate = $command->execute();
-        $message = new CandidateUpdatedMessage(
+        $message = new CandidateDeletedMessage(
             $candidate->getId()
         );
 
@@ -36,4 +35,5 @@ class DeleteCandidateCommandHandler implements CommandHandlerInterface
             throw new \RuntimeException($e->getMessage());
         }
     }
+
 }

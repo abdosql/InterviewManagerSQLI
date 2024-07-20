@@ -46,7 +46,20 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
      */
     public function deleteDocument(int $entityId): void
     {
-        $this->documentManager->remove($this->findDocumentByEntity($entityId));
+        $candidateDocument = $this->findDocumentByEntity($entityId);
+        if (!$candidateDocument) {
+            throw new \Exception('Candidate not found');
+        }
+        $this->documentManager->remove($candidateDocument->getResume());
+        foreach ($candidateDocument->getInterviews() as $interview) {
+            $this->documentManager->remove($interview);
+        }
+
+        foreach ($candidateDocument->getCandidatePhases() as $candidatePhase) {
+            $this->documentManager->remove($candidatePhase);
+        }
+
+        $this->documentManager->remove($candidateDocument);
         $this->documentManager->flush();
     }
 

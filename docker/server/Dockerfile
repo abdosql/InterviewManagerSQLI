@@ -12,6 +12,7 @@ RUN apt install nano
 
 # install the PHP APCu extension
 RUN mkdir -p /usr/src/php/ext/apcu && curl -fsSL https://pecl.php.net/get/apcu | tar xvz -C "/usr/src/php/ext/apcu" --strip 1 && docker-php-ext-install apcu
+RUN mkdir -p /var/www/html/var/messenger && chmod -R 775 /var/www/html/var/messenger
 
 # Install xsl extension
 RUN apt install -y libxslt-dev
@@ -27,7 +28,7 @@ RUN docker-php-ext-install xsl
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | bash
 RUN apt install symfony-cli
 
- Install MongoDb
+#Install MongoDb
 RUN pecl install mongodb
 RUN echo "extension=mongodb.so" >> /usr/local/etc/php/conf.d/mongodb.ini
 

@@ -25,7 +25,7 @@ class CandidateDocument extends PersonDocument
     #[MongoDB\ReferenceMany(targetDocument: CandidatePhaseDocument::class, mappedBy: "candidate")]
     private ArrayCollection $candidatePhases;
 
-    #[MongoDB\ReferenceOne(targetDocument: ResumeDocument::class, cascade: ["persist", "delete", "update"])]
+    #[MongoDB\ReferenceOne(targetDocument: ResumeDocument::class, cascade: ["persist", "delete"])]
     private ?ResumeDocument $resume;
 
     public function __construct()
@@ -140,4 +140,5 @@ class CandidateDocument extends PersonDocument
         $resume->setEntityId($resumeDocument->getEntityId());
         $resume->setFilePath($resumeDocument->getFilePath());
     }
+
 }

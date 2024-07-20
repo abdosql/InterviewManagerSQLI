@@ -6,6 +6,7 @@ framework:
         buses:
             command.bus: ~
             event.bus: ~
+
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
             # failed: 'doctrine://default?queue_name=failed'

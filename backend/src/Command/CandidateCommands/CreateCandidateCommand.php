@@ -20,9 +20,6 @@ readonly class CreateCandidateCommand implements CommandInterface
      */
     public function execute(): Candidate
     {
-        if ($this->candidate->getId() == null) {
-            throw new \Exception('Candidate ID is required');
-        }
         $this->candidateService->saveEntity($this->candidate);
         return $this->candidate;
     }
