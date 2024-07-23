@@ -8,6 +8,7 @@ use App\Adapter\DataTransformationAdapter;
 use App\Entity\Candidate;
 use App\Message\CandidateMessages\CandidateCreatedMessage;
 use App\Services\Impl\CandidateService;
+use Doctrine\ODM\MongoDB\MongoDBException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -19,14 +20,17 @@ class CandidateCreatedMessageHandler
     )
     {}
 
+    /**
+     * @throws MongoDBException
+     */
     public function __invoke(CandidateCreatedMessage $message): void
     {
-        $candidateEntity = $this->getCandidateEntityFromMessage($message);
+        $candidateEntity = $this->getEntityFromMessage($message);
         $candidateDocument = $this->transformationAdapter->transformToDocument($candidateEntity, 'candidate');
         $this->candidateService->saveDocument($candidateDocument);
     }
 
-    public function getCandidateEntityFromMessage(CandidateCreatedMessage $message): Candidate
+    public function getEntityFromMessage(CandidateCreatedMessage $message): Candidate
     {
         return $this->candidateService->findEntity($message->getId());
     }

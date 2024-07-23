@@ -3,6 +3,8 @@
 namespace App\Adapter;
 
 use App\Transformation\Factory\TransformationStrategyFactory;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 readonly class DataTransformationAdapter
 {
@@ -10,11 +12,20 @@ readonly class DataTransformationAdapter
     {
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function transformToDocument($entity, string $type): object
     {
         $strategy = $this->transformationStrategyFactory->getTransformToDocumentStrategy($type);
         return $strategy->transformToDocument($entity);
     }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function transformToEntity($document, string $type): object
     {
         $strategy = $this->transformationStrategyFactory->getTransformToEntityStrategy($type);

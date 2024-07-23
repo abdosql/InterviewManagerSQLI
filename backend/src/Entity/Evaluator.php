@@ -10,7 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: EvaluatorRepository::class)]
 class Evaluator extends User
 {
-
     #[ORM\Column(length: 255)]
     private ?string $specialization = null;
 

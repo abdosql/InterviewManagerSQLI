@@ -49,11 +49,12 @@ class CandidateCrudController extends AbstractCrudController
 //        dd($this->candidateService->findDocumentByEntity(1));
         yield IdField::new('id')->hideOnForm();
         yield FormField::addPanel('Personal information');
+        yield TextField::new("fullName", "Full Name")->hideOnForm();
         yield TextField::new('firstName')
-            ->setRequired(true)
+            ->onlyOnForms(true)
         ;
         yield TextField::new('lastName')
-            ->setRequired(true)
+            ->onlyOnForms(true)
         ;
         yield FormField::addPanel('Contact Information');
         yield TextField::new('phone', "Phone Number");
