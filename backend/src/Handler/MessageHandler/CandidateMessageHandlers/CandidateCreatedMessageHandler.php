@@ -9,6 +9,9 @@ use App\Entity\Candidate;
 use App\Message\CandidateMessages\CandidateCreatedMessage;
 use App\Services\Impl\CandidateService;
 use Doctrine\ODM\MongoDB\MongoDBException;
+use ProxyManager\Exception\ExceptionInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -21,7 +24,10 @@ class CandidateCreatedMessageHandler
     {}
 
     /**
+     * @param CandidateCreatedMessage $message
      * @throws MongoDBException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function __invoke(CandidateCreatedMessage $message): void
     {

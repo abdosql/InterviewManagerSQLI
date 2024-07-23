@@ -35,7 +35,6 @@ class EvaluatorCrudController extends AbstractCrudController
     /**
      * @param EntityManagerInterface $entityManager
      * @param $entityInstance
-     * @throws ExceptionInterface
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
@@ -59,6 +58,9 @@ class EvaluatorCrudController extends AbstractCrudController
         yield TextField::new('specialization', "Specialization");
     }
 
+    /**
+     * @throws ExceptionInterface
+     */
     private function createOrUpdateEvaluator(Evaluator $evaluator): void
     {
         try {

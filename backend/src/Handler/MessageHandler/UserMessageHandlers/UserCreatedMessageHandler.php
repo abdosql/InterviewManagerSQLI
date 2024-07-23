@@ -11,7 +11,9 @@ use App\Services\UserService;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+#[AsMessageHandler]
 class UserCreatedMessageHandler
 {
     public function __construct(
@@ -21,9 +23,10 @@ class UserCreatedMessageHandler
     {}
 
     /**
+     * @param UserCreatedMessage $message
      * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      * @throws MongoDBException
+     * @throws NotFoundExceptionInterface
      */
     public function __invoke(UserCreatedMessage $message): void
     {
