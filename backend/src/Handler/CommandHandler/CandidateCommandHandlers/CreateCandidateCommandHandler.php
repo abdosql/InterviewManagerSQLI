@@ -25,9 +25,9 @@ readonly class CreateCandidateCommandHandler implements CommandHandlerInterface
         if (!$command instanceof CreateCandidateCommand){
             throw new \InvalidArgumentException('Invalid command');
         }
-        $candidate = $command->execute();
+        $candidateId = $command->execute();
         $message = new CandidateCreatedMessage(
-            $candidate->getId()
+            $candidateId
         );
 
         try {

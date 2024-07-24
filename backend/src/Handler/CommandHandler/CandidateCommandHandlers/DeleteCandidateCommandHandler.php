@@ -24,9 +24,9 @@ class DeleteCandidateCommandHandler implements CommandHandlerInterface
         if (!$command instanceof DeleteCandidateCommand){
             throw new \InvalidArgumentException('Invalid command');
         }
-        $candidate = $command->execute();
+        $candidateId = $command->execute();
         $message = new CandidateDeletedMessage(
-            $candidate->getId()
+            $candidateId
         );
 
         try {

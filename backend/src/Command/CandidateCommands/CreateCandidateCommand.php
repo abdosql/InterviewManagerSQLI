@@ -18,9 +18,9 @@ readonly class CreateCandidateCommand implements CommandInterface
     /**
      * @throws \Exception
      */
-    public function execute(): Candidate
+    public function execute(): int
     {
         $this->candidateService->saveEntity($this->candidate);
-        return $this->candidate;
+        return $this->candidate->getId();
     }
 }

@@ -95,7 +95,6 @@ class CandidateCrudController extends AbstractCrudController
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $this->deleteCandidate($entityInstance);
-        $this->addFlash('success', 'Candidate deletion initiated.');
     }
 
     /**

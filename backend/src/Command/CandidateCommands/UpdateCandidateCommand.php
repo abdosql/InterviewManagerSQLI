@@ -19,12 +19,12 @@ readonly class UpdateCandidateCommand implements CommandInterface
     /**
      * @throws \Exception
      */
-    public function execute(): Candidate
+    public function execute(): int
     {
         if ($this->candidate->getId() == null) {
             throw new \Exception('Candidate ID is required');
         }
         $this->candidateService->updateEntity($this->candidate);
-        return $this->candidate;
+        return $this->candidate->getId();
     }
 }

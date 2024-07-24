@@ -4,26 +4,28 @@ namespace App\Command\UserCommands;
 
 use App\Command\CommandInterface;
 use App\Entity\Evaluator;
+use App\Entity\User;
 use App\Services\Impl\EvaluatorService;
+use App\Services\Impl\UserService;
 use App\Services\Manager\UserCredentialManager;
 
 class CreateUserCommand implements CommandInterface
 {
-    private Evaluator $evaluator;
-    private EvaluatorService $evaluatorService;
+    private User $user;
+    private UserService $userService;
     private UserCredentialManager $credentialManager;
-    public function __construct(Evaluator $evaluator, EvaluatorService $evaluatorService, UserCredentialManager $credentialManager)
+    public function __construct(User $evaluator, UserService $evaluatorService, UserCredentialManager $credentialManager)
     {
-        $this->evaluator = $evaluator;
-        $this->evaluatorService = $evaluatorService;
+        $this->user = $evaluator;
+        $this->userService = $evaluatorService;
         $this->credentialManager = $credentialManager;
     }
 
-    public function execute(): object
+    public function execute(): int
     {
-        $credentialManager = $this->credentialManager->generateCredentials($this->evaluator);
-        $this->credentialManager->applyCredentialsToUser($this->evaluator, $credentialManager);
-        $this->evaluatorService->saveEntity($this->evaluator);
-        return $this->evaluator;
+        $credentialManager = $this->credentialManager->generateCredentials($this->user);
+        $this->credentialManager->applyCredentialsToUser($this->user, $credentialManager);
+        $this->userService->saveEntity($this->user);
+        return $this->user->getId();
     }
 }

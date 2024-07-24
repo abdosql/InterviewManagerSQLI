@@ -6,8 +6,7 @@ use App\Adapter\DataTransformationAdapter;
 use App\Entity\Evaluator;
 use App\Entity\User;
 use App\Message\UserMessages\UserCreatedMessage;
-
-use App\Services\UserService;
+use App\Services\Impl\UserService;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Impl;
 
 use App\Services\Impl\Abstract\AbstractUserService;
 

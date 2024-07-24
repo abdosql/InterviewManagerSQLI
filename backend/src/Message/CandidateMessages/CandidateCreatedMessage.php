@@ -3,14 +3,8 @@
 namespace App\Message\CandidateMessages;
 
 
-readonly class CandidateCreatedMessage
-{
-    public function __construct(
-        protected int $id,
-    ) {}
+use App\Message\Abstract\AbstractMessage;
 
-    public function getId(): int
-    {
-        return $this->id;
-    }
+readonly class CandidateCreatedMessage extends AbstractMessage
+{
 }

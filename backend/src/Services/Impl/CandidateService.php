@@ -7,6 +7,7 @@ use App\Entity\Candidate;
 use App\Services\DatabasePersistence\DocumentPersistenceServiceInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\DocumentNotFoundException;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -21,6 +22,9 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
      */
     public function saveDocument(object $document): void
     {
+        if (!$document instanceof Candidate) {
+            throw new \InvalidArgumentException("Document must be an instance of Candidate");
+        }
         $this->documentManager->persist($document);
         $this->documentManager->flush();
     }
@@ -48,7 +52,7 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
     {
         $candidateDocument = $this->findDocumentByEntity($entityId);
         if (!$candidateDocument) {
-            throw new \Exception('Candidate not found');
+            throw new DocumentNotFoundException("Document not found");
         }
         $this->documentManager->remove($candidateDocument->getResume());
         foreach ($candidateDocument->getInterviews() as $interview) {

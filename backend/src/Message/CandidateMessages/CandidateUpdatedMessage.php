@@ -2,20 +2,9 @@
 
 namespace App\Message\CandidateMessages;
 
-readonly class CandidateUpdatedMessage
+use App\Message\Abstract\AbstractMessage;
+
+readonly class CandidateUpdatedMessage extends AbstractMessage
 {
 
-    protected int $id;
-    /**
-     * @param int|null $getId
-     */
-    public function __construct(?int $getId)
-    {
-        $this->id = $getId;
-    }
-
-    public function getId(): int
-    {
-        return $this->id;
-    }
 }

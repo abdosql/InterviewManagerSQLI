@@ -4,5 +4,5 @@ namespace App\Command;
 
 interface CommandInterface
 {
-    public function execute(): object;
+    public function execute(): int;
 }

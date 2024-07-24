@@ -24,9 +24,9 @@ class UpdateCandidateCommandHandler implements CommandHandlerInterface
         if (!$command instanceof UpdateCandidateCommand){
             throw new \InvalidArgumentException('Invalid command');
         }
-        $candidate = $command->execute();
+        $candidateId = $command->execute();
         $message = new CandidateUpdatedMessage(
-            $candidate->getId()
+            $candidateId
         );
 
         try {

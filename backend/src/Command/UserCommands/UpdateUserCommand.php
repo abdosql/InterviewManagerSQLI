@@ -7,7 +7,7 @@ use App\Command\CommandInterface;
 class UpdateUserCommand implements CommandInterface
 {
 
-    public function execute(): object
+    public function execute(): int
     {
         // TODO: Implement execute() method.
     }

@@ -2,12 +2,15 @@
 
 namespace App\Services\Impl\Abstract;
 
+use App\Document\EvaluatorDocument;
 use App\Entity\Evaluator;
 use App\Services\DatabasePersistence\DocumentPersistenceServiceInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\DocumentNotFoundException;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityNotFoundException;
 
 class AbstractUserService implements DocumentPersistenceServiceInterface, EntityPersistenceServiceInterface
 {
@@ -42,24 +45,19 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
 
     /**
      * @throws MongoDBException
+     * @throws \Exception
      */
     public function deleteDocument(int $entityId): void
     {
-//        $candidateDocument = $this->findDocumentByEntity($entityId);
-//        if (!$candidateDocument) {
-//            throw new \Exception('Candidate not found');
-//        }
-//        $this->documentManager->remove($candidateDocument->getResume());
-//        foreach ($candidateDocument->getInterviews() as $interview) {
-//            $this->documentManager->remove($interview);
-//        }
-//
-//        foreach ($candidateDocument->getCandidatePhases() as $candidatePhase) {
-//            $this->documentManager->remove($candidatePhase);
-//        }
-//
-//        $this->documentManager->remove($candidateDocument);
-//        $this->documentManager->flush();
+        $userDocument = $this->findDocumentByEntity($entityId);
+        if (!$userDocument) {
+            throw new DocumentNotFoundException("Document not found");
+        }
+        /*
+         * we need to handle the deletion of the document association with other documents
+         */
+        $this->documentManager->remove($userDocument);
+        $this->documentManager->flush();
     }
 
     public function findDocument($id)
