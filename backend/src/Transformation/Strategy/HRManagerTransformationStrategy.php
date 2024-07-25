@@ -2,23 +2,23 @@
 
 namespace App\Transformation\Strategy;
 
-use App\Document\EvaluatorDocument;
-use App\Entity\Evaluator;
+use App\Document\HRManagerDocument;
+use App\Entity\HRManager;
 use App\Transformation\Strategy\Abstract\AbstractUserTransformationStrategy;
-use App\Transformation\TransformToDocumentStrategyInterface;
 
-class EvaluatorTransformationStrategy extends AbstractUserTransformationStrategy
+class HRManagerTransformationStrategy extends AbstractUserTransformationStrategy
 {
 
     public function transformToDocument($entity): object
     {
-        if (!$entity instanceof Evaluator) {
+        if (!$entity instanceof HRManager) {
             throw new \InvalidArgumentException('Expected entity to be an instance of Evaluator');
         }
 
-        $document = new EvaluatorDocument();
+        $document = new HRManagerDocument();
         $this->transformCommonFields($entity, $document);
-        $document->setSpecialization($entity->getSpecialization());
+        $document->setDepartment($entity->getDepartment());
+        $document->setPosition($entity->getPosition());
 
         return $document;
     }
