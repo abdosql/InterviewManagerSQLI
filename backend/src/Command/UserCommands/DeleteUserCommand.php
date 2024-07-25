@@ -22,7 +22,7 @@ class DeleteUserCommand
     public function execute(): int
     {
         if ($this->user->getId() == null) {
-            throw new \Exception('Candidate ID is required');
+            throw new \Exception('User ID is required');
         }
         $evaluatorIdBackup = $this->user->getId();
         $this->userService->deleteEntity($this->user->getId());

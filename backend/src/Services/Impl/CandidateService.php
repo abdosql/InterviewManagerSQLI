@@ -22,8 +22,8 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
      */
     public function saveDocument(object $document): void
     {
-        if (!$document instanceof Candidate) {
-            throw new \InvalidArgumentException("Document must be an instance of Candidate");
+        if (!$document instanceof CandidateDocument) {
+            throw new \InvalidArgumentException("Document must be an instance of CandidateDocument");
         }
         $this->documentManager->persist($document);
         $this->documentManager->flush();
@@ -79,6 +79,9 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
 
     public function saveEntity(object $entity): void
     {
+        if (!$entity instanceof Candidate) {
+            throw new \InvalidArgumentException("Document must be an instance of CandidateDocument");
+        }
         $this->entityManager->persist($entity);
         $this->entityManager->flush();
     }

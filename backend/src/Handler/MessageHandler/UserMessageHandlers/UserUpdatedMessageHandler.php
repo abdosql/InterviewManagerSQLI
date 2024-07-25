@@ -34,7 +34,9 @@ class UserUpdatedMessageHandler
     public function __invoke(UserUpdatedMessage $message): void
     {
         $userEntity = $this->getUserEntityFromMessage($message);
-        $userUpdatedDocument = $this->transformationAdapter->transformToDocument($userEntity, "evaluator");
+        if($userEntity instanceof Evaluator){
+            $userUpdatedDocument = $this->transformationAdapter->transformToDocument($userEntity, "evaluator");
+        }
         if($userEntity instanceof HRManager){
             $userUpdatedDocument = $this->transformationAdapter->transformToDocument($userEntity, "hr");
         }

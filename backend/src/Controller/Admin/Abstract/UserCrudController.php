@@ -5,7 +5,6 @@ namespace App\Controller\Admin\Abstract;
 use App\Command\UserCommands\CreateUserCommand;
 use App\Command\UserCommands\DeleteUserCommand;
 use App\Command\UserCommands\UpdateUserCommand;
-use App\Entity\Evaluator;
 use App\Entity\User;
 use App\Handler\CommandHandler\UserCommandHandlers\CreateUserCommandHandler;
 use App\Handler\CommandHandler\UserCommandHandlers\DeleteUserCommandHandler;
@@ -49,7 +48,7 @@ Abstract class UserCrudController extends AbstractCrudController
     /**
      * @throws ExceptionInterface
      */
-    private function createOrUpdateEvaluator(User $user): void
+    private function createOrUpdateUser(User $user): void
     {
         try {
             if (!$user->getId()){
@@ -68,7 +67,7 @@ Abstract class UserCrudController extends AbstractCrudController
      * @param User $user
      * @throws ExceptionInterface
      */
-    public function deleteEvaluator(User $user): void
+    public function deleteUser(User $user): void
     {
         try {
             $command = new DeleteUserCommand($user, $this->userService);
@@ -85,7 +84,7 @@ Abstract class UserCrudController extends AbstractCrudController
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        $this->createOrUpdateEvaluator($entityInstance);
+        $this->createOrUpdateUser($entityInstance);
     }
 
     /**
@@ -95,7 +94,7 @@ Abstract class UserCrudController extends AbstractCrudController
      */
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        $this->createOrUpdateEvaluator($entityInstance);
+        $this->createOrUpdateUser($entityInstance);
     }
 
     /**
@@ -103,6 +102,6 @@ Abstract class UserCrudController extends AbstractCrudController
      */
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
-        $this->deleteEvaluator($entityInstance);
+        $this->deleteUser($entityInstance);
     }
 }

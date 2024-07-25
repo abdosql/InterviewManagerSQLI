@@ -69,4 +69,10 @@ class HRManagerDocument extends UserDocument
         }
         return $this;
     }
+    public function setDocument(HRManagerDocument|UserDocument $document): void
+    {
+        parent::setDocument($document);
+        $this->department = $document->getDepartment();
+        $this->position = $document->getPosition();
+    }
 }

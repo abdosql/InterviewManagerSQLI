@@ -96,5 +96,15 @@ class UserDocument extends PersonDocument
         return $this;
     }
 
-
+    public function setDocument(UserDocument $document): void
+    {
+        $this->firstName = $document->getFirstName();
+        $this->lastName = $document->getLastName();
+        $this->phone = $document->getPhone();
+        $this->email = $document->getEmail();
+        $this->entityId = $document->getEntityId();
+        $this->username = $document->getUsername();
+        $this->password = $document->getPassword();
+        $this->roles = $document->getRoles();
+    }
 }

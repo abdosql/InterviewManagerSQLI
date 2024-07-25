@@ -3,7 +3,6 @@
 namespace App\Services\Impl\Abstract;
 
 use App\Document\UserDocument;
-use App\Entity\Evaluator;
 use App\Entity\User;
 use App\Services\DatabasePersistence\DocumentPersistenceServiceInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;

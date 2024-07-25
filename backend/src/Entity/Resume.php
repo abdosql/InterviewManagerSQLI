@@ -13,7 +13,7 @@ class Resume
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $filePath = null;
 
     #[ORM\OneToOne(mappedBy: 'resume', cascade: ['persist', 'remove'])]
