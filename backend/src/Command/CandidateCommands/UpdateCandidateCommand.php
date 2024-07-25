@@ -11,7 +11,7 @@ readonly class UpdateCandidateCommand implements CommandInterface
 {
     protected Candidate $candidate;
     private CandidateService $candidateService;
-    public function __construct($candidate, CandidateService $candidateService) {
+    public function __construct(Candidate $candidate, CandidateService $candidateService) {
         $this->candidate = $candidate;
         $this->candidateService = $candidateService;
     }

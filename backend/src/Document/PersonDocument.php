@@ -86,4 +86,5 @@ abstract class PersonDocument
         $this->entityId = $entityId;
         return $this;
     }
+
 }

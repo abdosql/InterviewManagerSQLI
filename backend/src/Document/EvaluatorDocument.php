@@ -2,6 +2,7 @@
 
 namespace App\Document;
 
+use App\Entity\Evaluator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
@@ -54,5 +55,17 @@ class EvaluatorDocument extends UserDocument
             }
         }
         return $this;
+    }
+    public function setDocument(EvaluatorDocument $document): void
+    {
+        $this->firstName = $document->getFirstName();
+        $this->lastName = $document->getLastName();
+        $this->phone = $document->getPhone();
+        $this->email = $document->getEmail();
+        $this->entityId = $document->getEntityId();
+        $this->username = $document->getUsername();
+        $this->password = $document->getPassword();
+        $this->roles = $document->getRoles();
+        $this->specialization = $document->getSpecialization();
     }
 }

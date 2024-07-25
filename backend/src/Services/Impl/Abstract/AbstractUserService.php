@@ -2,15 +2,15 @@
 
 namespace App\Services\Impl\Abstract;
 
-use App\Document\EvaluatorDocument;
+use App\Document\UserDocument;
 use App\Entity\Evaluator;
+use App\Entity\User;
 use App\Services\DatabasePersistence\DocumentPersistenceServiceInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\DocumentNotFoundException;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityNotFoundException;
 
 class AbstractUserService implements DocumentPersistenceServiceInterface, EntityPersistenceServiceInterface
 {
@@ -32,15 +32,15 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
      */
     public function updateDocument(int $id, object $document): void
     {
-//        if (!$document instanceof CandidateDocument) {
-//            throw new \InvalidArgumentException("Document must be an instance of CandidateDocument");
-//        }
-//        $candidateDocument = $this->findDocumentByEntity($id);
-//        if (!$candidateDocument){
-//            throw new MongoDBException("Candidate not found");
-//        }
-//        $candidateDocument->setDocument($document);
-//        $this->documentManager->flush();
+        if (!$document instanceof UserDocument) {
+            throw new \InvalidArgumentException("Document must be an instance of UserDocument");
+        }
+        $UserDocument = $this->findDocumentByEntity($id);
+        if (!$UserDocument){
+            throw new MongoDBException("User not found");
+        }
+        $UserDocument->setDocument($document);
+        $this->documentManager->flush();
     }
 
     /**
@@ -78,8 +78,8 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
 
     public function updateEntity(object $entity): void
     {
-        if (!$entity instanceof Evaluator){
-            throw new \InvalidArgumentException("Entity must be an instance of Candidate");
+        if (!$entity instanceof User){
+            throw new \InvalidArgumentException("Entity must be an instance of User");
         }
         $this->entityManager->flush();
     }
@@ -90,7 +90,7 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
         $this->entityManager->flush();
     }
 
-    public function findEntity(int $id): Evaluator
+    public function findEntity(int $id): User
     {
         return $this->entityManager->getRepository(Evaluator::class)->find($id);
     }
@@ -102,10 +102,6 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
 
     public function findDocumentByEntity(int $entityId): object
     {
-        return $this->documentManager->getRepository(EvaluatorDocument::class)->findOneBy(["entityId" => $entityId]);
-    }
-    public function generateCredentials(EValuator $evaluator): void
-    {
-
+        return $this->documentManager->getRepository(UserDocument::class)->findOneBy(["entityId" => $entityId]);
     }
 }

@@ -19,6 +19,7 @@ class EvaluatorTransformationStrategy implements TransformToDocumentStrategyInte
         $document->setFirstName($entity->getFirstName());
         $document->setLastName($entity->getLastName());
         $document->setEmail($entity->getEmail());
+        $document->setPhone($entity->getPhone());
         $document->setEntityId($entity->getId());
         $document->setUsername($entity->getUsername());
         $document->setPassword($entity->getPassword());

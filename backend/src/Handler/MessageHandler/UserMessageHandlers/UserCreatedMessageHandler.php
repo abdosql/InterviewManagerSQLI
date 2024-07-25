@@ -4,6 +4,7 @@ namespace App\Handler\MessageHandler\UserMessageHandlers;
 
 use App\Adapter\DataTransformationAdapter;
 use App\Entity\Evaluator;
+use App\Entity\HRManager;
 use App\Entity\User;
 use App\Message\UserMessages\UserCreatedMessage;
 use App\Services\Impl\UserService;
@@ -32,7 +33,7 @@ class UserCreatedMessageHandler
         $userEntity = $this->getEntityFromMessage($message);
         if ($userEntity instanceof Evaluator){
             $userDocument = $this->transformationAdapter->transformToDocument($userEntity, "evaluator");
-        }else{
+        }else if($userEntity instanceof HRManager){
             $userDocument = $this->transformationAdapter->transformToDocument($userEntity, "hr");
         }
         $this->userService->saveDocument($userDocument);

@@ -10,6 +10,7 @@ use App\Entity\Evaluator;
 use App\Entity\User;
 use App\Handler\CommandHandler\UserCommandHandlers\CreateUserCommandHandler;
 use App\Handler\CommandHandler\UserCommandHandlers\DeleteUserCommandHandler;
+use App\Handler\CommandHandler\UserCommandHandlers\UpdateUserCommandHandler;
 use App\Services\Impl\UserService;
 use App\Services\Manager\UserCredentialManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,6 +27,7 @@ class EvaluatorCrudController extends AbstractCrudController
         private UserService $userService,
         private UserCredentialManager $credentialManager,
         private CreateUserCommandHandler $createUserCommandHandler,
+        private UpdateUserCommandHandler $updateUserCommandHandler,
         private DeleteUserCommandHandler $deleteUserCommandHandler,
     )
     {}
@@ -40,6 +42,14 @@ class EvaluatorCrudController extends AbstractCrudController
      * @throws ExceptionInterface
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
+    {
+        $this->createOrUpdateEvaluator($entityInstance);
+    }
+
+    /**
+     * @throws ExceptionInterface
+     */
+    public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $this->createOrUpdateEvaluator($entityInstance);
     }
@@ -79,7 +89,8 @@ class EvaluatorCrudController extends AbstractCrudController
                 $command = new CreateUserCommand($evaluator, $this->userService, $this->credentialManager);
                 $this->createUserCommandHandler->handle($command);
             }else{
-                $command = new UpdateUserCommand();
+                $command = new UpdateUserCommand($evaluator, $this->userService);
+                $this->updateUserCommandHandler->handle($command);
             }
         } catch (TransportException $e) {
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
