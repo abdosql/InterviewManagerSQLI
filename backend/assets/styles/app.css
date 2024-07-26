@@ -1,0 +1,9 @@
+body {
+    background-color: lightgray;
+}
+/* assets/styles/app.css */
+#calendar {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
