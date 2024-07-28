@@ -2,8 +2,8 @@
 
 namespace App\Handler\MessageHandler\UserMessageHandlers;
 
-use App\Message\UserMessages\UserCreatedMessage;
-use App\Message\UserMessages\UserDeletedMessage;
+use App\Message\User\UserCreatedMessage;
+use App\Message\User\UserDeletedMessage;
 use App\Services\Impl\UserService;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;

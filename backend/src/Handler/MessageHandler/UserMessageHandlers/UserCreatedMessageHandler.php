@@ -6,7 +6,7 @@ use App\Adapter\DataTransformationAdapter;
 use App\Entity\Evaluator;
 use App\Entity\HRManager;
 use App\Entity\User;
-use App\Message\UserMessages\UserCreatedMessage;
+use App\Message\User\UserCreatedMessage;
 use App\Services\Impl\UserService;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Psr\Container\ContainerExceptionInterface;

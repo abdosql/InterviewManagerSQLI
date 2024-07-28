@@ -2,15 +2,15 @@
 
 namespace App\Controller\Admin\Abstract;
 
-use App\Command\UserCommands\CreateUserCommand;
-use App\Command\UserCommands\DeleteUserCommand;
-use App\Command\UserCommands\UpdateUserCommand;
+use App\Command\User\CreateUserCommand;
+use App\Command\User\DeleteUserCommand;
+use App\Command\User\UpdateUserCommand;
 use App\Entity\User;
 use App\Handler\CommandHandler\UserCommandHandlers\CreateUserCommandHandler;
 use App\Handler\CommandHandler\UserCommandHandlers\DeleteUserCommandHandler;
 use App\Handler\CommandHandler\UserCommandHandlers\UpdateUserCommandHandler;
+use App\Manager\UserCredentialManager;
 use App\Services\Impl\UserService;
-use App\Services\Manager\UserCredentialManager;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;

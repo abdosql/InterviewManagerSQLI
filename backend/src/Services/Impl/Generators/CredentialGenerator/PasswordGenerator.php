@@ -2,7 +2,7 @@
 
 namespace App\Services\Impl\Generators\CredentialGenerator;
 
-use App\Services\CredentialGeneratorInterface;
+use App\Manager\CredentialGeneratorInterface;
 
 class PasswordGenerator implements CredentialGeneratorInterface
 {

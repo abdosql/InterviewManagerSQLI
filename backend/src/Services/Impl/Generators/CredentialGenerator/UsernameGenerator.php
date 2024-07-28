@@ -1,7 +1,7 @@
 <?php
 namespace App\Services\Impl\Generators\CredentialGenerator;
 
-use App\Services\CredentialGeneratorInterface;
+use App\Manager\CredentialGeneratorInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 class UsernameGenerator implements CredentialGeneratorInterface

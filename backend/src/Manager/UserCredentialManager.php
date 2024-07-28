@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace App\Services\Manager;
+namespace App\Manager;
 
 use App\Entity\User;
 use App\Services\Impl\Generators\CredentialGenerator\CredentialFactory;
@@ -15,8 +15,8 @@ class UserCredentialManager
 
 
     public function __construct(
-        private CredentialFactory $credentialFactory,
-        private UserPasswordHasherInterface $passwordHasher
+        private readonly CredentialFactory           $credentialFactory,
+        private readonly UserPasswordHasherInterface $passwordHasher
     )
     {
         $this->usernameGenerator = $this->credentialFactory->getUsernameGenerator();

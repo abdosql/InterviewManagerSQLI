@@ -4,18 +4,26 @@ namespace App\Services\Impl;
 
 use App\Document\CandidateDocument;
 use App\Entity\Candidate;
+use App\Persister\DocumentPersisterInterface;
+use App\Persister\EntityPersisterInterface;
 use App\Services\DatabasePersistence\DocumentPersistenceServiceInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\DocumentNotFoundException;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class CandidateService implements DocumentPersistenceServiceInterface, EntityPersistenceServiceInterface
 {
-    public function __construct(private DocumentManager $documentManager, private EntityManagerInterface $entityManager)
-    {
-    }
+    public function __construct(
+        #[Autowire(service: 'App\Persister\DocumentPersister\CandidateDocumentPersister')]
+        private DocumentPersisterInterface $documentPersister,
+        #[Autowire(service: 'App\Persister\EntityPersister\CandidateEntityPersister')]
+        private EntityPersisterInterface $entityPersister,
+        private DocumentManager $documentManager,
+        private EntityManagerInterface $entityManager
+    ){}
 
     /**
      * @throws MongoDBException
@@ -25,8 +33,7 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
         if (!$document instanceof CandidateDocument) {
             throw new \InvalidArgumentException("Document must be an instance of CandidateDocument");
         }
-        $this->documentManager->persist($document);
-        $this->documentManager->flush();
+        $this->documentPersister->save($document);
     }
 
     /**
@@ -41,8 +48,7 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
         if (!$candidateDocument){
             throw new MongoDBException("Candidate not found");
         }
-        $candidateDocument->setDocument($document);
-        $this->documentManager->flush();
+        $this->documentPersister->update($document);
     }
 
     /**
@@ -52,19 +58,9 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
     {
         $candidateDocument = $this->findDocumentByEntity($entityId);
         if (!$candidateDocument) {
-            throw new DocumentNotFoundException("Document not found");
+            throw new DocumentNotFoundException("Candidate not found");
         }
-        $this->documentManager->remove($candidateDocument->getResume());
-        foreach ($candidateDocument->getInterviews() as $interview) {
-            $this->documentManager->remove($interview);
-        }
-
-        foreach ($candidateDocument->getCandidatePhases() as $candidatePhase) {
-            $this->documentManager->remove($candidatePhase);
-        }
-
-        $this->documentManager->remove($candidateDocument);
-        $this->documentManager->flush();
+        $this->documentPersister->delete($candidateDocument);
     }
 
     public function findDocument($id)
@@ -82,8 +78,7 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
         if (!$entity instanceof Candidate) {
             throw new \InvalidArgumentException("Document must be an instance of CandidateDocument");
         }
-        $this->entityManager->persist($entity);
-        $this->entityManager->flush();
+        $this->entityPersister->save($entity);
     }
 
     public function updateEntity(object $entity): void
@@ -91,13 +86,12 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
         if (!$entity instanceof Candidate){
             throw new \InvalidArgumentException("Entity must be an instance of Candidate");
         }
-        $this->entityManager->flush();
+        $this->entityPersister->update($entity);
     }
 
     public function deleteEntity(int $entityId): void
     {
-        $this->entityManager->remove($this->findEntity($entityId));
-        $this->entityManager->flush();
+        $this->entityPersister->delete($this->findEntity($entityId));
     }
 
     public function findEntity(int $id): Candidate

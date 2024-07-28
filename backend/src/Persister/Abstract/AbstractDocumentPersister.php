@@ -26,7 +26,7 @@ abstract class AbstractDocumentPersister implements DocumentPersisterInterface
             if ($flush) {
                 $this->flush();
             }
-        } catch (MongoDBException $e) {
+        } catch (\Exception $e) {
             throw new PersistenceException("Failed to save document: " . $e->getMessage(), 0, $e, get_class($document), 'save');
         }
     }
@@ -40,12 +40,12 @@ abstract class AbstractDocumentPersister implements DocumentPersisterInterface
     public function update(object $document, bool $flush = true): void
     {
         try {
-            $this->documentManager->persist($document);
+            $this->documentManager->merge($document);
             if ($flush) {
                 $this->flush();
             }
-        } catch (MongoDBException $e) {
-            throw new PersistenceException("Failed to update document: " . $e->getMessage(), 0, $e, get_class($document), 'update');
+        } catch (\Exception $e) {
+            throw new PersistenceException("Failed to update document: " . $e->getMessage(), 0, $e);
         }
     }
 
@@ -62,8 +62,8 @@ abstract class AbstractDocumentPersister implements DocumentPersisterInterface
             if ($flush) {
                 $this->flush();
             }
-        } catch (MongoDBException $e) {
-            throw new PersistenceException("Failed to delete document: " . $e->getMessage(), 0, $e, get_class($document), 'delete');
+        } catch (\Exception $e) {
+            throw new PersistenceException("Failed to delete document: " . $e->getMessage(), 0, $e);
         }
     }
 

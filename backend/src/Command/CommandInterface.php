@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Command;
-
 interface CommandInterface
 {
-    public function execute(): int;
+    public function execute(): mixed;
+    public static function getMessageClass(): string;
 }

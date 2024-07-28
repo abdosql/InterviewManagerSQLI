@@ -87,8 +87,8 @@ readonly class CreateCandidateCommand
 // write-project/src/CommandHandler/CandidateCommandHandlers/CreateCandidateCommandHandler.php
 namespace App\CommandHandler\CandidateCommandHandlers;
 
-use App\Command\CandidateCommands\CreateCandidateCommand;
-use App\Message\CandidateMessages\CandidateCreatedMessage;
+use App\Command\Candidate\CreateCandidateCommand;
+use App\Message\Candidate\CandidateCreatedMessage;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 readonly class CreateCandidateCommandHandler
@@ -117,7 +117,7 @@ namespace App\MessageHandler\CandidateMessageHandlers;
 
 use App\Entity\Candidate;
 use App\Factory\DocumentFactory\CandidateFactory;
-use App\Message\CandidateMessages\CandidateCreatedMessage;
+use App\Message\Candidate\CandidateCreatedMessage;
 use App\Document\CandidateDocument;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManagerInterface;

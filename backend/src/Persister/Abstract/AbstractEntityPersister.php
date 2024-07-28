@@ -4,7 +4,6 @@ namespace App\Persister\Abstract;
 
 use App\Persister\EntityPersisterInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\OptimisticLockException;
 use App\Exception\PersistenceException;
 
 abstract class AbstractEntityPersister implements EntityPersisterInterface
@@ -75,8 +74,6 @@ abstract class AbstractEntityPersister implements EntityPersisterInterface
     {
         try {
             $this->entityManager->flush();
-        } catch (OptimisticLockException $e) {
-            throw new PersistenceException("Optimistic lock exception: " . $e->getMessage(), 0, $e);
         } catch (\Exception $e) {
             throw new PersistenceException("Failed to flush changes: " . $e->getMessage(), 0, $e);
         }

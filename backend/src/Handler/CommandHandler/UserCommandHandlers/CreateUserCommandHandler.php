@@ -2,9 +2,9 @@
 
 namespace App\Handler\CommandHandler\UserCommandHandlers;
 
-use App\Command\UserCommands\CreateUserCommand;
+use App\Command\User\CreateUserCommand;
 use App\Handler\CommandHandler\CommandHandlerInterface;
-use App\Message\UserMessages\UserCreatedMessage;
+use App\Message\User\UserCreatedMessage;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;

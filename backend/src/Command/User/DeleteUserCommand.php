@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Command\UserCommands;
+namespace App\Command\User;
 
-use App\Command\CommandInterface;
+use App\Entity\Candidate;
+use App\Entity\Evaluator;
 use App\Entity\User;
 use App\Services\Impl\UserService;
 
-class UpdateUserCommand implements CommandInterface
+class DeleteUserCommand
 {
     protected User $user;
     private UserService $userService;
@@ -23,7 +24,8 @@ class UpdateUserCommand implements CommandInterface
         if ($this->user->getId() == null) {
             throw new \Exception('User ID is required');
         }
-        $this->userService->updateEntity($this->user);
-        return $this->user->getId();
+        $evaluatorIdBackup = $this->user->getId();
+        $this->userService->deleteEntity($this->user->getId());
+        return $evaluatorIdBackup;
     }
 }

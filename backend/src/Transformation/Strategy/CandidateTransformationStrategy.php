@@ -6,14 +6,19 @@ use App\Document\CandidateDocument;
 use App\Document\ResumeDocument;
 use App\Entity\Candidate;
 use App\Transformation\TransformToDocumentStrategyInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class CandidateTransformationStrategy implements TransformToDocumentStrategyInterface
 {
-
-    public function transformToDocument($entity): CandidateDocument
+    public function __construct(private EntityManagerInterface $entityManager)
     {
-        if (!$entity instanceof Candidate) {
-            throw new \InvalidArgumentException('Expected instance of Candidate');
+    }
+
+    public function transformToDocument(int $entityId): CandidateDocument
+    {
+        $entity = $this->entityManager->getRepository(Candidate::class)->find($entityId);
+        if (!$entity) {
+            throw new \RuntimeException("Candidate not found with id: $entityId");
         }
         $candidateDocument = new CandidateDocument();
         $candidateDocument->setEntityId($entity->getId());

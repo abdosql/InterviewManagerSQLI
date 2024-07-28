@@ -2,10 +2,10 @@
 
 namespace App\Handler\CommandHandler\CandidateCommandHandlers;
 
-use App\Command\CandidateCommands\CreateCandidateCommand;
-use App\Command\CandidateCommands\UpdateCandidateCommand;
+use App\Command\Candidate\CreateCandidateCommand;
+use App\Command\Candidate\UpdateCandidateCommand;
 use App\Handler\CommandHandler\CommandHandlerInterface;
-use App\Message\CandidateMessages\CandidateCreatedMessage;
+use App\Message\Candidate\CandidateCreatedMessage;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
