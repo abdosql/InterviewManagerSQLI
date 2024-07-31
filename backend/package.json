@@ -10,6 +10,7 @@
     "@fullcalendar/core": "^6.0.0",
     "@fullcalendar/daygrid": "^6.0.0",
     "@fullcalendar/interaction": "^6.0.0",
+    "@fullcalendar/timegrid": "^6.1.15",
     "@symfony/webpack-encore": "^1.0.0",
     "core-js": "^3.6.5",
     "regenerator-runtime": "^0.13.7"

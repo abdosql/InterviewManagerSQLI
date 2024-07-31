@@ -3,11 +3,17 @@
     "app": {
       "js": [
         "/build/runtime.js",
-        "/build/vendors-node_modules_fullcalendar_daygrid_index_js-node_modules_fullcalendar_interaction_index_js.js",
         "/build/app.js"
       ],
       "css": [
         "/build/app.css"
+      ]
+    },
+    "calendar": {
+      "js": [
+        "/build/runtime.js",
+        "/build/vendors-node_modules_fullcalendar_daygrid_index_js-node_modules_fullcalendar_interaction_inde-44d67c.js",
+        "/build/calendar.js"
       ]
     }
   }
