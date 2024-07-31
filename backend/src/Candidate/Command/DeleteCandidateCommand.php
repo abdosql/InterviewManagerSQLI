@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Command\Candidate;
+namespace App\Candidate\Command;
 
-use App\Command\Abstract\AbstractCommand;
+use App\Candidate\Command\Abstract\AbstractCommand;
 use App\Entity\Candidate;
 use App\Message\Candidate\CandidateDeletedMessage;
 use App\Services\Impl\CandidateService;
@@ -29,6 +29,6 @@ readonly class DeleteCandidateCommand extends AbstractCommand
     }
     public static function getMessageClass(): string
     {
-        return CandidateDeletedMessage::Message::class;
+        return CandidateDeletedMessage::class;
     }
 }

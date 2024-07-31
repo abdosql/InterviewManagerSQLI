@@ -5,9 +5,6 @@
  */
 
 namespace App\Message\Abstract;
-
-use App\Message\Abstract\AbstractMessage;
-
 readonly class AbstractUserMessage extends AbstractMessage
 {
 

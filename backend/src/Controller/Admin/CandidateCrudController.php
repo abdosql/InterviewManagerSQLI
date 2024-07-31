@@ -6,10 +6,10 @@
  */
 namespace App\Controller\Admin;
 
-use App\Command\Candidate\CreateCandidateCommand;
-use App\Command\Candidate\DeleteCandidateCommand;
-use App\Command\Candidate\UpdateCandidateCommand;
-use App\Command\CommandHandlerInterface;
+use App\Candidate\Command\CreateCandidateCommand;
+use App\Candidate\Command\DeleteCandidateCommand;
+use App\Candidate\Command\Handler\CommandHandlerInterface;
+use App\Candidate\Command\UpdateCandidateCommand;
 use App\EasyAdmin\Fields\ResumeUploadField;
 use App\Entity\Candidate;
 use App\Services\FileUploadServiceInterface;
@@ -109,7 +109,6 @@ class CandidateCrudController extends AbstractCrudController
                 }
                 $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
                 $command = new CreateCandidateCommand($candidate, $this->candidateService);
-                $this->commandHandler->handle($command);
             } else {
                 if(isset($file)){
                     if (!$file instanceof UploadedFile){
@@ -118,8 +117,8 @@ class CandidateCrudController extends AbstractCrudController
                     $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
                 };
                 $command = new UpdateCandidateCommand($candidate, $this->candidateService);
-                $this->commandHandler->handle($command);
             }
+            $this->commandHandler->handle($command);
         } catch (TransportException $e) {
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }

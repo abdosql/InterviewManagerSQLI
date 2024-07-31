@@ -87,10 +87,6 @@ readonly class CreateCandidateCommand
 // write-project/src/CommandHandler/CandidateCommandHandlers/CreateCandidateCommandHandler.php
 namespace App\CommandHandler\CandidateCommandHandlers;
 
-use App\Command\Candidate\CreateCandidateCommand;
-use App\Message\Candidate\CandidateCreatedMessage;
-use Symfony\Component\Messenger\MessageBusInterface;
-
 readonly class CreateCandidateCommandHandler
 {
     // ... (implementation as provided)

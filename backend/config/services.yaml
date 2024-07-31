@@ -39,30 +39,36 @@ services:
         tags:
             - { name: 'app.transform_to_document_strategy', type: 'candidate' }
             - { name: 'app.transform_to_entity_strategy', type: 'candidate' }
-    App\Transformation\Strategy\EvaluatorTransformationStrategy:
+    App\Transformation\Strategy\UserTransformationStrategy:
         tags:
-            - { name: 'app.transform_to_document_strategy', type: 'evaluator' }
-            - { name: 'app.transform_to_entity_strategy', type: 'evaluator' }
-    App\Transformation\Strategy\HRManagerTransformationStrategy:
-        tags:
-            - { name: 'app.transform_to_document_strategy', type: 'hr' }
-            - { name: 'app.transform_to_entity_strategy', type: 'hr' }
+            - { name: 'app.transform_to_document_strategy', type: 'user' }
+            - { name: 'app.transform_to_entity_strategy', type: 'user' }
+#    App\Transformation\Strategy\EvaluatorTransformationStrategy:
+#        tags:
+#            - { name: 'app.transform_to_document_strategy', type: 'evaluator' }
+#            - { name: 'app.transform_to_entity_strategy', type: 'evaluator' }
+#    App\Transformation\Strategy\HRManagerTransformationStrategy:
+#        tags:
+#            - { name: 'app.transform_to_document_strategy', type: 'hr' }
+#            - { name: 'app.transform_to_entity_strategy', type: 'hr' }
 
     app.transform_to_document_strategy_locator:
         class: Symfony\Component\DependencyInjection\ServiceLocator
         arguments:
             -
                 candidate: '@App\Transformation\Strategy\CandidateTransformationStrategy'
-                evaluator: '@App\Transformation\Strategy\EvaluatorTransformationStrategy'
-                hr: '@App\Transformation\Strategy\HRManagerTransformationStrategy'
+                user: '@App\Transformation\Strategy\UserTransformationStrategy'
+#                evaluator: '@App\Transformation\Strategy\EvaluatorTransformationStrategy'
+#                hr: '@App\Transformation\Strategy\HRManagerTransformationStrategy'
 
     app.transform_to_entity_strategy_locator:
         class: Symfony\Component\DependencyInjection\ServiceLocator
         arguments:
             -
                 candidate: '@App\Transformation\Strategy\CandidateTransformationStrategy'
-                evaluator: '@App\Transformation\Strategy\EvaluatorTransformationStrategy'
-                hr: '@App\Transformation\Strategy\HRManagerTransformationStrategy'
+                user: '@App\Transformation\Strategy\UserTransformationStrategy'
+#                evaluator: '@App\Transformation\Strategy\EvaluatorTransformationStrategy'
+#                hr: '@App\Transformation\Strategy\HRManagerTransformationStrategy'
 
 
     App\Transformation\Factory\TransformationStrategyFactory:

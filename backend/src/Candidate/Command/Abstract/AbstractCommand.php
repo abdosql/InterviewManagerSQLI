@@ -4,9 +4,9 @@
  * @Linkedin https://www.linkedin.com/abdelaziz-saqqal
  */
 
-namespace App\Command\Abstract;
+namespace App\Candidate\Command\Abstract;
 
-use App\Command\CommandInterface;
+use App\Candidate\Command\CommandInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 
 readonly abstract class AbstractCommand implements CommandInterface

@@ -7,7 +7,6 @@
 namespace App\Message\Handler;
 
 use App\Adapter\DataTransformationAdapter;
-use App\Entity\Candidate;
 use App\Message\Abstract\AbstractCandidateMessage;
 use App\Message\Candidate\CandidateCreatedMessage;
 use App\Message\Candidate\CandidateDeletedMessage;
@@ -73,8 +72,7 @@ class CandidateHandler
      */
     private function handleUpdatedCandidate(CandidateUpdatedMessage $message): void
     {
-        $candidateEntity = $this->getCandidateEntity($message->getId());
-        $updatedCandidateDocument = $this->transformationAdapter->transformToDocument($candidateEntity, 'candidate');
+        $updatedCandidateDocument = $this->transformationAdapter->transformToDocument($message->getId(), 'candidate');
         $this->candidateService->updateDocument($message->getId(), $updatedCandidateDocument);
     }
 
@@ -84,10 +82,5 @@ class CandidateHandler
     private function handleDeletedCandidate(CandidateDeletedMessage $message): void
     {
         $this->candidateService->deleteDocument($message->getId());
-    }
-
-    private function getCandidateEntity(int $id): Candidate
-    {
-        return $this->candidateService->findEntity($id);
     }
 }

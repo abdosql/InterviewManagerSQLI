@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command;
+namespace App\User\Command;
 interface CommandInterface
 {
     public function execute(): mixed;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Command\Candidate;
+namespace App\Candidate\Command;
 
 readonly class AddInterviewToCandidateCommand
 {

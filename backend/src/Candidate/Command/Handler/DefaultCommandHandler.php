@@ -1,16 +1,19 @@
 <?php
+/**
+ * @author Saqqal Abdelaziz <seqqal.abdelaziz@gmail.com>
+ * @Linkedin https://www.linkedin.com/abdelaziz-saqqal
+ */
 
-namespace App\Handler\CommandHandler\CandidateCommandHandlers;
+namespace App\Candidate\Command\Handler;
 
-use App\Command\Candidate\UpdateCandidateCommand;
-use App\Handler\CommandHandler\CommandHandlerInterface;
-use App\Message\Candidate\CandidateUpdatedMessage;
+use App\Candidate\Command\CommandInterface;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class UpdateCandidateCommandHandler implements CommandHandlerInterface
+readonly class DefaultCommandHandler implements CommandHandlerInterface
 {
+
     public function __construct(
         private MessageBusInterface $messageBus,
     ) {}
@@ -21,18 +24,19 @@ class UpdateCandidateCommandHandler implements CommandHandlerInterface
      */
     public function handle(object $command): void
     {
-        if (!$command instanceof UpdateCandidateCommand){
+        if (!$command instanceof CommandInterface){
             throw new \InvalidArgumentException('Invalid command');
         }
-        $candidateId = $command->execute();
-        $message = new CandidateUpdatedMessage(
-            $candidateId
+        $entityId = $command->execute();
+        $messageClass = $command::getMessageClass();
+        $message = new $messageClass(
+            $entityId
         );
 
         try {
             $this->messageBus->dispatch($message);
         }catch (TransportException $e) {
-            throw new \RuntimeException($e->getMessage());
+            throw new \RuntimeException('Failed to dispatch '.$messageClass." : ". $e->getMessage());
         }
     }
 }

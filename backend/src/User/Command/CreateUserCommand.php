@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Command\User;
+namespace App\User\Command;
 
-use App\Command\Abstract\AbstractCommand;
+use App\Candidate\Command\Abstract\AbstractCommand;
 use App\Entity\User;
 use App\Manager\UserCredentialManager;
 use App\Message\User\UserCreatedMessage;
@@ -11,7 +11,7 @@ use App\Services\Impl\UserService;
 readonly class CreateUserCommand extends AbstractCommand
 {
 
-    public function __construct(private UserService $userService, private User $user,private UserCredentialManager $credentialManager)
+    public function __construct(private User $user, private UserService $userService, private UserCredentialManager $credentialManager)
     {
         parent::__construct($userService);
     }

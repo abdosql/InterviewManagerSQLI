@@ -48,7 +48,8 @@ class CandidateService implements DocumentPersistenceServiceInterface, EntityPer
         if (!$candidateDocument){
             throw new MongoDBException("Candidate not found");
         }
-        $this->documentPersister->update($document);
+        $candidateDocument->setDocument($document);
+        $this->documentPersister->update($candidateDocument);
     }
 
     /**

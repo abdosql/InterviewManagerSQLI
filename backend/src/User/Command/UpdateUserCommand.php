@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Command\User;
+namespace App\User\Command;
 
-use App\Command\Abstract\AbstractCommand;
+use App\Candidate\Command\Abstract\AbstractCommand;
 use App\Entity\User;
 use App\Message\User\UserUpdatedMessage;
 use App\Services\Impl\UserService;
@@ -10,7 +10,7 @@ use App\Services\Impl\UserService;
 readonly class UpdateUserCommand extends AbstractCommand
 {
 
-    public function __construct(private UserService $userService, private User $user)
+    public function __construct(private User $user, private UserService $userService)
     {
         parent::__construct($userService);
     }
