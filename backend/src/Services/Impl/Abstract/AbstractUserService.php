@@ -4,26 +4,36 @@ namespace App\Services\Impl\Abstract;
 
 use App\Document\UserDocument;
 use App\Entity\User;
+use App\Persister\DocumentPersisterInterface;
+use App\Persister\EntityPersisterInterface;
 use App\Services\DatabasePersistence\DocumentPersistenceServiceInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\DocumentNotFoundException;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class AbstractUserService implements DocumentPersistenceServiceInterface, EntityPersistenceServiceInterface
 {
-    public function __construct(private DocumentManager $documentManager, private EntityManagerInterface $entityManager)
-    {
-    }
+    public function __construct(
+        #[Autowire(service: 'App\Persister\DocumentPersister\UserDocumentPersister')]
+        private DocumentPersisterInterface $documentPersister,
+        #[Autowire(service: 'App\Persister\EntityPersister\UserEntityPersister')]
+        private EntityPersisterInterface $entityPersister,
+        private DocumentManager $documentManager,
+        private EntityManagerInterface $entityManager
+    ){}
 
     /**
-     * @throws MongoDBException
+     * @param object $document
      */
     public function saveDocument(object $document): void
     {
-        $this->documentManager->persist($document);
-        $this->documentManager->flush();
+        if (!$document instanceof UserDocument) {
+            throw new \InvalidArgumentException("Entity must be an instance of User");
+        }
+        $this->documentPersister->save($document);
     }
 
     /**
@@ -39,7 +49,7 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
             throw new MongoDBException("User not found");
         }
         $UserDocument->setDocument($document);
-        $this->documentManager->flush();
+        $this->documentPersister->update($UserDocument);
     }
 
     /**
@@ -53,10 +63,10 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
             throw new DocumentNotFoundException("Document not found");
         }
         /*
-         * we need to handle the deletion of the document association with other documents
+         * we need to handle the deletion of the document association with other documents apré nchelh
          */
-        $this->documentManager->remove($userDocument);
-        $this->documentManager->flush();
+        $this->documentPersister->delete($userDocument);
+
     }
 
     public function findDocument($id)
@@ -71,8 +81,10 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
 
     public function saveEntity(object $entity): void
     {
-        $this->entityManager->persist($entity);
-        $this->entityManager->flush();
+        if (!$entity instanceof User){
+            throw new \InvalidArgumentException("Entity must be an instance of User");
+        }
+        $this->entityPersister->save($entity);
     }
 
     public function updateEntity(object $entity): void
@@ -80,13 +92,13 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
         if (!$entity instanceof User){
             throw new \InvalidArgumentException("Entity must be an instance of User");
         }
-        $this->entityManager->flush();
+        $this->entityPersister->update($entity);
     }
 
     public function deleteEntity(int $entityId): void
     {
-        $this->entityManager->remove($this->findEntity($entityId));
-        $this->entityManager->flush();
+        $this->entityPersister->delete($this->findEntity($entityId));
+
     }
 
     public function findEntity(int $id): User

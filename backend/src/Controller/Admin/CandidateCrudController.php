@@ -6,14 +6,12 @@
  */
 namespace App\Controller\Admin;
 
-use App\Command\CandidateCommands\CreateCandidateCommand;
-use App\Command\CandidateCommands\DeleteCandidateCommand;
-use App\Command\CandidateCommands\UpdateCandidateCommand;
+use App\Candidate\Command\CreateCandidateCommand;
+use App\Candidate\Command\DeleteCandidateCommand;
+use App\Candidate\Command\Handler\CommandHandlerInterface;
+use App\Candidate\Command\UpdateCandidateCommand;
 use App\EasyAdmin\Fields\ResumeUploadField;
 use App\Entity\Candidate;
-use App\Handler\CommandHandler\CandidateCommandHandlers\CreateCandidateCommandHandler;
-use App\Handler\CommandHandler\CandidateCommandHandlers\DeleteCandidateCommandHandler;
-use App\Handler\CommandHandler\CandidateCommandHandlers\UpdateCandidateCommandHandler;
 use App\Services\FileUploadServiceInterface;
 use App\Services\Impl\CandidateService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,7 +21,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 
 class CandidateCrudController extends AbstractCrudController
@@ -31,9 +28,7 @@ class CandidateCrudController extends AbstractCrudController
 
 
     public function __construct(
-        private CreateCandidateCommandHandler $createCandidateCommandHandler,
-        private UpdateCandidateCommandHandler $updateCandidateCommandHandler,
-        private DeleteCandidateCommandHandler $deleteCandidateCommandHandler,
+        private CommandHandlerInterface $commandHandler,
         private FileUploadServiceInterface $resumeUploadService,
         private CandidateService $candidateService,
     )
@@ -72,7 +67,9 @@ class CandidateCrudController extends AbstractCrudController
     }
 
     /**
-     * @throws ExceptionInterface
+     * @param EntityManagerInterface $entityManager
+     * @param $entityInstance
+     * @throws \Exception
      */
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
@@ -82,7 +79,7 @@ class CandidateCrudController extends AbstractCrudController
     /**
      * @param EntityManagerInterface $entityManager
      * @param $entityInstance
-     * @throws ExceptionInterface
+     * @throws \Exception
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
@@ -90,7 +87,8 @@ class CandidateCrudController extends AbstractCrudController
     }
 
     /**
-     * @throws ExceptionInterface
+     * @param EntityManagerInterface $entityManager
+     * @param $entityInstance
      */
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
@@ -99,7 +97,6 @@ class CandidateCrudController extends AbstractCrudController
 
     /**
      * @param Candidate $candidate
-     * @throws ExceptionInterface
      * @throws \Exception
      */
     private function createOrUpdateCandidate(Candidate $candidate): void
@@ -112,7 +109,6 @@ class CandidateCrudController extends AbstractCrudController
                 }
                 $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
                 $command = new CreateCandidateCommand($candidate, $this->candidateService);
-                $this->createCandidateCommandHandler->handle($command);
             } else {
                 if(isset($file)){
                     if (!$file instanceof UploadedFile){
@@ -121,8 +117,8 @@ class CandidateCrudController extends AbstractCrudController
                     $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
                 };
                 $command = new UpdateCandidateCommand($candidate, $this->candidateService);
-                $this->updateCandidateCommandHandler->handle($command);
             }
+            $this->commandHandler->handle($command);
         } catch (TransportException $e) {
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }
@@ -130,13 +126,12 @@ class CandidateCrudController extends AbstractCrudController
 
     /**
      * @param Candidate $candidate
-     * @throws ExceptionInterface
      */
     public function deleteCandidate(Candidate $candidate): void
     {
         try {
             $command = new DeleteCandidateCommand($candidate, $this->candidateService);
-            $this->deleteCandidateCommandHandler->handle($command);
+            $this->commandHandler->handle($command);
         }catch (TransportException $e){
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }

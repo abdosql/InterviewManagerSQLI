@@ -2,15 +2,13 @@
 
 namespace App\Controller\Admin\Abstract;
 
-use App\Command\UserCommands\CreateUserCommand;
-use App\Command\UserCommands\DeleteUserCommand;
-use App\Command\UserCommands\UpdateUserCommand;
+use App\Candidate\Command\Handler\DefaultCommandHandler;
+use App\User\Command\CreateUserCommand;
+use App\User\Command\DeleteUserCommand;
+use App\User\Command\UpdateUserCommand;
 use App\Entity\User;
-use App\Handler\CommandHandler\UserCommandHandlers\CreateUserCommandHandler;
-use App\Handler\CommandHandler\UserCommandHandlers\DeleteUserCommandHandler;
-use App\Handler\CommandHandler\UserCommandHandlers\UpdateUserCommandHandler;
+use App\Manager\UserCredentialManager;
 use App\Services\Impl\UserService;
-use App\Services\Manager\UserCredentialManager;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
@@ -24,9 +22,7 @@ Abstract class UserCrudController extends AbstractCrudController
     public function __construct(
         private UserService $userService,
         private UserCredentialManager $credentialManager,
-        private CreateUserCommandHandler $createUserCommandHandler,
-        private UpdateUserCommandHandler $updateUserCommandHandler,
-        private DeleteUserCommandHandler $deleteUserCommandHandler,
+        private DefaultCommandHandler $commandHandler
     )
     {}
     public function configureFields(string $pageName): iterable
@@ -53,11 +49,10 @@ Abstract class UserCrudController extends AbstractCrudController
         try {
             if (!$user->getId()){
                 $command = new CreateUserCommand($user, $this->userService, $this->credentialManager);
-                $this->createUserCommandHandler->handle($command);
             }else{
                 $command = new UpdateUserCommand($user, $this->userService);
-                $this->updateUserCommandHandler->handle($command);
             }
+            $this->commandHandler->handle($command);
         } catch (TransportException $e) {
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }
@@ -71,7 +66,7 @@ Abstract class UserCrudController extends AbstractCrudController
     {
         try {
             $command = new DeleteUserCommand($user, $this->userService);
-            $this->deleteUserCommandHandler->handle($command);
+            $this->commandHandler->handle($command);
         }catch (TransportException $e){
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }

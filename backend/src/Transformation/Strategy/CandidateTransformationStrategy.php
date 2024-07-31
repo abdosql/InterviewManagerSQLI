@@ -6,27 +6,34 @@ use App\Document\CandidateDocument;
 use App\Document\ResumeDocument;
 use App\Entity\Candidate;
 use App\Transformation\TransformToDocumentStrategyInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class CandidateTransformationStrategy implements TransformToDocumentStrategyInterface
 {
-
-    public function transformToDocument($entity): CandidateDocument
+    public function __construct(private EntityManagerInterface $entityManager)
     {
-        if (!$entity instanceof Candidate) {
-            throw new \InvalidArgumentException('Expected instance of Candidate');
+    }
+
+    public function transformToDocument(int $entityId): CandidateDocument
+    {
+        $entity = $this->entityManager->getRepository(Candidate::class)->find($entityId);
+        if (!$entity) {
+            throw new \RuntimeException("Candidate not found with id: $entityId");
         }
         $candidateDocument = new CandidateDocument();
-        $candidateDocument->setEntityId($entity->getId());
-        $candidateDocument->setFirstName($entity->getFirstName());
-        $candidateDocument->setLastName($entity->getLastName());
-        $candidateDocument->setPhone($entity->getPhone());
-        $candidateDocument->setEmail($entity->getEmail());
-        $candidateDocument->setAddress($entity->getAddress());
-        $candidateDocument->setHireDate($entity->getHireDate());
+        $candidateDocument
+            ->setEntityId($entity->getId())
+            ->setFirstName($entity->getFirstName())
+            ->setLastName($entity->getLastName())
+            ->setPhone($entity->getPhone())
+            ->setEmail($entity->getEmail())
+            ->setAddress($entity->getAddress())
+            ->setHireDate($entity->getHireDate());
         $resumeDocument = new ResumeDocument();
-        $resumeDocument->setCandidate($candidateDocument);
-        $resumeDocument->setFilePath($entity->getResume()->getFilePath());
-        $resumeDocument->setEntityId($entity->getResume()->getId());
+        $resumeDocument
+            ->setCandidate($candidateDocument)
+            ->setFilePath($entity->getResume()->getFilePath())
+            ->setEntityId($entity->getResume()->getId());
         $candidateDocument->setResume($resumeDocument);
         return $candidateDocument;
     }

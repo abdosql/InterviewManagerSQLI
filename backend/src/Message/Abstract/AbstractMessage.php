@@ -2,7 +2,7 @@
 
 namespace App\Message\Abstract;
 
-readonly class AbstractMessage
+readonly class  AbstractMessage
 {
     public function __construct(
         protected int $id,
