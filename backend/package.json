@@ -13,6 +13,7 @@
     "@fullcalendar/timegrid": "^6.1.15",
     "@symfony/webpack-encore": "^1.0.0",
     "core-js": "^3.6.5",
+    "file-loader": "^6.2.0",
     "regenerator-runtime": "^0.13.7"
   },
   "devDependencies": {

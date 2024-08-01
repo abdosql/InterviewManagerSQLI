@@ -9,10 +9,57 @@
 
 {% block main %}
     <div class="row">
-        <div class="col-12">
+        <div class="col-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Interview Controls</h5>
+                    <div class="d-grid gap-2">
+                        <button id="add-interview" class="btn btn-primary">Add Interview</button>
+                        <button id="delete-interview" class="btn btn-danger">Delete Interview</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming Interviews</h5>
+                    <ul class="list-group" id="upcoming-interviews">
+                        <!-- Upcoming interviews will be dynamically inserted here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
             <div class="card">
                 <div class="card-body">
                     <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="interviewModal" tabindex="-1" aria-labelledby="interviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="interviewModalLabel">New Interview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="interviewForm">
+                        <div class="mb-3">
+                            <label for="interview-title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="interview-title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interview-start" class="form-label">Start Date</label>
+                            <input type="datetime-local" class="form-control" id="interview-start" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interview-end" class="form-label">End Date</label>
+                            <input type="datetime-local" class="form-control" id="interview-end">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Interview</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -22,4 +69,49 @@
 {% block body_javascript %}
     {{ parent() }}
     {{ encore_entry_script_tags('calendar') }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addInterviewButton = document.getElementById('add-interview');
+            const interviewModal = new bootstrap.Modal(document.getElementById('interviewModal'), {
+                keyboard: false
+            });
+
+            addInterviewButton.addEventListener('click', function() {
+                interviewModal.show();
+            });
+
+            document.getElementById('interviewForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const title = document.getElementById('interview-title').value;
+                const start = document.getElementById('interview-start').value;
+                const end = document.getElementById('interview-end').value;
+
+                // Perform an AJAX request to save the interview
+                fetch('/api/interviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ title: title, start: start, end: end })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Refresh the calendar to show the new interview
+                            const calendar = FullCalendar.getCalendar(calendarEl);
+                            calendar.addEvent({ id: data.id, title: title, start: start, end: end });
+                            interviewModal.hide();
+                            // Update upcoming interviews list
+                            updateUpcomingInterviews();
+                        } else {
+                            alert('Error saving interview');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    </script>
 {% endblock %}
