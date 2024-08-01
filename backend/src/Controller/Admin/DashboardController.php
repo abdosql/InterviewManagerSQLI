@@ -17,8 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class DashboardController extends AbstractDashboardController
 {
     /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
+     * @return Response
      */
     #[Route('/admin', name: 'admin')]
     public function index(): Response
@@ -35,9 +34,14 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        yield MenuItem::linkToCrud('Candidates', 'fa-solid fa-user-tie', Candidate::class);
-        yield MenuItem::linkToCrud('HR Manager', 'fa-solid fa-people-line', HRManager::class);
-        yield MenuItem::linkToCrud('Evaluators', 'fa-solid fa-user-secret', Evaluator::class);
+
+        if($this->isGranted('ROLE_HR')){
+            yield MenuItem::linkToCrud('Candidates', 'fa-solid fa-user-tie', Candidate::class)->setPermission("ROLE_HR");
+            yield MenuItem::linkToCrud('Evaluators', 'fa-solid fa-user-secret', Evaluator::class)->setPermission("ROLE_HR");
+        }
+        if ($this->isGranted('ROLE_ADMIN')) {
+            yield MenuItem::linkToCrud('HR Manager', 'fa-solid fa-people-line', HRManager::class)->setPermission("ROLE_ADMIN");
+        }
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
     }
 }
