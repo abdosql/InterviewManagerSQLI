@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 abstract class AbstractUserTransformationStrategy implements TransformToDocumentStrategyInterface
 {
-    public function __construct(private EntityManagerInterface $entityManager)
+    public function __construct(private readonly EntityManagerInterface $entityManager)
     {
     }
     /**
@@ -34,16 +34,13 @@ abstract class AbstractUserTransformationStrategy implements TransformToDocument
     }
     public function getEntityOrFail(int $entityId): User
     {
-        if ($entityId == null) {
-            throw new \InvalidArgumentException('Entity ID cannot be null');
-        }
         $entity = $this->entityManager->getRepository(User::class)->find($entityId);
-        if (!$entity) {
+        if (null === $entity) {
             throw new \RuntimeException("User not found with id: $entityId");
         }
         return $entity;
     }
-    public function transformEvaluatorEntityToDocument(User $user): object
+    public function transformEvaluatorEntityToDocument(User $user): EvaluatorDocument
     {
         if (!$user instanceof Evaluator){
             throw new \InvalidArgumentException('Expected entity to be an instance of Evaluator');
@@ -54,7 +51,12 @@ abstract class AbstractUserTransformationStrategy implements TransformToDocument
 
         return $document;
     }
-    public function transformHRManagerEntityToDocument(User $user): object
+
+    /**
+     * @param User $user
+     * @return HRManagerDocument
+     */
+    public function transformHRManagerEntityToDocument(User $user): HRManagerDocument
     {
         if (!$user instanceof HRManager){
             throw new \InvalidArgumentException('Expected entity to be an instance of Evaluator');

@@ -2,33 +2,45 @@
 
 namespace App\User\Command;
 
-use App\Candidate\Command\Abstract\AbstractCommand;
+use App\Candidate\Command\AbstractCommand;
 use App\Entity\User;
 use App\Manager\UserCredentialManager;
 use App\Message\User\UserCreatedMessage;
 use App\Services\Impl\UserService;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 readonly class CreateUserCommand extends AbstractCommand
 {
 
-    public function __construct(private User $user, private UserService $userService, private UserCredentialManager $credentialManager)
+    public function __construct(
+        private User $user,
+        private UserService $userService,
+        private UserCredentialManager $credentialManager,
+        private MessageBusInterface $messageBus,
+
+    )
     {
-        parent::__construct($userService);
+        parent::__construct($userService, $messageBus);
     }
 
     /**
      * @return int
+     * @throws ExceptionInterface
      */
     public function execute(): int
     {
         $credentialManager = $this->credentialManager->generateCredentials($this->user);
         $this->credentialManager->applyCredentialsToUser($this->user, $credentialManager);
         $this->userService->saveEntity($this->user);
+        $message = new UserCreatedMessage($this->user->getId());
+        try {
+            $this->messageBus->dispatch($message);
+        }catch (TransportException $e) {
+            throw new \RuntimeException('Failed to dispatch '.$message::class." : ". $e->getMessage());
+        }
         return $this->user->getId();
     }
 
-    public static function getMessageClass(): string
-    {
-        return UserCreatedMessage::class;
-    }
 }

@@ -26,6 +26,7 @@ class UserCredentialManager
     public function generateCredentials(User $user): array
     {
         $plainPassword = $this->usernameGenerator->generate();
+
         return [
             "username" => $this->usernameGenerator->generate(),
             "password" => $plainPassword,
@@ -33,7 +34,7 @@ class UserCredentialManager
         ];
     }
 
-    public function applyCredentialsToUser(User &$user, array $credentials): void
+    public function applyCredentialsToUser(User $user, array $credentials): void
     {
         $user->setUsername($credentials['username']);
         $user->setPassword($credentials['hashedPassword']);

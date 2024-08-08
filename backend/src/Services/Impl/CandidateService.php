@@ -4,7 +4,9 @@ namespace App\Services\Impl;
 
 use App\Document\CandidateDocument;
 use App\Entity\Candidate;
+use App\Persister\Document\CandidateDocumentPersister;
 use App\Persister\DocumentPersisterInterface;
+use App\Persister\Entity\CandidateEntityPersister;
 use App\Persister\EntityPersisterInterface;
 use App\Services\DatabasePersistence\DocumentPersistenceServiceInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
@@ -14,19 +16,19 @@ use Doctrine\ODM\MongoDB\MongoDBException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class CandidateService implements DocumentPersistenceServiceInterface, EntityPersistenceServiceInterface
+final class CandidateService implements DocumentPersistenceServiceInterface, EntityPersistenceServiceInterface
 {
     public function __construct(
-        #[Autowire(service: 'App\Persister\DocumentPersister\CandidateDocumentPersister')]
+        #[Autowire(service: CandidateDocumentPersister::class)]
         private DocumentPersisterInterface $documentPersister,
-        #[Autowire(service: 'App\Persister\EntityPersister\CandidateEntityPersister')]
+        #[Autowire(service: CandidateEntityPersister::class)]
         private EntityPersisterInterface $entityPersister,
         private DocumentManager $documentManager,
         private EntityManagerInterface $entityManager
     ){}
 
     /**
-     * @throws MongoDBException
+     * @param object $document
      */
     public function saveDocument(object $document): void
     {

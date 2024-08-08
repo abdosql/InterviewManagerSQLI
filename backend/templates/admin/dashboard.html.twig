@@ -1,16 +1,100 @@
-{# templates/admin/calendar.html.twig #}
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block content %}
-    <div id="calendar"></div>
+{% block head_stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('calendar') }}
 {% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
-    <script src="{{ asset('build/app.js') }}"></script>
+{% block content_title %}Dashboard{% endblock %}
+
+{% block main %}
 {% endblock %}
 
-{% block stylesheets %}
+{% block body_javascript %}
     {{ parent() }}
-    <link rel="stylesheet" href="{{ asset('build/app.css') }}">
+    {{ encore_entry_script_tags('calendar') }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addInterviewButton = document.getElementById('add-interview');
+            const interviewModal = new bootstrap.Modal(document.getElementById('interviewModal'), {
+                keyboard: false
+            });
+
+            addInterviewButton.addEventListener('click', function() {
+                interviewModal.show();
+            });
+
+            document.getElementById('interviewForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+
+                // Perform an AJAX request to save the interview
+                fetch('/api/interviews', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Refresh the calendar to show the new interview
+                            const calendar = FullCalendar.getCalendar(calendarEl);
+
+                            // Get the selected candidate's name
+                            const candidateSelect = document.getElementById('interview_candidate');
+                            const candidateName = candidateSelect.options[candidateSelect.selectedIndex].text;
+
+                            // Get the selected evaluators' names
+                            const evaluatorSelect = document.getElementById('interview_evaluator');
+                            const evaluatorNames = Array.from(evaluatorSelect.selectedOptions).map(option => option.text).join(', ');
+
+                            // Create a more detailed event title
+                            const eventTitle = `${formData.get('interview_location')} - ${candidateName}`;
+
+                            calendar.addEvent({
+                                id: data.id,
+                                title: eventTitle,
+                                start: formData.get('interview_date'),
+                                extendedProps: {
+                                    location: formData.get('interview_location'),
+                                    candidate: candidateName,
+                                    evaluators: evaluatorNames
+                                }
+                            });
+
+                            interviewModal.hide();
+                            // Update upcoming interviews list
+                            updateUpcomingInterviews();
+
+                            // Clear the form
+                            this.reset();
+                        } else {
+                            alert('Error saving interview: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while saving the interview.');
+                    });
+            });
+        });
+
+        // You might want to add this function to show event details when clicked
+        function showEventDetails(info) {
+            const event = info.event;
+            const props = event.extendedProps;
+            alert(`
+        Interview Details:
+        Location: ${props.location}
+        Candidate: ${props.candidate}
+        Evaluators: ${props.evaluators}
+        Date: ${event.start.toLocaleString()}
+    `);
+        }
+
+        // Make sure to add this event listener to your calendar options
+        // eventClick: showEventDetails
+    </script>
 {% endblock %}

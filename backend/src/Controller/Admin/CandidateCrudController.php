@@ -12,7 +12,7 @@ use App\Candidate\Command\Handler\CommandHandlerInterface;
 use App\Candidate\Command\UpdateCandidateCommand;
 use App\EasyAdmin\Fields\ResumeUploadField;
 use App\Entity\Candidate;
-use App\Services\FileUploadServiceInterface;
+use App\File\FileUploaderInterface;
 use App\Services\Impl\CandidateService;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -22,6 +22,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class CandidateCrudController extends AbstractCrudController
 {
@@ -29,8 +30,9 @@ class CandidateCrudController extends AbstractCrudController
 
     public function __construct(
         private CommandHandlerInterface $commandHandler,
-        private FileUploadServiceInterface $resumeUploadService,
+        private FileUploaderInterface $resumeUploadService,
         private CandidateService $candidateService,
+        private MessageBusInterface $messageBus,
     )
     {}
 
@@ -107,16 +109,16 @@ class CandidateCrudController extends AbstractCrudController
                 if (!$file instanceof UploadedFile){
                     throw new \Exception(   'Resume file is required for new Candidate');
                 }
-                $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
-                $command = new CreateCandidateCommand($candidate, $this->candidateService);
+                $candidate->getResume()->setFilePath($this->resumeUploadService->upload($file));
+                $command = new CreateCandidateCommand($candidate, $this->candidateService, $this->messageBus);
             } else {
                 if(isset($file)){
                     if (!$file instanceof UploadedFile){
                         throw new \Exception(   'Resume file is required for new Candidate');
                     }
-                    $candidate->getResume()->setFilePath($this->resumeUploadService->handleFileUpload($file));
+                    $candidate->getResume()->setFilePath($this->resumeUploadService->upload($file));
                 };
-                $command = new UpdateCandidateCommand($candidate, $this->candidateService);
+                $command = new UpdateCandidateCommand($candidate, $this->candidateService, $this->messageBus);
             }
             $this->commandHandler->handle($command);
         } catch (TransportException $e) {
@@ -130,7 +132,7 @@ class CandidateCrudController extends AbstractCrudController
     public function deleteCandidate(Candidate $candidate): void
     {
         try {
-            $command = new DeleteCandidateCommand($candidate, $this->candidateService);
+            $command = new DeleteCandidateCommand($candidate, $this->candidateService, $this->messageBus);
             $this->commandHandler->handle($command);
         }catch (TransportException $e){
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);

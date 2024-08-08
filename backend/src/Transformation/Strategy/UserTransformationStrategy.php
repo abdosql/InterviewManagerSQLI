@@ -10,17 +10,16 @@ use App\Transformation\Strategy\Abstract\AbstractUserTransformationStrategy;
 class UserTransformationStrategy extends AbstractUserTransformationStrategy
 {
 
-    public function transformToDocument($entityId): object
+    public function transformToDocument(int $entityId): UserDocument
     {
         $entity = $this->getEntityOrFail($entityId);
-        $document = new UserDocument();
-        if ($entity instanceof Evaluator){
-            $document = $this->transformEvaluatorEntityToDocument($entity);
+        if ($entity instanceof Evaluator) {
+            return $this->transformEvaluatorEntityToDocument($entity);
         }
-        if ($document instanceof HRManager){
-            $document = $this->transformHRManagerEntityToDocument($entity);
+        if ($entity instanceof HRManager) {
+            return $this->transformHRManagerEntityToDocument($entity);
         }
-        return $document;
+        throw new \InvalidArgumentException('Unsupported entity type');
     }
 
 

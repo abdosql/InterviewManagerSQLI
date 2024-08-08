@@ -13,30 +13,12 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 readonly class DefaultCommandHandler implements CommandHandlerInterface
 {
-
-    public function __construct(
-        private MessageBusInterface $messageBus,
-    ) {}
-
     /**
-     * @throws ExceptionInterface
-     * @throws \Exception
+     * @param object $command
+     * @return void
      */
     public function handle(object $command): void
     {
-        if (!$command instanceof CommandInterface){
-            throw new \InvalidArgumentException('Invalid command');
-        }
-        $entityId = $command->execute();
-        $messageClass = $command::getMessageClass();
-        $message = new $messageClass(
-            $entityId
-        );
-
-        try {
-            $this->messageBus->dispatch($message);
-        }catch (TransportException $e) {
-            throw new \RuntimeException('Failed to dispatch '.$messageClass." : ". $e->getMessage());
-        }
+        $command->execute();
     }
 }

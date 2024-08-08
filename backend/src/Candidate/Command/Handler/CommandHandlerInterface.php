@@ -2,7 +2,9 @@
 
 namespace App\Candidate\Command\Handler;
 
+use App\Candidate\Command\CommandInterface;
+
 interface CommandHandlerInterface
 {
-    public function handle(object $command): void;
+    public function handle(CommandInterface $command): void;
 }

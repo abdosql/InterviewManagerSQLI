@@ -25,8 +25,10 @@ class TransformationStrategyFactory
         if (!$this->entityStrategies->has($type)){
             throw new \InvalidArgumentException('Unknown transformation type: ' . $type);
         }
+
         return $this->entityStrategies->get($type);
     }
+
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
