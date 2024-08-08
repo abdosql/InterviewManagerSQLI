@@ -29,17 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function showEventDetails(info) {
-        const event = info.event;
-        const props = event.extendedProps;
-        alert(`
-            Interview Details:
-            Location: ${props.location}
-            Candidate: ${props.candidate}
-            Evaluators: ${props.evaluators}
-            Date: ${event.start.toLocaleString()}
-        `);
-    }
     function showInterviewDetails(info) {
         const event = info.event;
         const props = event.extendedProps;
@@ -126,9 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Add the new event to the calendar
-                    addInterviewToCalendar(5, transformedData);
-
+                    // addInterviewToCalendar(5, transformedData);
+                    calendar.refetchEvents();
                     interviewModal.hide();
                     this.reset();
                 } else {

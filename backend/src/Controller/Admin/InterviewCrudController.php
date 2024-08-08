@@ -14,13 +14,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -100,68 +97,90 @@ class InterviewCrudController extends AbstractCrudController
         ]);
     }
 
-    #[Route('/api/interviews', name: 'api_create_interview', methods: ["post"])]
+    //The Get Method Is temporarily don't panic a chef (:
+    #[Route('/api/interviews', name: 'api_create_interview', methods: ["post", "get"])]
     public function createInterview(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        if ($request->isMethod('POST')){
+            $data = json_decode($request->getContent(), true);
 
-        if (!$this->isCsrfTokenValid('interview', $data['token'] ?? '')) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Invalid CSRF token'],
-                Response::HTTP_BAD_REQUEST);
-        }
-
-        if (empty($data['date']) || empty($data['location']) || empty($data['candidate']) || empty($data['evaluators'])) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Some fields are missing'],
-                Response::HTTP_BAD_REQUEST
-            );
-        }
-
-        try {
-            $interview = new Interview();
-            $candidate = $this->entityManager->getRepository(Candidate::class)->find($data['candidate']);
-            if (!$candidate) {
+            if (!$this->isCsrfTokenValid('interview', $data['token'] ?? '')) {
                 return new JsonResponse([
                     'success' => false,
-                    'message' => 'Invalid candidate',
-                ], Response::HTTP_BAD_REQUEST);
+                    'message' => 'Invalid CSRF token'],
+                    Response::HTTP_BAD_REQUEST);
             }
-            foreach ($data['evaluators'] as $evaluator) {
-                $evaluator = $this->entityManager->getRepository(Evaluator::class)->find($evaluator);
-                if (!$evaluator) {
+
+            if (empty($data['date']) || empty($data['location']) || empty($data['candidate']) || empty($data['evaluators'])) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Some fields are missing'],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            try {
+                $interview = new Interview();
+                $candidate = $this->entityManager->getRepository(Candidate::class)->find($data['candidate']);
+                if (!$candidate) {
                     return new JsonResponse([
                         'success' => false,
-                        'message' => 'Invalid candidate or evaluator',
+                        'message' => 'Invalid candidate',
                     ], Response::HTTP_BAD_REQUEST);
                 }
-                $interview->addEvaluator($evaluator);
+                foreach ($data['evaluators'] as $evaluator) {
+                    $evaluator = $this->entityManager->getRepository(Evaluator::class)->find($evaluator);
+                    if (!$evaluator) {
+                        return new JsonResponse([
+                            'success' => false,
+                            'message' => 'Invalid candidate or evaluator',
+                        ], Response::HTTP_BAD_REQUEST);
+                    }
+                    $interview->addEvaluator($evaluator);
 
+                }
+
+
+                $interviewDate = \DateTime::createFromFormat('Y-m-d\TH:i', $data['date']);
+                if (!$interviewDate) {
+                    return new JsonResponse(['success' => false, 'message' => 'Invalid date format'], Response::HTTP_BAD_REQUEST);
+                }
+
+                $interview
+                    ->setInterviewDate($interviewDate)
+                    ->setInterviewLocation($data['location'])
+                    ->setCandidate($candidate)
+                    ->setHrManager($this->getUser());
+                ;
+
+                $command = new CreateInterviewCommand($interview, $this->interviewService, $this->messageBus);
+                $this->commandHandler->handle($command);
+
+                return new JsonResponse(['success' => true, 'id' => $interview->getId()], Response::HTTP_OK);
+
+            } catch (\Exception $e) {
+                return new JsonResponse(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
+        }elseif ($request->isMethod("GET")){
+            $interviews = $this->entityManager->getRepository(Interview::class)->findAll();
+            $data = array_map(function ($interview) {
+                return [
+                    'id' => $interview->getId(),
+                    'start' => $interview->getInterviewDate()->format('Y-m-d\TH:i'),
+                    'end' => $interview->getInterviewDate()->format('Y-m-d\TH:i'),
+                    'title' => $interview->getInterviewLocation(),
+                    'location' => $interview->getInterviewLocation(),
+                    'candidate' => $interview->getCandidate()->getFullName(),
+                    'evaluators' => array_map(function ($evaluator) {
+                        return $evaluator->getFullName();
+                    }, $interview->getEvaluators()->toArray())
 
+                ];
+            }, $interviews);
 
-            $interviewDate = \DateTime::createFromFormat('Y-m-d\TH:i', $data['date']);
-            if (!$interviewDate) {
-                return new JsonResponse(['success' => false, 'message' => 'Invalid date format'], Response::HTTP_BAD_REQUEST);
-            }
-
-            $interview
-                ->setInterviewDate($interviewDate)
-                ->setInterviewLocation($data['location'])
-                ->setCandidate($candidate)
-                ->setHrManager($this->getUser());
-            ;
-
-            $command = new CreateInterviewCommand($interview, $this->interviewService, $this->messageBus);
-            $this->commandHandler->handle($command);
-
-            return new JsonResponse(['success' => true, 'id' => $interview->getId()], Response::HTTP_OK);
-
-        } catch (\Exception $e) {
-            return new JsonResponse(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse($data);
         }
+        return new JsonResponse(['success' => false, 'message' => 'Method not allowed'], Response::HTTP_METHOD_NOT_ALLOWED);
     }
 
 //    #[Route('/api/interviews/{id}', name: 'api_delete_interview', methods: ["DELETE"])]
