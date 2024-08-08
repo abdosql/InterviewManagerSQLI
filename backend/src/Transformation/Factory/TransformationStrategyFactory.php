@@ -6,14 +6,19 @@ use App\Transformation\TransformToDocumentStrategyInterface;
 use App\Transformation\TransformToEntityStrategyInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\TaggedLocator;
 use Symfony\Component\DependencyInjection\ServiceLocator;
+use Symfony\Contracts\Service\ServiceProviderInterface;
 
 
-class TransformationStrategyFactory
+readonly class TransformationStrategyFactory
 {
     public function __construct(
-        private ServiceLocator $documentStrategies,
-        private ServiceLocator $entityStrategies
+        #[TaggedLocator('app.transform_to_document_strategy', indexAttribute: 'type')]
+        private ServiceProviderInterface $documentStrategies,
+        #[TaggedLocator('app.transform_to_entity_strategy', indexAttribute: 'type')]
+        private ServiceProviderInterface $entityStrategies
     ){}
 
     /**

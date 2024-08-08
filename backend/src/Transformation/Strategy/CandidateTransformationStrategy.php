@@ -7,7 +7,10 @@ use App\Document\ResumeDocument;
 use App\Entity\Candidate;
 use App\Transformation\TransformToDocumentStrategyInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
+#[AutoconfigureTag("app.transform_to_entity_strategy", ['type' => 'candidate'])]
+#[AutoconfigureTag("app.transform_to_document_strategy", ['type' => 'candidate'])]
 readonly class CandidateTransformationStrategy implements TransformToDocumentStrategyInterface
 {
     public function __construct(private EntityManagerInterface $entityManager)

@@ -5,10 +5,14 @@ namespace App\Adapter;
 use App\Transformation\Factory\TransformationStrategyFactory;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 readonly class DataTransformationAdapter
 {
-    public function __construct(private TransformationStrategyFactory $transformationStrategyFactory)
+    public function __construct(
+        #[Autowire(service: TransformationStrategyFactory::class)]
+        private TransformationStrategyFactory $transformationStrategyFactory
+    )
     {
     }
 
