@@ -7,8 +7,16 @@ import 'bootstrap';
 document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar');
     const addInterviewButton = document.getElementById('add-interview');
+    const deleteInterviewButton = document.getElementById('interview-delete');
+    const interviewId = document.getElementById('interview-id');
+
     const interviewModalEl = document.getElementById('interviewModal');
     const interviewModal = new bootstrap.Modal(interviewModalEl, { keyboard: false });
+
+    const interviewDetailModalEl = document.getElementById('interviewDetailsModal');
+
+    const interviewDetailModal = new bootstrap.Modal(interviewDetailModalEl, { keyboard: false });
+
     const interviewForm = document.getElementById('interviewForm');
     let selectedEventId = null;
     let calendar = null;
@@ -40,10 +48,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('interview-details-candidate').innerText = props.candidate;
         document.getElementById('interview-details-evaluators').innerText = props.evaluators;
         document.getElementById('interview-details-date').innerText = event.start.toLocaleString();
+        document.getElementById('interview-id').value = event.id;
 
         // Show the modal
         interviewDetailsModal.show();
     }
+
     if (calendarEl) {
         calendar = new Calendar(calendarEl, {
             plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
@@ -74,6 +84,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     addInterviewButton.addEventListener('click', function() {
         interviewModal.show();
+    });
+
+    deleteInterviewButton.addEventListener('click', function() {
+        const id = interviewId.value;
+        fetch(`/api/interviews/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    calendar.refetchEvents();
+                    interviewDetailModal.hide();
+                } else {
+                    alert('Error Deleting interview: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while Deleting the interview.');
+            });
     });
 
     interviewForm.addEventListener('submit', function(e) {
@@ -115,7 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // addInterviewToCalendar(5, transformedData);
                     calendar.refetchEvents();
                     interviewModal.hide();
                     this.reset();

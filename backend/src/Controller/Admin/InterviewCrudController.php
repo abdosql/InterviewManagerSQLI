@@ -183,14 +183,14 @@ class InterviewCrudController extends AbstractCrudController
         return new JsonResponse(['success' => false, 'message' => 'Method not allowed'], Response::HTTP_METHOD_NOT_ALLOWED);
     }
 
-//    #[Route('/api/interviews/{id}', name: 'api_delete_interview', methods: ["DELETE"])]
-//    public function deleteInterview(Interview $interview): JsonResponse
-//    {
-//        $this->entityManager->remove($interview);
-//        $this->entityManager->flush();
-//
-//        return new JsonResponse(['success' => true]);
-//    }
+    #[Route('/api/interviews/{id}', name: 'api_delete_interview', methods: ["DELETE"])]
+    public function deleteInterview(Interview $interview): JsonResponse
+    {
+        $this->entityManager->remove($interview);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
 //    #[Route('/api/upcoming-interviews', name: 'api_upcoming_interviews', methods: ["GET"])]
 //
 //    public function getUpcomingInterviews(): JsonResponse
