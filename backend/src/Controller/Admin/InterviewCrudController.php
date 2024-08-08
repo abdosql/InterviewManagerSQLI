@@ -10,8 +10,16 @@ use App\Form\InterviewType;
 use App\Interview\Command\CreateInterviewCommand;
 use App\Services\Impl\InterviewService;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +33,6 @@ class InterviewCrudController extends AbstractCrudController
         private CommandHandlerInterface $commandHandler,
         private MessageBusInterface $messageBus,
         private InterviewService $interviewService
-
     )
     {
     }
@@ -34,19 +41,26 @@ class InterviewCrudController extends AbstractCrudController
     {
         return Interview::class;
     }
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
+            ->disable(Action::DELETE, Action::EDIT)
+            ;
+    }
 
-    /*
     public function configureFields(string $pageName): iterable
     {
-        return [
-            IdField::new('id'),
-            TextField::new('title'),
-            TextEditorField::new('description'),
-        ];
+        yield IdField::new('id')->hideOnForm();
+        yield TextField::new('interview_location')->hideOnForm();
+        yield DateField::new('interview_date')->hideOnForm();
+        yield AssociationField::new('candidate')->hideOnForm();
+        yield AssociationField::new('evaluator')->hideOnForm();
     }
-    */
 
-    public function index(AdminContext $context): Response
+    #[Route('/interview/calendar', name: 'interview_calendar', methods: ["GET"])]
+
+    public function viewCalendar(): Response
     {
         $interview = new Interview();
         $form = $this->createForm(InterviewType::class, $interview);
@@ -55,7 +69,6 @@ class InterviewCrudController extends AbstractCrudController
             'form' => $form->createView(),
         ]);
     }
-
 
     #[Route('/api/interviews', name: 'api_create_interview', methods: ["post"])]
     public function createInterview(Request $request): JsonResponse
@@ -112,14 +125,14 @@ class InterviewCrudController extends AbstractCrudController
         }
     }
 
-    #[Route('/api/interviews/{id}', name: 'api_delete_interview', methods: ["DELETE"])]
-    public function deleteInterview(Interview $interview): JsonResponse
-    {
-        $this->entityManager->remove($interview);
-        $this->entityManager->flush();
-
-        return new JsonResponse(['success' => true]);
-    }
+//    #[Route('/api/interviews/{id}', name: 'api_delete_interview', methods: ["DELETE"])]
+//    public function deleteInterview(Interview $interview): JsonResponse
+//    {
+//        $this->entityManager->remove($interview);
+//        $this->entityManager->flush();
+//
+//        return new JsonResponse(['success' => true]);
+//    }
 //    #[Route('/api/upcoming-interviews', name: 'api_upcoming_interviews', methods: ["GET"])]
 //
 //    public function getUpcomingInterviews(): JsonResponse
@@ -139,12 +152,4 @@ class InterviewCrudController extends AbstractCrudController
 //        return new JsonResponse($formattedInterviews);
 //    }
 
-    private function getFormErrors($form): array
-    {
-        $errors = [];
-        foreach ($form->getErrors(true) as $error) {
-            $errors[] = $error->getMessage();
-        }
-        return $errors;
-    }
 }

@@ -58,7 +58,13 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
         if($this->isGranted('ROLE_HR')){
             yield MenuItem::linkToCrud('Candidates', 'fa-solid fa-user-tie', Candidate::class)->setPermission("ROLE_HR");
-            yield MenuItem::linkToCrud('Evaluators', 'fa-solid fa-user-secret', Evaluator::class)->setPermission("ROLE_HR");
+            yield MenuItem::linkToCrud('Evaluators', 'fa-solid fa-users', Evaluator::class)->setPermission("ROLE_HR");
+//            yield MenuItem::linkToCrud('Interviews', 'fa-solid fa-user-secret', Interview::class)->setPermission("ROLE_HR");
+            yield MenuItem::subMenu('Interviews', 'fa-solid fa-clipboard-question')->setSubItems([
+                MenuItem::linkToRoute('Calendar', 'fa-regular fa-calendar-days', "interview_calendar"),
+                MenuItem::LinkToCrud('List', 'fa fa-list', Interview::class),
+            ])
+                ->setPermission("ROLE_HR");
         }
         if ($this->isGranted('ROLE_ADMIN')) {
             yield MenuItem::linkToCrud('HR Manager', 'fa-solid fa-people-line', HRManager::class)->setPermission("ROLE_ADMIN");

@@ -18,7 +18,7 @@ use Symfony\Component\Process\Process;
     name: 'app:doctrine-setup',
     description: 'Runs a series of Doctrine commands to reset the database and MongoDB schema'
 )]
-class DatabasesInitialisationCommand extends Command
+class DatabasesInitialisation extends Command
 {
     protected static $defaultName = 'app:doctrine-setup';
     protected static $defaultDescription = 'Runs a series of Doctrine commands to reset the database and MongoDB schema';

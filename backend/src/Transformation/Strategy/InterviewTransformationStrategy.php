@@ -29,9 +29,7 @@ readonly class InterviewTransformationStrategy implements TransformToDocumentStr
         $interviewDocument = new InterviewDocument();
         $interviewDocument
             ->setInterviewDate($entity->getInterviewDate())
-            ->setCandidate($entity->getCandidate())
             ->setInterviewLocation($entity->getInterviewLocation())
-            ->setEvaluator($entity->getEvaluator())
         ;
         return $interviewDocument;
     }
