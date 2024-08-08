@@ -16,10 +16,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ArrayField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\CollectionField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,6 +38,20 @@ class InterviewCrudController extends AbstractCrudController
     {
     }
 
+//    public function configureCrud(Crud $crud): Crud
+//    {
+//        return $crud
+//            ->setEntityLabelInSingular('Custom Entity')
+//            ->setEntityLabelInPlural('Custom Entities')
+//            ->setPageTitle(Crud::PAGE_DETAIL, 'Details of %entity_label_singular%')
+//            ->overrideTemplates(
+//                [
+//                    'crud/detail' => 'interview/show.html.twig',
+//                ]
+//            );
+//    }
+
+
     public static function getEntityFqcn(): string
     {
         return Interview::class;
@@ -45,17 +60,32 @@ class InterviewCrudController extends AbstractCrudController
     {
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->disable(Action::DELETE, Action::EDIT)
-            ;
+            ->disable(Action::DELETE, Action::EDIT);
     }
+
+
 
     public function configureFields(string $pageName): iterable
     {
-        yield IdField::new('id')->hideOnForm();
+        yield IdField::new('id')->onlyOnForms();
         yield TextField::new('interview_location')->hideOnForm();
         yield DateField::new('interview_date')->hideOnForm();
-        yield AssociationField::new('candidate')->hideOnForm()->renderAsNativeWidget();
-        yield AssociationField::new('evaluators')->hideOnForm();
+
+        yield AssociationField::new('candidate')
+            ->formatValue(function ($value) {
+                return $value->getFirstName() . ' ' . $value->getLastName();
+            });
+
+        yield AssociationField::new('evaluators', 'Evaluators')
+            ->formatValue(function ($value) {
+                $evaluators = [];
+                foreach ($value as $evaluator) {
+                    $evaluators[] = $evaluator->getFirstName() . ' ' . $evaluator->getLastName();
+                }
+                return implode(', ', $evaluators);
+            });
+
+
     }
 
     #[Route('/interview/calendar', name: 'interview_calendar', methods: ["GET"])]
