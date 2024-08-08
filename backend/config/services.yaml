@@ -27,18 +27,18 @@ services:
 
 ################################################################
     #configuring the service locator (:
-    App\Transformation\Strategy\CandidateTransformationStrategy:
-        tags:
-            - { name: 'app.transform_to_document_strategy', type: 'candidate' }
-            - { name: 'app.transform_to_entity_strategy', type: 'candidate' }
-    App\Transformation\Strategy\UserTransformationStrategy:
-        tags:
-            - { name: 'app.transform_to_document_strategy', type: 'user' }
-            - { name: 'app.transform_to_entity_strategy', type: 'user' }
-    App\Transformation\Strategy\InterviewTransformationStrategy:
-        tags:
-            - { name: 'app.transform_to_document_strategy', type: 'interview' }
-            - { name: 'app.transform_to_entity_strategy', type: 'interview' }
+#    App\Transformation\Strategy\CandidateTransformationStrategy:
+#        tags:
+#            - { name: 'app.transform_to_document_strategy', type: 'candidate' }
+#            - { name: 'app.transform_to_entity_strategy', type: 'candidate' }
+#    App\Transformation\Strategy\UserTransformationStrategy:
+#        tags:
+#            - { name: 'app.transform_to_document_strategy', type: 'user' }
+#            - { name: 'app.transform_to_entity_strategy', type: 'user' }
+#    App\Transformation\Strategy\InterviewTransformationStrategy:
+#        tags:
+#            - { name: 'app.transform_to_document_strategy', type: 'interview' }
+#            - { name: 'app.transform_to_entity_strategy', type: 'interview' }
 #    App\Transformation\Strategy\EvaluatorTransformationStrategy:
 #        tags:
 #            - { name: 'app.transform_to_document_strategy', type: 'evaluator' }
@@ -49,23 +49,25 @@ services:
 #            - { name: 'app.transform_to_entity_strategy', type: 'hr' }
 
     # Define service locator with strategies
-    app.super_strategy_locator:
-        class: Symfony\Component\DependencyInjection\ServiceLocator
-        arguments:
-            - candidate: '@App\Transformation\Strategy\CandidateTransformationStrategy'
-            - user: '@App\Transformation\Strategy\UserTransformationStrategy'
-            - interview : '@App\Transformation\Strategy\InterviewTransformationStrategy'
+#    app.super_strategy_locator:
+#        class: Symfony\Component\DependencyInjection\ServiceLocator
+#        arguments:
+#            $services:
+#                candidate: '@App\Transformation\Strategy\CandidateTransformationStrategy'
+#                user: '@App\Transformation\Strategy\UserTransformationStrategy'
+#                interview: '@App\Transformation\Strategy\InterviewTransformationStrategy'
+#        tags: ['container.service_locator']
 
     # Define factory using the locator
-    App\Transformation\Factory\TransformationStrategyFactory:
-        arguments:
-            $documentStrategies: '@app.super_strategy_locator'
-            $entityStrategies: '@app.super_strategy_locator'
+#    App\Transformation\Factory\TransformationStrategyFactory:
+#        arguments:
+#            $documentStrategies: '@app.super_strategy_locator'
+#            $entityStrategies: '@app.super_strategy_locator'
 
     # Define adapter with factory
-    App\Adapter\DataTransformationAdapter:
-        arguments:
-            $transformationStrategyFactory: '@App\Transformation\Factory\TransformationStrategyFactory'
+#    App\Adapter\DataTransformationAdapter:
+#        arguments:
+#            $transformationStrategyFactory: '@App\Transformation\Factory\TransformationStrategyFactory'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
