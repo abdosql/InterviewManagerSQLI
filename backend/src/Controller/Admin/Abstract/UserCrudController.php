@@ -16,13 +16,15 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 Abstract class UserCrudController extends AbstractCrudController
 {
     public function __construct(
         private UserService $userService,
         private UserCredentialManager $credentialManager,
-        private DefaultCommandHandler $commandHandler
+        private DefaultCommandHandler $commandHandler,
+        private MessageBusInterface $messageBus,
     )
     {}
     public function configureFields(string $pageName): iterable
@@ -42,15 +44,15 @@ Abstract class UserCrudController extends AbstractCrudController
     }
 
     /**
-     * @throws ExceptionInterface
+     * @param User $user
      */
     private function createOrUpdateUser(User $user): void
     {
         try {
             if (!$user->getId()){
-                $command = new CreateUserCommand($user, $this->userService, $this->credentialManager);
+                $command = new CreateUserCommand($user, $this->userService, $this->credentialManager, $this->messageBus);
             }else{
-                $command = new UpdateUserCommand($user, $this->userService);
+                $command = new UpdateUserCommand($user, $this->userService, $this->messageBus);
             }
             $this->commandHandler->handle($command);
         } catch (TransportException $e) {
@@ -60,12 +62,11 @@ Abstract class UserCrudController extends AbstractCrudController
 
     /**
      * @param User $user
-     * @throws ExceptionInterface
      */
     public function deleteUser(User $user): void
     {
         try {
-            $command = new DeleteUserCommand($user, $this->userService);
+            $command = new DeleteUserCommand($user, $this->userService, $this->messageBus);
             $this->commandHandler->handle($command);
         }catch (TransportException $e){
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);

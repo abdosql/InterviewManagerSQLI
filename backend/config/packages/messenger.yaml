@@ -1,27 +1,18 @@
+# config/packages/messenger.yaml
 framework:
     messenger:
-        default_bus: command.bus
-        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
-        # failure_transport: failed
-        buses:
-            command.bus: ~
-            event.bus: ~
-
         transports:
-            # https://symfony.com/doc/current/messenger.html#transport-configuration
-            # failed: 'doctrine://default?queue_name=failed'
             async: '%env(MESSENGER_TRANSPORT_DSN)%'
             sync: 'sync://'
-
         routing:
-            # Route your messages to the transports
-            # 'App\Message\YourMessage': async
-            'App\Command\*': sync
-            'App\Messages\*': async
-# when@test:
-#    framework:
-#        messenger:
-#            transports:
-#                # replace with your transport name here (e.g., my_transport: 'in-memory://')
-#                # For more Messenger testing tools, see https://github.com/zenstruck/messenger-test
-#                async: 'in-memory://'
+            'App\Message\Candidate\CandidateCreatedMessage': async
+            'App\Message\Candidate\CandidateUpdatedMessage': async
+            'App\Message\Candidate\CandidateDeletedMessage': async
+
+            'App\Message\User\UserCreatedMessage': async
+            'App\Message\User\UserUpdatedMessage': async
+            'App\Message\User\UserDeletedMessage': async
+
+            'App\Message\Interview\InterviewCreatedMessage': async
+
+

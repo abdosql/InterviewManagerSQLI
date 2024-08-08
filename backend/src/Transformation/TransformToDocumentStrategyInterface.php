@@ -4,5 +4,5 @@ namespace App\Transformation;
 
 interface TransformToDocumentStrategyInterface
 {
-    public function transformToDocument(int $entityId): object;
+    public function transformToDocument(int $entityId): mixed;
 }

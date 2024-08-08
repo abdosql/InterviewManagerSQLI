@@ -1,20 +1,96 @@
-{% extends 'base.html.twig' %}
+{% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block title %}Hello InterviewController!{% endblock %}
+{% block head_stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('calendar') }}
+{#    {{ encore_entry_link_tags('chosen') }}#}
+{% endblock %}
 
-{% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+{% block content_title %}Interviews{% endblock %}
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+{% block main %}
+    <div class="row">
+        <div class="col-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Interview Controls</h5>
+                    <div class="d-grid gap-2">
+                        <button id="add-interview" class="btn btn-primary">Add Interview</button>
+                        <button id="delete-interview" class="btn btn-danger">Delete Interview</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming Interviews</h5>
+                    <ul class="list-group" id="upcoming-interviews">
+                        <!-- Upcoming interviews will be dynamically inserted here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="card">
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="interviewModal" tabindex="-1" aria-labelledby="interviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="interviewModalLabel">New Interview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form_start(form, {'attr': {'id': 'interviewForm'}}) }}
+                    {{ form_widget(form) }}
+                    <button type="submit" class="btn btn-primary">Save Interview</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal for Showing Interview Details -->
+    <div class="modal fade" id="interviewDetailsModal" tabindex="-1" aria-labelledby="interviewDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="interviewDetailsModalLabel">Interview Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>Location:</strong>
+                        <span id="interview-details-location"></span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Candidate:</strong>
+                        <span id="interview-details-candidate"></span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Evaluators:</strong>
+                        <span id="interview-details-evaluators"></span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Date:</strong>
+                        <span id="interview-details-date"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/var/www/html/src/Controller/InterviewController.php</code></li>
-        <li>Your template at <code>/var/www/html/templates/interview/index.html.twig</code></li>
-    </ul>
-</div>
+{% endblock %}
+
+{% block body_javascript %}
+    {{ parent() }}
+{#    {{ encore_entry_script_tags('chosen') }}}#}
+    {{ encore_entry_script_tags('calendar') }}
 {% endblock %}

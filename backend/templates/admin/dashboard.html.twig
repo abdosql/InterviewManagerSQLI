@@ -8,62 +8,6 @@
 {% block content_title %}Dashboard{% endblock %}
 
 {% block main %}
-    <div class="row">
-        <div class="col-4">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Interview Controls</h5>
-                    <div class="d-grid gap-2">
-                        <button id="add-interview" class="btn btn-primary">Add Interview</button>
-                        <button id="delete-interview" class="btn btn-danger">Delete Interview</button>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Upcoming Interviews</h5>
-                    <ul class="list-group" id="upcoming-interviews">
-                        <!-- Upcoming interviews will be dynamically inserted here -->
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="col-8">
-            <div class="card">
-                <div class="card-body">
-                    <div id="calendar"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal -->
-    <div class="modal fade" id="interviewModal" tabindex="-1" aria-labelledby="interviewModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="interviewModalLabel">New Interview</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="interviewForm">
-                        <div class="mb-3">
-                            <label for="interview-title" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="interview-title" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="interview-start" class="form-label">Start Date</label>
-                            <input type="datetime-local" class="form-control" id="interview-start" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="interview-end" class="form-label">End Date</label>
-                            <input type="datetime-local" class="form-control" id="interview-end">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Save Interview</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 {% endblock %}
 
 {% block body_javascript %}
@@ -82,36 +26,75 @@
 
             document.getElementById('interviewForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                const title = document.getElementById('interview-title').value;
-                const start = document.getElementById('interview-start').value;
-                const end = document.getElementById('interview-end').value;
+                const formData = new FormData(this);
 
                 // Perform an AJAX request to save the interview
                 fetch('/api/interviews', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({ title: title, start: start, end: end })
+                    body: formData
                 })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
                             // Refresh the calendar to show the new interview
                             const calendar = FullCalendar.getCalendar(calendarEl);
-                            calendar.addEvent({ id: data.id, title: title, start: start, end: end });
+
+                            // Get the selected candidate's name
+                            const candidateSelect = document.getElementById('interview_candidate');
+                            const candidateName = candidateSelect.options[candidateSelect.selectedIndex].text;
+
+                            // Get the selected evaluators' names
+                            const evaluatorSelect = document.getElementById('interview_evaluator');
+                            const evaluatorNames = Array.from(evaluatorSelect.selectedOptions).map(option => option.text).join(', ');
+
+                            // Create a more detailed event title
+                            const eventTitle = `${formData.get('interview_location')} - ${candidateName}`;
+
+                            calendar.addEvent({
+                                id: data.id,
+                                title: eventTitle,
+                                start: formData.get('interview_date'),
+                                extendedProps: {
+                                    location: formData.get('interview_location'),
+                                    candidate: candidateName,
+                                    evaluators: evaluatorNames
+                                }
+                            });
+
                             interviewModal.hide();
                             // Update upcoming interviews list
                             updateUpcomingInterviews();
+
+                            // Clear the form
+                            this.reset();
                         } else {
-                            alert('Error saving interview');
+                            alert('Error saving interview: ' + data.message);
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        alert('An error occurred while saving the interview.');
                     });
             });
         });
+
+        // You might want to add this function to show event details when clicked
+        function showEventDetails(info) {
+            const event = info.event;
+            const props = event.extendedProps;
+            alert(`
+        Interview Details:
+        Location: ${props.location}
+        Candidate: ${props.candidate}
+        Evaluators: ${props.evaluators}
+        Date: ${event.start.toLocaleString()}
+    `);
+        }
+
+        // Make sure to add this event listener to your calendar options
+        // eventClick: showEventDetails
     </script>
 {% endblock %}

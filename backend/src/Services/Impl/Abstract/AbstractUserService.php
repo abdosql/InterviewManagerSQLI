@@ -4,7 +4,9 @@ namespace App\Services\Impl\Abstract;
 
 use App\Document\UserDocument;
 use App\Entity\User;
+use App\Persister\Document\UserDocumentPersister;
 use App\Persister\DocumentPersisterInterface;
+use App\Persister\Entity\UserEntityPersister;
 use App\Persister\EntityPersisterInterface;
 use App\Services\DatabasePersistence\DocumentPersistenceServiceInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
@@ -17,9 +19,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 class AbstractUserService implements DocumentPersistenceServiceInterface, EntityPersistenceServiceInterface
 {
     public function __construct(
-        #[Autowire(service: 'App\Persister\DocumentPersister\UserDocumentPersister')]
+        #[Autowire(service: UserDocumentPersister::class)]
         private DocumentPersisterInterface $documentPersister,
-        #[Autowire(service: 'App\Persister\EntityPersister\UserEntityPersister')]
+        #[Autowire(service: UserEntityPersister::class)]
         private EntityPersisterInterface $entityPersister,
         private DocumentManager $documentManager,
         private EntityManagerInterface $entityManager
