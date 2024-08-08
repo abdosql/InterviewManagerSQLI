@@ -2,7 +2,8 @@
 
 namespace App\Document;
 
-use App\Entity\Evaluator;
+namespace App\Document;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
@@ -13,7 +14,7 @@ class EvaluatorDocument extends UserDocument
     #[MongoDB\Field(type: "string")]
     private $specialization;
 
-    #[MongoDB\ReferenceMany(targetDocument: InterviewDocument::class, mappedBy: "evaluator")]
+    #[MongoDB\ReferenceMany(targetDocument: InterviewDocument::class, mappedBy: "evaluators")]
     private $interviews;
 
     public function __construct()
@@ -42,7 +43,7 @@ class EvaluatorDocument extends UserDocument
     {
         if (!$this->interviews->contains($interview)) {
             $this->interviews->add($interview);
-            $interview->setEvaluator($this);
+            $interview->addEvaluator($this);
         }
         return $this;
     }
@@ -50,15 +51,8 @@ class EvaluatorDocument extends UserDocument
     public function removeInterview(InterviewDocument $interview): self
     {
         if ($this->interviews->removeElement($interview)) {
-            if ($interview->getEvaluator() === $this) {
-                $interview->setEvaluator(null);
-            }
+            $interview->removeEvaluator($this);
         }
         return $this;
-    }
-    public function setDocument(EvaluatorDocument|UserDocument $document): void
-    {
-        parent::setDocument($document);
-        $this->specialization = $document->getSpecialization();
     }
 }

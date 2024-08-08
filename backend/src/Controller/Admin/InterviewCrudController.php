@@ -54,8 +54,8 @@ class InterviewCrudController extends AbstractCrudController
         yield IdField::new('id')->hideOnForm();
         yield TextField::new('interview_location')->hideOnForm();
         yield DateField::new('interview_date')->hideOnForm();
-        yield AssociationField::new('candidate')->hideOnForm();
-        yield AssociationField::new('evaluator')->hideOnForm();
+        yield AssociationField::new('candidate')->hideOnForm()->renderAsNativeWidget();
+        yield AssociationField::new('evaluators')->hideOnForm();
     }
 
     #[Route('/interview/calendar', name: 'interview_calendar', methods: ["GET"])]
@@ -82,7 +82,7 @@ class InterviewCrudController extends AbstractCrudController
                 Response::HTTP_BAD_REQUEST);
         }
 
-        if (empty($data['date']) || empty($data['location']) || empty($data['candidate']) || empty($data['evaluator'])) {
+        if (empty($data['date']) || empty($data['location']) || empty($data['candidate']) || empty($data['evaluators'])) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Some fields are missing'],
@@ -91,27 +91,36 @@ class InterviewCrudController extends AbstractCrudController
         }
 
         try {
+            $interview = new Interview();
             $candidate = $this->entityManager->getRepository(Candidate::class)->find($data['candidate']);
-            $evaluator = $this->entityManager->getRepository(Evaluator::class)->find($data['evaluator'][0]);
-
-            if (!$candidate || !$evaluator) {
+            if (!$candidate) {
                 return new JsonResponse([
                     'success' => false,
-                    'message' => 'Invalid candidate or evaluator',
-                    ], Response::HTTP_BAD_REQUEST);
+                    'message' => 'Invalid candidate',
+                ], Response::HTTP_BAD_REQUEST);
             }
+            foreach ($data['evaluators'] as $evaluator) {
+                $evaluator = $this->entityManager->getRepository(Evaluator::class)->find($evaluator);
+                if (!$evaluator) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'message' => 'Invalid candidate or evaluator',
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+                $interview->addEvaluator($evaluator);
+
+            }
+
 
             $interviewDate = \DateTime::createFromFormat('Y-m-d\TH:i', $data['date']);
             if (!$interviewDate) {
                 return new JsonResponse(['success' => false, 'message' => 'Invalid date format'], Response::HTTP_BAD_REQUEST);
             }
 
-            $interview = new Interview();
             $interview
                 ->setInterviewDate($interviewDate)
                 ->setInterviewLocation($data['location'])
                 ->setCandidate($candidate)
-                ->setEvaluator($evaluator)
                 ->setHrManager($this->getUser());
             ;
 

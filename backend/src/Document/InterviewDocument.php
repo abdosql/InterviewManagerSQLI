@@ -21,8 +21,8 @@ class InterviewDocument
     #[MongoDB\ReferenceOne(targetDocument: CandidateDocument::class, inversedBy: "interviews")]
     private $candidate;
 
-    #[MongoDB\ReferenceOne(targetDocument: EvaluatorDocument::class, inversedBy: "interviews")]
-    private $evaluator;
+    #[MongoDB\ReferenceMany(targetDocument: EvaluatorDocument::class, inversedBy: "interviews")]
+    private $evaluators;
 
     #[MongoDB\ReferenceOne(targetDocument: HRManagerDocument::class, inversedBy: "interviews")]
     private $hrManager;
@@ -33,6 +33,7 @@ class InterviewDocument
     public function __construct()
     {
         $this->appreciations = new ArrayCollection();
+        $this->evaluators = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -73,14 +74,25 @@ class InterviewDocument
         return $this;
     }
 
-    public function getEvaluator(): ?EvaluatorDocument
+    public function getEvaluators(): Collection
     {
-        return $this->evaluator;
+        return $this->evaluators;
     }
 
-    public function setEvaluator(?EvaluatorDocument $evaluator): self
+    public function addEvaluator(EvaluatorDocument $evaluator): self
     {
-        $this->evaluator = $evaluator;
+        if (!$this->evaluators->contains($evaluator)) {
+            $this->evaluators->add($evaluator);
+            $evaluator->addInterview($this);
+        }
+        return $this;
+    }
+
+    public function removeEvaluator(EvaluatorDocument $evaluator): self
+    {
+        if ($this->evaluators->removeElement($evaluator)) {
+            $evaluator->removeInterview($this);
+        }
         return $this;
     }
 

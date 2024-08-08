@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function addInterviewToCalendar(id, interviewData) {
         const eventTitle = `${interviewData.location} - ${interviewData.candidate}`;
-        const evaluators = interviewData.evaluator.join(', ');
+        const evaluators = interviewData.evaluators.join(', ');
 
         calendar.addEvent({
             id: id,
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const transformedData = {
             location: formData['interview[interview_location]'],
             candidate: formData['interview[candidate]'],
-            evaluator: formData['interview[evaluator][]'],
+            evaluators: formData['interview[evaluators][]'],
             date: formData['interview[interview_date]'],
             token: formData['interview[_token]']
         };

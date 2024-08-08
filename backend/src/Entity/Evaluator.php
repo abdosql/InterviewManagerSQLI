@@ -16,14 +16,15 @@ class Evaluator extends User
     /**
      * @var Collection<int, Interview>
      */
-    #[ORM\OneToMany(targetEntity: Interview::class, mappedBy: 'evaluator')]
+    #[ORM\ManyToMany(targetEntity: Interview::class, inversedBy: 'evaluators')]
     private Collection $interviews;
+
 
     public function __construct()
     {
         parent::__construct();
         $this->interviews = new ArrayCollection();
-    }
+   }
 
     public function getSpecialization(): ?string
     {
@@ -49,7 +50,6 @@ class Evaluator extends User
     {
         if (!$this->interviews->contains($interview)) {
             $this->interviews->add($interview);
-            $interview->setEvaluator($this);
         }
 
         return $this;
@@ -57,13 +57,14 @@ class Evaluator extends User
 
     public function removeInterview(Interview $interview): static
     {
-        if ($this->interviews->removeElement($interview)) {
-            // set the owning side to null (unless already changed)
-            if ($interview->getEvaluator() === $this) {
-                $interview->setEvaluator(null);
-            }
-        }
+        $this->interviews->removeElement($interview);
 
         return $this;
     }
+
+
+
+
+
+
 }
