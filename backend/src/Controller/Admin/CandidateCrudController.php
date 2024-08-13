@@ -13,6 +13,8 @@ use App\Candidate\Command\UpdateCandidateCommand;
 use App\EasyAdmin\Fields\ResumeUploadField;
 use App\Entity\Candidate;
 use App\File\FileUploaderInterface;
+use App\File\Uploader\DefaultFileUploader;
+use App\File\Uploader\MinioUploader;
 use App\Services\Impl\CandidateService;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -20,6 +22,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -30,6 +33,7 @@ class CandidateCrudController extends AbstractCrudController
 
     public function __construct(
         private CommandHandlerInterface $commandHandler,
+        #[Autowire(service: MinioUploader::class)]
         private FileUploaderInterface $resumeUploadService,
         private CandidateService $candidateService,
         private MessageBusInterface $messageBus,

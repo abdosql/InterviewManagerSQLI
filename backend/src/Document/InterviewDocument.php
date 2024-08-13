@@ -30,6 +30,9 @@ class InterviewDocument
     #[MongoDB\ReferenceMany(targetDocument: AppreciationDocument::class, mappedBy: "interview")]
     private $appreciations;
 
+//    #[MongoDB\Field(type: "int")]
+//    protected ?int $entityId;
+
     public function __construct()
     {
         $this->appreciations = new ArrayCollection();
@@ -130,4 +133,13 @@ class InterviewDocument
         }
         return $this;
     }
+//    public function getEntityId():?int
+//    {
+//        return $this->entityId;
+//    }
+//    public function setEntityId(?int $entityId): self
+//    {
+//        $this->entityId = $entityId;
+//        return $this;
+//    }
 }

@@ -16,6 +16,7 @@ readonly abstract class AbstractCommand implements CommandInterface
         private readonly MessageBusInterface $messageBus,
     )
     {
+        
     }
     abstract public function execute(): mixed;
 }

@@ -14,11 +14,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const interviewModal = new bootstrap.Modal(interviewModalEl, { keyboard: false });
 
     const interviewDetailModalEl = document.getElementById('interviewDetailsModal');
-
     const interviewDetailModal = new bootstrap.Modal(interviewDetailModalEl, { keyboard: false });
 
+
     const interviewForm = document.getElementById('interviewForm');
-    let selectedEventId = null;
+    // let selectedEventId = null;
     let calendar = null;
 
     function addInterviewToCalendar(id, interviewData) {
@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
     addInterviewButton.addEventListener('click', function() {
         interviewModal.show();
     });
-
     deleteInterviewButton.addEventListener('click', function() {
         const id = interviewId.value;
         fetch(`/api/interviews/${id}`, {
@@ -99,7 +98,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     calendar.refetchEvents();
-                    interviewDetailModal.hide();
+                    if (interviewDetailModal) {
+                        const modalInstance = bootstrap.Modal.getInstance(interviewDetailModalEl);
+                        modalInstance.hide();
+                    }
                 } else {
                     alert('Error Deleting interview: ' + data.message);
                 }

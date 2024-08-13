@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Interview\Command\DeleteInterviewCommand;
 use App\Interview\Command\Handler\CommandHandlerInterface;
 use App\Entity\Candidate;
 use App\Entity\Evaluator;
@@ -57,7 +58,7 @@ class InterviewCrudController extends AbstractCrudController
     {
         return $actions
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->disable(Action::DELETE, Action::EDIT);
+            ->disable(Action::DELETE, Action::EDIT, Action::NEW);
     }
 
 
@@ -174,7 +175,6 @@ class InterviewCrudController extends AbstractCrudController
                     'evaluators' => array_map(function ($evaluator) {
                         return $evaluator->getFullName();
                     }, $interview->getEvaluators()->toArray())
-
                 ];
             }, $interviews);
 
@@ -186,10 +186,14 @@ class InterviewCrudController extends AbstractCrudController
     #[Route('/api/interviews/{id}', name: 'api_delete_interview', methods: ["DELETE"])]
     public function deleteInterview(Interview $interview): JsonResponse
     {
-        $this->entityManager->remove($interview);
-        $this->entityManager->flush();
+        try {
+            $command = new DeleteInterviewCommand($interview, $this->interviewService, $this->messageBus);
+            $this->commandHandler->handle($command);
+            return new JsonResponse(['success' => true]);
 
-        return new JsonResponse(['success' => true]);
+        }catch (\Exception $e) {
+            return new JsonResponse(['success' => false,'message' => 'An error occurred: '. $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 //    #[Route('/api/upcoming-interviews', name: 'api_upcoming_interviews', methods: ["GET"])]
 //

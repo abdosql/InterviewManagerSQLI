@@ -8,7 +8,9 @@ namespace App\Message\Handler;
 
 use App\Adapter\DataTransformationAdapter;
 use App\Message\Interview\InterviewCreatedMessage;
+use App\Message\Interview\InterviewDeletedMessage;
 use App\Services\Impl\InterviewService;
+use Doctrine\ODM\MongoDB\MongoDBException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -43,12 +45,12 @@ readonly class InterviewHandler
 //        $updatedCandidateDocument = $this->transformationAdapter->transformToDocument($message->getId(), 'candidate');
 //        $this->candidateService->updateDocument($message->getId(), $updatedCandidateDocument);
 //    }
-//    #[AsMessageHandler]
-//    /**
-//     * @throws MongoDBException
-//     */
-//    public function handleDeletedCandidate(CandidateDeletedMessage $message): void
-//    {
-//        $this->candidateService->deleteDocument($message->getId());
-//    }
+    #[AsMessageHandler]
+    /**
+     * @throws MongoDBException
+     */
+    public function handleDeletedInterview(InterviewDeletedMessage $message): void
+    {
+        $this->interviewService->deleteDocument($message->getId());
+    }
 }
