@@ -24,7 +24,7 @@ class UserDocument extends PersonDocument
     #[MongoDB\Field(type: "collection")]
     protected array $roles = [];
 
-    #[MongoDB\ReferenceMany(targetDocument: NotificationDocument::class, mappedBy: "user")]
+    #[MongoDB\ReferenceMany(targetDocument: Notification::class, mappedBy: "user")]
     protected ArrayCollection $notifications;
 
     public function __construct()
@@ -77,7 +77,7 @@ class UserDocument extends PersonDocument
         return $this->notifications;
     }
 
-    public function addNotification(NotificationDocument $notification): self
+    public function addNotification(Notification $notification): self
     {
         if (!$this->notifications->contains($notification)) {
             $this->notifications[] = $notification;
@@ -86,7 +86,7 @@ class UserDocument extends PersonDocument
         return $this;
     }
 
-    public function removeNotification(NotificationDocument $notification): self
+    public function removeNotification(Notification $notification): self
     {
         if ($this->notifications->removeElement($notification)) {
             if ($notification->getUser() === $this) {

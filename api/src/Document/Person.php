@@ -6,7 +6,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[MongoDB\EmbeddedDocument]
-abstract class PersonDocument
+abstract class Person
 {
     #[MongoDB\Field(type: "string")]
     #[Assert\NotBlank(message: "First name should not be blank")]
@@ -79,11 +79,12 @@ abstract class PersonDocument
 
     /**
      * @param int|null $entityId
-     * @return PersonDocument
+     * @return Person
      */
     public function setEntityId(?int $entityId): self
     {
         $this->entityId = $entityId;
         return $this;
     }
+
 }

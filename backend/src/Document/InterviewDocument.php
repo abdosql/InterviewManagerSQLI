@@ -27,7 +27,7 @@ class InterviewDocument
     #[MongoDB\ReferenceOne(targetDocument: HRManagerDocument::class, inversedBy: "interviews")]
     private $hrManager;
 
-    #[MongoDB\ReferenceMany(targetDocument: AppreciationDocument::class, mappedBy: "interview")]
+    #[MongoDB\ReferenceMany(targetDocument: Appreciation::class, mappedBy: "interview")]
     private $appreciations;
 
 //    #[MongoDB\Field(type: "int")]
@@ -115,7 +115,7 @@ class InterviewDocument
         return $this->appreciations;
     }
 
-    public function addAppreciation(AppreciationDocument $appreciation): self
+    public function addAppreciation(Appreciation $appreciation): self
     {
         if (!$this->appreciations->contains($appreciation)) {
             $this->appreciations[] = $appreciation;
@@ -124,7 +124,7 @@ class InterviewDocument
         return $this;
     }
 
-    public function removeAppreciation(AppreciationDocument $appreciation): self
+    public function removeAppreciation(Appreciation $appreciation): self
     {
         if ($this->appreciations->removeElement($appreciation)) {
             if ($appreciation->getInterview() === $this) {

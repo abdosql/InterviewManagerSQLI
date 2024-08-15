@@ -2,18 +2,20 @@
 
 namespace App\Document;
 
+namespace App\Document;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
-#[MongoDB\Document(collection: "users")]
-class EvaluatorDocument extends UserDocument
+#[MongoDB\Document(collection: "evaluators")]
+class Evaluator extends User
 {
     #[MongoDB\Field(type: "string")]
-    private $specialization;
+    private ?string $specialization;
 
-    #[MongoDB\ReferenceMany(targetDocument: InterviewDocument::class, mappedBy: "evaluator")]
-    private $interviews;
+    #[MongoDB\ReferenceMany(targetDocument: Interview::class, mappedBy: "evaluators")]
+    private ArrayCollection $interviews;
 
     public function __construct()
     {
@@ -37,21 +39,19 @@ class EvaluatorDocument extends UserDocument
         return $this->interviews;
     }
 
-    public function addInterview(InterviewDocument $interview): self
+    public function addInterview(Interview $interview): self
     {
         if (!$this->interviews->contains($interview)) {
             $this->interviews->add($interview);
-            $interview->setEvaluator($this);
+            $interview->addEvaluator($this);
         }
         return $this;
     }
 
-    public function removeInterview(InterviewDocument $interview): self
+    public function removeInterview(Interview $interview): self
     {
         if ($this->interviews->removeElement($interview)) {
-            if ($interview->getEvaluator() === $this) {
-                $interview->setEvaluator(null);
-            }
+            $interview->removeEvaluator($this);
         }
         return $this;
     }

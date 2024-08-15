@@ -11,7 +11,6 @@ use Aws\S3\S3Client;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MinioUploader implements FileUploaderInterface
 {

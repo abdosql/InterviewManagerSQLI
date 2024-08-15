@@ -5,25 +5,25 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[MongoDB\Document(collection: "candidate_phases")]
-class CandidatePhaseDocument
+class CandidatePhase
 {
     #[MongoDB\Id]
-    private $id;
+    private ?string $id;
 
     #[MongoDB\Field(type: "string")]
-    private $phase;
+    private ?string $phase;
 
     #[MongoDB\Field(type: "date")]
-    private $startDate;
+    private ?\DateTimeInterface $startDate;
 
     #[MongoDB\Field(type: "date")]
-    private $endDate;
+    private ?\DateTimeInterface $endDate;
 
     #[MongoDB\Field(type: "string")]
-    private $result;
+    private ?string $result;
 
-    #[MongoDB\ReferenceOne(targetDocument: CandidateDocument::class, inversedBy: "candidatePhases")]
-    private $candidate;
+    #[MongoDB\ReferenceOne(targetDocument: Candidate::class, inversedBy: "candidatePhases")]
+    private ?Candidate $candidate;
 
     public function getId(): ?string
     {
@@ -74,12 +74,12 @@ class CandidatePhaseDocument
         return $this;
     }
 
-    public function getCandidate(): ?CandidateDocument
+    public function getCandidate(): ?Candidate
     {
         return $this->candidate;
     }
 
-    public function setCandidate(?CandidateDocument $candidate): self
+    public function setCandidate(?Candidate $candidate): self
     {
         $this->candidate = $candidate;
         return $this;

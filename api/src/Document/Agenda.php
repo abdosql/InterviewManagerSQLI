@@ -5,30 +5,30 @@ namespace App\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[MongoDB\Document(collection: "agenda")]
-class AgendaDocument
+class Agenda
 {
     #[MongoDB\Id]
-    private $id;
+    private ?string $id;
 
     #[MongoDB\Field(type: "date")]
-    private $date;
+    private ?\DateTimeInterface $date;
 
     #[MongoDB\Field(type: "date")]
-    private $startTime;
+    private ?\DateTimeInterface $startTime;
 
     #[MongoDB\Field(type: "date")]
-    private $endTime;
+    private ?\DateTimeInterface $endTime;
 
     #[MongoDB\Field(type: "string")]
-    private $status;
+    private ?string $status;
 
     #[MongoDB\Field(type: "string")]
-    private $description;
+    private ?string $description;
 
-    #[MongoDB\ReferenceOne(targetDocument: InterviewDocument::class)]
-    private $interview;
+    #[MongoDB\ReferenceOne(targetDocument: Interview::class)]
+    private ?Interview $interview;
 
-    public function getId()
+    public function getId(): ?string
     {
         return $this->id;
     }
@@ -88,12 +88,12 @@ class AgendaDocument
         return $this;
     }
 
-    public function getInterview(): ?InterviewDocument
+    public function getInterview(): ?Interview
     {
         return $this->interview;
     }
 
-    public function setInterview(InterviewDocument $interview): self
+    public function setInterview(Interview $interview): self
     {
         $this->interview = $interview;
         return $this;

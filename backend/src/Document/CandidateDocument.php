@@ -22,7 +22,7 @@ class CandidateDocument extends PersonDocument
     #[MongoDB\ReferenceMany(targetDocument: InterviewDocument::class, mappedBy: "candidate")]
     private ArrayCollection $interviews;
 
-    #[MongoDB\ReferenceMany(targetDocument: CandidatePhaseDocument::class, mappedBy: "candidate")]
+    #[MongoDB\ReferenceMany(targetDocument: CandidatePhase::class, mappedBy: "candidate")]
     private ArrayCollection $candidatePhases;
 
     #[MongoDB\ReferenceOne(targetDocument: ResumeDocument::class, cascade: ["persist", "delete"])]
@@ -90,7 +90,7 @@ class CandidateDocument extends PersonDocument
         return $this->candidatePhases;
     }
 
-    public function addCandidatePhase(CandidatePhaseDocument $candidatePhase): self
+    public function addCandidatePhase(CandidatePhase $candidatePhase): self
     {
         if (!$this->candidatePhases->contains($candidatePhase)) {
             $this->candidatePhases->add($candidatePhase);
@@ -99,7 +99,7 @@ class CandidateDocument extends PersonDocument
         return $this;
     }
 
-    public function removeCandidatePhase(CandidatePhaseDocument $candidatePhase): self
+    public function removeCandidatePhase(CandidatePhase $candidatePhase): self
     {
         if ($this->candidatePhases->removeElement($candidatePhase)) {
             if ($candidatePhase->getCandidate() === $this) {
