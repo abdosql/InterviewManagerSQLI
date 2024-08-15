@@ -8,8 +8,6 @@ namespace App\Candidate\Provider;
 
 use App\Document\Candidate;
 use Doctrine\ODM\MongoDB\DocumentManager;
-use Doctrine\ODM\MongoDB\LockException;
-use Doctrine\ODM\MongoDB\Mapping\MappingException;
 
 readonly class CandidateProvider implements ProviderInterface
 {
@@ -19,14 +17,9 @@ readonly class CandidateProvider implements ProviderInterface
     )
     {
     }
-
-    /**
-     * @throws MappingException
-     * @throws LockException
-     */
     public function getByEntityId(int $entityId): Candidate
     {
-        return $this->documentManager->getRepository(Candidate::class)->find($entityId);
+        return $this->documentManager->getRepository(Candidate::class)->findOneBy(["entityId" => $entityId]);
     }
 
     public function getAll(): array
