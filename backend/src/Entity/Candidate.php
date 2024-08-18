@@ -61,7 +61,7 @@ class Candidate extends Person
         return $this->hire_date;
     }
 
-    public function setHireDate(\DateTimeInterface $hire_date): static
+    public function setHireDate(?\DateTimeInterface $hire_date): static
     {
         $this->hire_date = $hire_date;
 

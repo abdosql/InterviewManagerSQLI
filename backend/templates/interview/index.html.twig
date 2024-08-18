@@ -10,26 +10,34 @@
 
 {% block main %}
     <div class="row">
-        <div class="col-4">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Interview Controls</h5>
-                    <div class="d-grid gap-2">
-                        <button id="add-interview" class="btn btn-primary">Add Interview</button>
-                        <button id="delete-interview" class="btn btn-danger">Delete Interview</button>
+        <div class="col-3">
+            <div class="mb-4">
+                <button id="add-interview"  class="btn btn-primary w-100 pb-2 pt-2"><i class="fa-solid fa-plus"></i> Create New Event</button>
+
+            </div>
+            <div>
+                <h5 class="mb-1">Upcoming Events</h5>
+                <p class="text-muted">Don't miss scheduled events</p>
+                <div>
+                    <div class="card mb-3" bis_skin_checked="1">
+                        <div class="card-body" bis_skin_checked="1">
+                            <div class="d-flex mb-3" bis_skin_checked="1">
+                                <div class="flex-grow-1" bis_skin_checked="1">
+                                    <i class="mdi mdi-checkbox-blank-circle me-2 text-info"></i>
+                                    <span class="fw-medium">30 Jan 2022 </span></div>
+                                <div class="flex-shrink-0" bis_skin_checked="1">
+                                    <small class="badge bg-primary-subtle text-primary ms-auto">1:00 AM to 12:00 AM</small>
+                                </div>
+                            </div>
+                            <h6 class="card-title fs-16"> World Leprosy Day</h6>
+                            <p class="text-muted text-truncate-two-lines mb-0"> </p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Upcoming Interviews</h5>
-                    <ul class="list-group" id="upcoming-interviews">
-                        <!-- Upcoming interviews will be dynamically inserted here -->
-                    </ul>
-                </div>
-            </div>
+
         </div>
-        <div class="col-8">
+        <div class="col-9">
             <div class="card">
                 <div class="card-body">
                     <div id="calendar"></div>
@@ -62,26 +70,27 @@
                     <h5 class="modal-title" id="interviewDetailsModalLabel">Interview Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <input id="interview-id" type="hidden" value="">
                 <div class="modal-body">
                     <div class="mb-3">
                         <strong>Location:</strong>
-                        <span id="interview-details-location"></span>
+                        <span class="badge badge-info" id="interview-details-location"></span>
                     </div>
                     <div class="mb-3">
                         <strong>Candidate:</strong>
-                        <span id="interview-details-candidate"></span>
+                        <span class="badge badge-primary" id="interview-details-candidate"></span>
                     </div>
                     <div class="mb-3">
                         <strong>Evaluators:</strong>
-                        <span id="interview-details-evaluators"></span>
+                        <span class="badge badge-secondary" id="interview-details-evaluators"></span>
                     </div>
                     <div class="mb-3">
                         <strong>Date:</strong>
-                        <span id="interview-details-date"></span>
+                        <span class="badge badge-warning" id="interview-details-date"></span>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="interview-delete" class="btn btn-danger"><i class="fa-solid fa-xmark"></i> Delete</button>
                 </div>
             </div>
         </div>

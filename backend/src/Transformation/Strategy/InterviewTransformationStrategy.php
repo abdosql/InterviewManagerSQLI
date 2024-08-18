@@ -10,7 +10,10 @@ use App\Document\InterviewDocument;
 use App\Entity\Interview;
 use App\Transformation\TransformToDocumentStrategyInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
+#[AutoconfigureTag("app.transform_to_entity_strategy", ['type' => 'interview'])]
+#[AutoconfigureTag("app.transform_to_document_strategy", ['type' => 'interview'])]
 readonly class InterviewTransformationStrategy implements TransformToDocumentStrategyInterface
 {
     public function __construct(private EntityManagerInterface $entityManager)
@@ -26,9 +29,8 @@ readonly class InterviewTransformationStrategy implements TransformToDocumentStr
         $interviewDocument = new InterviewDocument();
         $interviewDocument
             ->setInterviewDate($entity->getInterviewDate())
-            ->setCandidate($entity->getCandidate())
             ->setInterviewLocation($entity->getInterviewLocation())
-            ->setEvaluator($entity->getEvaluator())
+            ->setEntityId($entity->getId());
         ;
         return $interviewDocument;
     }

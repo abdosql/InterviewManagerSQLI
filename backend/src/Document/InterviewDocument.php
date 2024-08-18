@@ -16,23 +16,27 @@ class InterviewDocument
     private $interviewDate;
 
     #[MongoDB\Field(type: "string")]
-    private $interviewLocation;
+    private ?string $interviewLocation;
 
     #[MongoDB\ReferenceOne(targetDocument: CandidateDocument::class, inversedBy: "interviews")]
-    private $candidate;
+    private ?CandidateDocument $candidate;
 
-    #[MongoDB\ReferenceOne(targetDocument: EvaluatorDocument::class, inversedBy: "interviews")]
-    private $evaluator;
+    #[MongoDB\ReferenceMany(targetDocument: EvaluatorDocument::class, inversedBy: "interviews")]
+    private ArrayCollection $evaluators;
 
     #[MongoDB\ReferenceOne(targetDocument: HRManagerDocument::class, inversedBy: "interviews")]
-    private $hrManager;
+    private ?HRManagerDocument $hrManager;
 
     #[MongoDB\ReferenceMany(targetDocument: AppreciationDocument::class, mappedBy: "interview")]
-    private $appreciations;
+    private ArrayCollection $appreciations;
+
+    #[MongoDB\Field(type: "int")]
+    protected ?int $entityId;
 
     public function __construct()
     {
         $this->appreciations = new ArrayCollection();
+        $this->evaluators = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -73,14 +77,25 @@ class InterviewDocument
         return $this;
     }
 
-    public function getEvaluator(): ?EvaluatorDocument
+    public function getEvaluators(): Collection
     {
-        return $this->evaluator;
+        return $this->evaluators;
     }
 
-    public function setEvaluator(?EvaluatorDocument $evaluator): self
+    public function addEvaluator(EvaluatorDocument $evaluator): self
     {
-        $this->evaluator = $evaluator;
+        if (!$this->evaluators->contains($evaluator)) {
+            $this->evaluators->add($evaluator);
+            $evaluator->addInterview($this);
+        }
+        return $this;
+    }
+
+    public function removeEvaluator(EvaluatorDocument $evaluator): self
+    {
+        if ($this->evaluators->removeElement($evaluator)) {
+            $evaluator->removeInterview($this);
+        }
         return $this;
     }
 
@@ -116,6 +131,16 @@ class InterviewDocument
                 $appreciation->setInterview(null);
             }
         }
+        return $this;
+    }
+
+    public function getEntityId():?int
+    {
+        return $this->entityId;
+    }
+    public function setEntityId(?int $entityId): self
+    {
+        $this->entityId = $entityId;
         return $this;
     }
 }

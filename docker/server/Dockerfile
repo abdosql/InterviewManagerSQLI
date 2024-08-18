@@ -1,11 +1,26 @@
 FROM lavoweb/php-8.2
 
 RUN a2enmod rewrite
-RUN apt-get update && apt-get install -y git unzip zip librabbitmq-dev libssl-dev nodejs npm
+RUN apt-get update && apt-get install -y git wget unzip zip librabbitmq-dev libssl-dev nodejs npm
 WORKDIR /var/www/html
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions gd pdo_mysql bcmath zip intl opcache xsl
+RUN install-php-extensions  \
+    gd  \
+    pdo_mysql \
+    bcmath \
+    zip \
+    intl \
+    opcache \
+    xsl \
+    json \
+    pcre \
+    simplexml \
+    dom \
+    openssl \
+    curl
+
 COPY --from=composer:2.0 /usr/bin/composer /usr/local/bin/composer
+
 RUN composer self-update
 RUN apt update 
 RUN apt install nano
@@ -40,4 +55,23 @@ RUN docker-php-ext-enable amqp
 # Install Nodejs
 RUN apt install -y nodejs npm
 
+
+# Install MinIO Client (mc)
+RUN wget https://dl.min.io/client/mc/release/linux-amd64/mc && \
+    chmod +x mc && \
+    mv mc /usr/local/bin/
+
+# Set environment variables for MinIO
+ENV MINIO_ENDPOINT=http://minio:9000
+ENV MINIO_ACCESS_KEY=access-key
+ENV MINIO_SECRET_KEY=secret-key
+
+# Create a script to initialize MinIO and create the bucket
+RUN echo '#!/bin/sh\n\
+    /usr/local/bin/mc alias set myminio ${MINIO_ENDPOINT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};\n\
+    /usr/local/bin/mc mb myminio/uploads;\n\
+    exec apache2-foreground' > /usr/local/bin/docker-entrypoint.sh && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 EXPOSE 8585

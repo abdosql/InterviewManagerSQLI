@@ -7,32 +7,36 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[MongoDB\Document(collection: "interviews")]
-class InterviewDocument
+class Interview
 {
     #[MongoDB\Id]
-    private $id;
+    private ?string $id;
 
     #[MongoDB\Field(type: "date")]
-    private $interviewDate;
+    private ?\DateTimeInterface $interviewDate;
 
     #[MongoDB\Field(type: "string")]
-    private $interviewLocation;
+    private ?string $interviewLocation;
 
-    #[MongoDB\ReferenceOne(targetDocument: CandidateDocument::class, inversedBy: "interviews")]
-    private $candidate;
+    #[MongoDB\ReferenceOne(targetDocument: Candidate::class, inversedBy: "interviews")]
+    private ?Candidate $candidate;
 
-    #[MongoDB\ReferenceOne(targetDocument: EvaluatorDocument::class, inversedBy: "interviews")]
-    private $evaluator;
+    #[MongoDB\ReferenceMany(targetDocument: Evaluator::class, inversedBy: "interviews")]
+    private ArrayCollection $evaluators;
 
-    #[MongoDB\ReferenceOne(targetDocument: HRManagerDocument::class, inversedBy: "interviews")]
-    private $hrManager;
+    #[MongoDB\ReferenceOne(targetDocument: HRManager::class, inversedBy: "interviews")]
+    private ?HRManager $hrManager;
 
-    #[MongoDB\ReferenceMany(targetDocument: AppreciationDocument::class, mappedBy: "interview")]
-    private $appreciations;
+    #[MongoDB\ReferenceMany(targetDocument: Appreciation::class, mappedBy: "interview")]
+    private ArrayCollection $appreciations;
+
+//    #[MongoDB\Field(type: "int")]
+//    protected ?int $entityId;
 
     public function __construct()
     {
         $this->appreciations = new ArrayCollection();
+        $this->evaluators = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -62,34 +66,45 @@ class InterviewDocument
         return $this;
     }
 
-    public function getCandidate(): ?CandidateDocument
+    public function getCandidate(): ?Candidate
     {
         return $this->candidate;
     }
 
-    public function setCandidate(?CandidateDocument $candidate): self
+    public function setCandidate(?Candidate $candidate): self
     {
         $this->candidate = $candidate;
         return $this;
     }
 
-    public function getEvaluator(): ?EvaluatorDocument
+    public function getEvaluators(): Collection
     {
-        return $this->evaluator;
+        return $this->evaluators;
     }
 
-    public function setEvaluator(?EvaluatorDocument $evaluator): self
+    public function addEvaluator(Evaluator $evaluator): self
     {
-        $this->evaluator = $evaluator;
+        if (!$this->evaluators->contains($evaluator)) {
+            $this->evaluators->add($evaluator);
+            $evaluator->addInterview($this);
+        }
         return $this;
     }
 
-    public function getHrManager(): ?HRManagerDocument
+    public function removeEvaluator(Evaluator $evaluator): self
+    {
+        if ($this->evaluators->removeElement($evaluator)) {
+            $evaluator->removeInterview($this);
+        }
+        return $this;
+    }
+
+    public function getHrManager(): ?HRManager
     {
         return $this->hrManager;
     }
 
-    public function setHrManager(?HRManagerDocument $hrManager): self
+    public function setHrManager(?HRManager $hrManager): self
     {
         $this->hrManager = $hrManager;
         return $this;
@@ -100,7 +115,7 @@ class InterviewDocument
         return $this->appreciations;
     }
 
-    public function addAppreciation(AppreciationDocument $appreciation): self
+    public function addAppreciation(Appreciation $appreciation): self
     {
         if (!$this->appreciations->contains($appreciation)) {
             $this->appreciations[] = $appreciation;
@@ -109,7 +124,7 @@ class InterviewDocument
         return $this;
     }
 
-    public function removeAppreciation(AppreciationDocument $appreciation): self
+    public function removeAppreciation(Appreciation $appreciation): self
     {
         if ($this->appreciations->removeElement($appreciation)) {
             if ($appreciation->getInterview() === $this) {
@@ -118,4 +133,13 @@ class InterviewDocument
         }
         return $this;
     }
+//    public function getEntityId():?int
+//    {
+//        return $this->entityId;
+//    }
+//    public function setEntityId(?int $entityId): self
+//    {
+//        $this->entityId = $entityId;
+//        return $this;
+//    }
 }

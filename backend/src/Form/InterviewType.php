@@ -32,7 +32,7 @@ class InterviewType extends AbstractType
                 'label' => 'Candidate',
                 'label_attr' => ['class' => 'form-label fw-bold'],
             ])
-            ->add('evaluator', EntityType::class, [
+            ->add('evaluators', EntityType::class, [
                 'class' => Evaluator::class,
                 'choice_label' => 'fullName',
                 'attr' => [

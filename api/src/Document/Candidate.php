@@ -2,16 +2,19 @@
 
 namespace App\Document;
 
-use App\Repository\Documents\CandidateRepository;
-use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use ApiPlatform\Metadata\ApiResource;
+use App\Provider\Data\CandidateDataProvider;
+use App\Repository\CandidateRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
+#[ApiResource(provider: CandidateDataProvider::class)]
 #[MongoDB\Document(collection: "candidates", repositoryClass: CandidateRepository::class)]
-class CandidateDocument extends PersonDocument
+class Candidate extends Person
 {
     #[MongoDB\Id]
-    private $id;
+    private ?string $id;
 
     #[MongoDB\Field(type: "string")]
     private ?string $address;
@@ -19,14 +22,14 @@ class CandidateDocument extends PersonDocument
     #[MongoDB\Field(type: "date", nullable: true)]
     private ?\DateTimeInterface $hireDate = null;
 
-    #[MongoDB\ReferenceMany(targetDocument: InterviewDocument::class, mappedBy: "candidate")]
+    #[MongoDB\ReferenceMany(targetDocument: Interview::class, mappedBy: "candidate")]
     private ArrayCollection $interviews;
 
-    #[MongoDB\ReferenceMany(targetDocument: CandidatePhaseDocument::class, mappedBy: "candidate")]
+    #[MongoDB\ReferenceMany(targetDocument: CandidatePhase::class, mappedBy: "candidate")]
     private ArrayCollection $candidatePhases;
 
-    #[MongoDB\ReferenceOne(targetDocument: ResumeDocument::class, cascade: ["persist"])]
-    private ?ResumeDocument $resume;
+    #[MongoDB\ReferenceOne(targetDocument: Resume::class, cascade: ["persist", "delete"])]
+    private ?Resume $resume;
 
     public function __construct()
     {
@@ -34,7 +37,7 @@ class CandidateDocument extends PersonDocument
         $this->candidatePhases = new ArrayCollection();
     }
 
-    public function getId()
+    public function getId(): ?string
     {
         return $this->id;
     }
@@ -66,7 +69,7 @@ class CandidateDocument extends PersonDocument
         return $this->interviews;
     }
 
-    public function addInterview(InterviewDocument $interview): self
+    public function addInterview(Interview $interview): self
     {
         if (!$this->interviews->contains($interview)) {
             $this->interviews->add($interview);
@@ -75,7 +78,7 @@ class CandidateDocument extends PersonDocument
         return $this;
     }
 
-    public function removeInterview(InterviewDocument $interview): self
+    public function removeInterview(Interview $interview): self
     {
         if ($this->interviews->removeElement($interview)) {
             if ($interview->getCandidate() === $this) {
@@ -90,7 +93,7 @@ class CandidateDocument extends PersonDocument
         return $this->candidatePhases;
     }
 
-    public function addCandidatePhase(CandidatePhaseDocument $candidatePhase): self
+    public function addCandidatePhase(CandidatePhase $candidatePhase): self
     {
         if (!$this->candidatePhases->contains($candidatePhase)) {
             $this->candidatePhases->add($candidatePhase);
@@ -99,7 +102,7 @@ class CandidateDocument extends PersonDocument
         return $this;
     }
 
-    public function removeCandidatePhase(CandidatePhaseDocument $candidatePhase): self
+    public function removeCandidatePhase(CandidatePhase $candidatePhase): self
     {
         if ($this->candidatePhases->removeElement($candidatePhase)) {
             if ($candidatePhase->getCandidate() === $this) {
@@ -109,17 +112,19 @@ class CandidateDocument extends PersonDocument
         return $this;
     }
 
-    public function getResume(): ?ResumeDocument
+    public function getResume(): ?Resume
     {
         if ($this->resume === null) {
-            $this->resume = new ResumeDocument();
+            $this->resume = new Resume();
         }
         return $this->resume;
     }
 
-    public function setResume(?ResumeDocument $resume): self
+    public function setResume(?Resume $resume): self
     {
         $this->resume = $resume;
         return $this;
     }
+
+
 }

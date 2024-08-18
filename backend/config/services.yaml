@@ -4,7 +4,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-
+    minio_endpoint: '%env(MINIO_ENDPOINT)%'
+    minio_key: '%env(MINIO_KEY)%'
+    minio_secret: '%env(MINIO_SECRET)%'
+    minio_bucket: '%env(MINIO_BUCKET)%'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -27,18 +30,18 @@ services:
 
 ################################################################
     #configuring the service locator (:
-    App\Transformation\Strategy\CandidateTransformationStrategy:
-        tags:
-            - { name: 'app.transform_to_document_strategy', type: 'candidate' }
-            - { name: 'app.transform_to_entity_strategy', type: 'candidate' }
-    App\Transformation\Strategy\UserTransformationStrategy:
-        tags:
-            - { name: 'app.transform_to_document_strategy', type: 'user' }
-            - { name: 'app.transform_to_entity_strategy', type: 'user' }
-    App\Transformation\Strategy\InterviewTransformationStrategy:
-        tags:
-            - { name: 'app.transform_to_document_strategy', type: 'interview' }
-            - { name: 'app.transform_to_entity_strategy', type: 'interview' }
+#    App\Transformation\Strategy\CandidateTransformationStrategy:
+#        tags:
+#            - { name: 'app.transform_to_document_strategy', type: 'candidate' }
+#            - { name: 'app.transform_to_entity_strategy', type: 'candidate' }
+#    App\Transformation\Strategy\UserTransformationStrategy:
+#        tags:
+#            - { name: 'app.transform_to_document_strategy', type: 'user' }
+#            - { name: 'app.transform_to_entity_strategy', type: 'user' }
+#    App\Transformation\Strategy\InterviewTransformationStrategy:
+#        tags:
+#            - { name: 'app.transform_to_document_strategy', type: 'interview' }
+#            - { name: 'app.transform_to_entity_strategy', type: 'interview' }
 #    App\Transformation\Strategy\EvaluatorTransformationStrategy:
 #        tags:
 #            - { name: 'app.transform_to_document_strategy', type: 'evaluator' }
@@ -49,23 +52,38 @@ services:
 #            - { name: 'app.transform_to_entity_strategy', type: 'hr' }
 
     # Define service locator with strategies
-    app.super_strategy_locator:
-        class: Symfony\Component\DependencyInjection\ServiceLocator
-        arguments:
-            - candidate: '@App\Transformation\Strategy\CandidateTransformationStrategy'
-            - user: '@App\Transformation\Strategy\UserTransformationStrategy'
-            - interview : '@App\Transformation\Strategy\InterviewTransformationStrategy'
+#    app.super_strategy_locator:
+#        class: Symfony\Component\DependencyInjection\ServiceLocator
+#        arguments:
+#            $services:
+#                candidate: '@App\Transformation\Strategy\CandidateTransformationStrategy'
+#                user: '@App\Transformation\Strategy\UserTransformationStrategy'
+#                interview: '@App\Transformation\Strategy\InterviewTransformationStrategy'
+#        tags: ['container.service_locator']
 
     # Define factory using the locator
-    App\Transformation\Factory\TransformationStrategyFactory:
-        arguments:
-            $documentStrategies: '@app.super_strategy_locator'
-            $entityStrategies: '@app.super_strategy_locator'
+#    App\Transformation\Factory\TransformationStrategyFactory:
+#        arguments:
+#            $documentStrategies: '@app.super_strategy_locator'
+#            $entityStrategies: '@app.super_strategy_locator'
 
     # Define adapter with factory
-    App\Adapter\DataTransformationAdapter:
-        arguments:
-            $transformationStrategyFactory: '@App\Transformation\Factory\TransformationStrategyFactory'
+#    App\Adapter\DataTransformationAdapter:
+#        arguments:
+#            $transformationStrategyFactory: '@App\Transformation\Factory\TransformationStrategyFactory'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+
+    Aws\S3\S3Client:
+        factory: ['Aws\S3\S3Client', 'factory']
+        arguments:
+            $config:
+                version: 'latest'
+                region: 'us-east-1'
+                endpoint: '%env(MINIO_ENDPOINT)%'
+                credentials:
+                    key: '%env(MINIO_ACCESS_KEY)%'
+                    secret: '%env(MINIO_SECRET_KEY)%'
+                use_path_style_endpoint: true

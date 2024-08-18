@@ -28,10 +28,6 @@ class Interview
 
     #[ORM\ManyToOne(inversedBy: 'interviews')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Evaluator $evaluator = null;
-
-    #[ORM\ManyToOne(inversedBy: 'interviews')]
-    #[ORM\JoinColumn(nullable: false)]
     private ?HRManager $hr_manager = null;
 
     /**
@@ -40,9 +36,16 @@ class Interview
     #[ORM\OneToMany(targetEntity: Appreciation::class, mappedBy: 'interview')]
     private Collection $appreciations;
 
+    /**
+     * @var Collection<int, Evaluator>
+     */
+    #[ORM\ManyToMany(targetEntity: Evaluator::class, mappedBy: 'interviews')]
+    private Collection $evaluators;
+
     public function __construct()
     {
         $this->appreciations = new ArrayCollection();
+        $this->evaluators = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -86,18 +89,6 @@ class Interview
         return $this;
     }
 
-    public function getEvaluator(): ?Evaluator
-    {
-        return $this->evaluator;
-    }
-
-    public function setEvaluator(?Evaluator $evaluator): static
-    {
-        $this->evaluator = $evaluator;
-
-        return $this;
-    }
-
     public function getHrManager(): ?HRManager
     {
         return $this->hr_manager;
@@ -135,6 +126,33 @@ class Interview
             if ($appreciation->getInterview() === $this) {
                 $appreciation->setInterview(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Evaluator>
+     */
+    public function getEvaluators(): Collection
+    {
+        return $this->evaluators;
+    }
+
+    public function addEvaluator(Evaluator $evaluator): static
+    {
+        if (!$this->evaluators->contains($evaluator)) {
+            $this->evaluators->add($evaluator);
+            $evaluator->addInterview($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvaluator(Evaluator $evaluator): static
+    {
+        if ($this->evaluators->removeElement($evaluator)) {
+            $evaluator->removeInterview($this);
         }
 
         return $this;

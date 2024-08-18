@@ -6,38 +6,38 @@
 
 namespace App\Interview\Command;
 
-use App\Interview\Command\AbstractCommand;
 use App\Entity\Interview;
-use App\Message\Interview\InterviewCreatedMessage;
+use App\Message\Interview\InterviewDeletedMessage;
 use App\Services\Impl\InterviewService;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-readonly class CreateInterviewCommand extends AbstractCommand
+readonly class DeleteInterviewCommand extends AbstractCommand
 {
-    public function __construct(
-        private Interview $interview,
-        private InterviewService $interviewService,
-        private MessageBusInterface $messageBus,
 
+    public function __construct(private Interview $interview,
+                                private InterviewService $interviewService,
+                                private MessageBusInterface $messageBus,
     )
     {
-        parent::__construct($interviewService, $this->messageBus);
+        parent::__construct($this->interviewService, $this->messageBus);
     }
 
     /**
+     * @return int
      * @throws ExceptionInterface
      */
     public function execute(): int
     {
-        $this->interviewService->saveEntity($this->interview);
-        $message = new InterviewCreatedMessage($this->interview->getId());
+        $interviewIdBackup = $this->interview->getId();
+        $this->interviewService->deleteEntity($this->interview->getId());
+        $message = new InterviewDeletedMessage($interviewIdBackup);
         try {
             $this->messageBus->dispatch($message);
         }catch (TransportException $e) {
             throw new \RuntimeException('Failed to dispatch '.$message::class." : ". $e->getMessage());
         }
-        return $this->interview->getId();
+        return $interviewIdBackup;
     }
 }
