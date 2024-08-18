@@ -30,6 +30,7 @@ readonly class InterviewTransformationStrategy implements TransformToDocumentStr
         $interviewDocument
             ->setInterviewDate($entity->getInterviewDate())
             ->setInterviewLocation($entity->getInterviewLocation())
+            ->setEntityId($entity->getId());
         ;
         return $interviewDocument;
     }

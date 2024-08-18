@@ -16,22 +16,22 @@ class InterviewDocument
     private $interviewDate;
 
     #[MongoDB\Field(type: "string")]
-    private $interviewLocation;
+    private ?string $interviewLocation;
 
     #[MongoDB\ReferenceOne(targetDocument: CandidateDocument::class, inversedBy: "interviews")]
-    private $candidate;
+    private ?CandidateDocument $candidate;
 
     #[MongoDB\ReferenceMany(targetDocument: EvaluatorDocument::class, inversedBy: "interviews")]
-    private $evaluators;
+    private ArrayCollection $evaluators;
 
     #[MongoDB\ReferenceOne(targetDocument: HRManagerDocument::class, inversedBy: "interviews")]
-    private $hrManager;
+    private ?HRManagerDocument $hrManager;
 
     #[MongoDB\ReferenceMany(targetDocument: AppreciationDocument::class, mappedBy: "interview")]
-    private $appreciations;
+    private ArrayCollection $appreciations;
 
-//    #[MongoDB\Field(type: "int")]
-//    protected ?int $entityId;
+    #[MongoDB\Field(type: "int")]
+    protected ?int $entityId;
 
     public function __construct()
     {
@@ -133,13 +133,14 @@ class InterviewDocument
         }
         return $this;
     }
-//    public function getEntityId():?int
-//    {
-//        return $this->entityId;
-//    }
-//    public function setEntityId(?int $entityId): self
-//    {
-//        $this->entityId = $entityId;
-//        return $this;
-//    }
+
+    public function getEntityId():?int
+    {
+        return $this->entityId;
+    }
+    public function setEntityId(?int $entityId): self
+    {
+        $this->entityId = $entityId;
+        return $this;
+    }
 }

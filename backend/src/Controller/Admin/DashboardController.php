@@ -32,19 +32,16 @@ class DashboardController extends AbstractDashboardController
 
     /**
      * @return Response
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     #[Route('/admin', name: 'admin')]
     public function index(): Response
     {
-        //It will be changed after using the api side
-        $candidates = $this->candidateService->findAllEntities();
-        $evaluators = $this->evaluatorService->findAllEntities();
-        return $this->render('admin/dashboard.html.twig',
-            [
-                'candidates' => $candidates,
-                'evaluators' => $evaluators,
-            ]
-        );
+        $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
+
+        return $this->redirect($adminUrlGenerator->setController(CandidateCrudController::class)->generateUrl());
+
     }
 
     public function configureDashboard(): Dashboard

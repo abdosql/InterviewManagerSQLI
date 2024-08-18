@@ -5,13 +5,15 @@ namespace App\Transformation\Strategy;
 use App\Document\CandidateDocument;
 use App\Document\ResumeDocument;
 use App\Entity\Candidate;
+use App\Entity\Resume;
 use App\Transformation\TransformToDocumentStrategyInterface;
+use App\Transformation\TransformToEntityStrategyInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag("app.transform_to_entity_strategy", ['type' => 'candidate'])]
 #[AutoconfigureTag("app.transform_to_document_strategy", ['type' => 'candidate'])]
-readonly class CandidateTransformationStrategy implements TransformToDocumentStrategyInterface
+readonly class CandidateTransformationStrategy implements TransformToDocumentStrategyInterface, TransformToEntityStrategyInterface
 {
     public function __construct(private EntityManagerInterface $entityManager)
     {
@@ -40,5 +42,24 @@ readonly class CandidateTransformationStrategy implements TransformToDocumentStr
         $candidateDocument->setResume($resumeDocument);
 
         return $candidateDocument;
+    }
+
+    public function transformToEntity(object $document): Candidate
+    {
+        $candidate = new Candidate();
+        $candidate
+            ->setFirstName($document->getFirstName())
+            ->setLastName($document->getLastName())
+            ->setPhone($document->getPhone())
+            ->setEmail($document->getEmail())
+            ->setAddress($document->getAddress())
+            ->setHireDate($document->getHireDate());
+        $resume = new Resume();
+        $resume
+            ->setCandidate($candidate)
+            ->setFilePath($document->getResume()->getFilePath());
+        $candidate->setResume($resume);
+
+        return $candidate;
     }
 }

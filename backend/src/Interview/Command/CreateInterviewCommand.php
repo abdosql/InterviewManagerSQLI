@@ -23,7 +23,7 @@ readonly class CreateInterviewCommand extends AbstractCommand
 
     )
     {
-        parent::__construct($interviewService);
+        parent::__construct($interviewService, $this->messageBus);
     }
 
     /**

@@ -6,18 +6,16 @@ use App\Transformation\TransformToDocumentStrategyInterface;
 use App\Transformation\TransformToEntityStrategyInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\DependencyInjection\Attribute\TaggedLocator;
-use Symfony\Component\DependencyInjection\ServiceLocator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireLocator;
 use Symfony\Contracts\Service\ServiceProviderInterface;
 
 
 readonly class TransformationStrategyFactory
 {
     public function __construct(
-        #[TaggedLocator('app.transform_to_document_strategy', indexAttribute: 'type')]
+        #[AutowireLocator('app.transform_to_document_strategy', indexAttribute: 'type')]
         private ServiceProviderInterface $documentStrategies,
-        #[TaggedLocator('app.transform_to_entity_strategy', indexAttribute: 'type')]
+        #[AutowireLocator('app.transform_to_entity_strategy', indexAttribute: 'type')]
         private ServiceProviderInterface $entityStrategies
     ){}
 
@@ -43,6 +41,7 @@ readonly class TransformationStrategyFactory
         if (!$this->documentStrategies->has($type)){
             throw new \InvalidArgumentException('Unknown transformation type: ' . $type);
         }
+
         return $this->documentStrategies->get($type);
     }
 }
