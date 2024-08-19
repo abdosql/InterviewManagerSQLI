@@ -23,12 +23,15 @@ readonly class CandidateProvider implements ProviderInterface
     public function getAllOrBy(?array $criteria = null, ?array $orderBy = null, $limit = null, $offset = null): array
     {
         return
-            !($criteria)
-                ?
-                $this->documentManager
-                    ->getRepository(Candidate::class)
+            is_array($criteria) ? $this->documentManager
+                ->getRepository(Candidate::class)
                     ->findBy($criteria, $orderBy, $limit, $offset)
                 :
-                $this->documentManager->getRepository(Candidate::class)->findAll();
+                $this->documentManager
+                    ->getRepository(Candidate::class)
+                        ->findAll()
+            ;
+
     }
+
 }

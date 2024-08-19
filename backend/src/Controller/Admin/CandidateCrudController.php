@@ -10,7 +10,9 @@ use App\Candidate\Command\CreateCandidateCommand;
 use App\Candidate\Command\DeleteCandidateCommand;
 use App\Candidate\Command\Handler\CommandHandlerInterface;
 use App\Candidate\Command\UpdateCandidateCommand;
-use App\Candidate\Query\FindCandidateQuery;
+use App\Candidate\Query\FindCandidate;
+use App\Candidate\Query\GetAllCandidate;
+use App\Candidate\Query\GetAllCandidates;
 use App\EasyAdmin\Fields\ResumeUploadField;
 use App\Entity\Candidate;
 use App\File\FileUploaderInterface;
@@ -18,11 +20,20 @@ use App\File\Uploader\DefaultFileUploader;
 use App\File\Uploader\MinioUploader;
 use App\Services\Impl\CandidateService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\PaginatorDto;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
+use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
+use EasyCorp\Bundle\EasyAdminBundle\Factory\PaginatorFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -34,7 +45,10 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class CandidateCrudController extends AbstractCrudController
@@ -47,7 +61,7 @@ class CandidateCrudController extends AbstractCrudController
         private readonly FileUploaderInterface   $resumeUploadService,
         private readonly CandidateService        $candidateService,
         private readonly MessageBusInterface     $messageBus,
-        private readonly FindCandidateQuery      $findCandidateQuery,
+        private readonly FindCandidate           $findCandidateQuery,
         private readonly AdminUrlGenerator       $adminUrlGenerator,
     )
     {}

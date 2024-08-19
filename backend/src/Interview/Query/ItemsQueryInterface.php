@@ -4,7 +4,7 @@
  * @Linkedin https://www.linkedin.com/abdelaziz-saqqal
  */
 
-namespace App\Candidate\Query;
+namespace App\Interview\Query;
 
 interface ItemsQueryInterface
 {

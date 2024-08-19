@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Candidate\Query\FindCandidate;
 use App\Interview\Command\DeleteInterviewCommand;
 use App\Interview\Command\Handler\CommandHandlerInterface;
 use App\Entity\Candidate;
@@ -19,20 +20,23 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class InterviewCrudController extends AbstractCrudController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private CommandHandlerInterface $commandHandler,
-        private MessageBusInterface $messageBus,
-        private InterviewService $interviewService
-    )
+        private readonly CommandHandlerInterface $commandHandler,
+        private readonly MessageBusInterface $messageBus,
+        private readonly FindCandidate $findCandidate
+     )
     {
     }
 
@@ -99,6 +103,12 @@ class InterviewCrudController extends AbstractCrudController
     }
 
     //The Get Method Is temporarily don't panic a chef (:
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     #[Route('/api/interviews', name: 'api_create_interview', methods: ["post", "get"])]
     public function createInterview(Request $request): JsonResponse
     {
@@ -122,7 +132,7 @@ class InterviewCrudController extends AbstractCrudController
 
             try {
                 $interview = new Interview();
-                $candidate = $this->entityManager->getRepository(Candidate::class)->find($data['candidate']);
+                $candidate = $this->findCandidate->findItem($data['candidate']);
                 if (!$candidate) {
                     return new JsonResponse([
                         'success' => false,

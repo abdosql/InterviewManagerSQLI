@@ -20,7 +20,7 @@ readonly class DataTransformationAdapter
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function transformToDocument($entity, string $type): object
+    public function transformToDocument($entity, string $type): mixed
     {
         $strategy = $this->transformationStrategyFactory->getTransformToDocumentStrategy($type);
         return $strategy->transformToDocument($entity);
@@ -30,7 +30,7 @@ readonly class DataTransformationAdapter
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function transformToEntity($document, string $type): object
+    public function transformToEntity($document, string $type): mixed
     {
         $strategy = $this->transformationStrategyFactory->getTransformToEntityStrategy($type);
         return $strategy->transformToEntity($document);

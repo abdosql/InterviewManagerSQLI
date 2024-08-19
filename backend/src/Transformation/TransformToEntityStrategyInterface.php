@@ -4,5 +4,5 @@ namespace App\Transformation;
 
 interface TransformToEntityStrategyInterface
 {
-    public function transformToEntity(object $document): object;
+    public function transformToEntity(object $document): mixed;
 }

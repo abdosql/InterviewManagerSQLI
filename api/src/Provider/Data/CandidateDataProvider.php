@@ -30,7 +30,9 @@ readonly class CandidateDataProvider implements ProviderInterface
         } else {
             $criteria = $context['filters'] ?? [];
 
-            return !empty($criteria) ? $this->candidateProvider->getAllOrBy($criteria) : $this->candidateProvider->getAllOrBy();
+            return !empty($criteria)
+                ? $this->candidateProvider->getAllOrBy($criteria)
+                : $this->candidateProvider->getAllOrBy();
         }
     }
 }
