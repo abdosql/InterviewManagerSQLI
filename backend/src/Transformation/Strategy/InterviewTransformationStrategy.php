@@ -11,6 +11,7 @@ use App\Entity\Interview;
 use App\Transformation\TransformToDocumentStrategyInterface;
 use App\Transformation\TransformToEntityStrategyInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\MappingException;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag("app.transform_to_entity_strategy", ['type' => 'interview'])]
@@ -36,14 +37,16 @@ readonly class InterviewTransformationStrategy implements TransformToDocumentStr
         return $interviewDocument;
     }
 
+    /**
+     * @param object $document
+     * @return Interview
+     */
     public function transformToEntity(object $document): Interview
     {
-        $interview = new Interview();
+        if (!$document instanceof InterviewDocument){
+            throw new \InvalidArgumentException("Document must be an instance of InterviewDocument");
+        }
 
-        $interview
-            ->setInterviewDate($document->getInterviewDate())
-            ->setInterviewLocation($document->getInterviewLocation())
-        ;
-        return $interview;
+        return $this->entityManager->getRepository(Interview::class)->find($document->getEntityId());
     }
 }

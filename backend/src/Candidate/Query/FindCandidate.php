@@ -43,12 +43,7 @@ class FindCandidate extends AbstractQuery implements ItemQueryInterface
     {
         try {
             $url = $this->apiBaseUrl."api/candidates/{$id}";
-            $response = $this->httpClient->request('GET', $url, [
-                'timeout' => 10,
-                'max_redirects' => 0,
-                'verify_peer' => false,
-                'verify_host' => false,
-            ])->getContent();
+            $response = $this->httpClient->request('GET', $url)->getContent();
             $candidateDocument = $this->serializer->deserialize($response, CandidateDocument::class, 'json');
             return $this->transformationAdapter->transformToEntity($candidateDocument, 'candidate');
         } catch (HttpExceptionInterface $e) {

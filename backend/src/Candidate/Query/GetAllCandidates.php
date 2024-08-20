@@ -55,7 +55,7 @@ class GetAllCandidates extends AbstractQuery implements ItemsQueryInterface
                 'max_redirects' => 0,
                 'verify_peer' => false,
                 'verify_host' => false,
-            ], !empty($criteria) ? ['query' => $criteria] : [])
+            ], !empty($criteria) ? ['query' => $criteria]    : [])
         );
 
         if ($response->getStatusCode() !== 200) {

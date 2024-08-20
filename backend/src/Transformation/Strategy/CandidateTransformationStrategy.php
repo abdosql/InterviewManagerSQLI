@@ -5,10 +5,12 @@ namespace App\Transformation\Strategy;
 use App\Document\CandidateDocument;
 use App\Document\ResumeDocument;
 use App\Entity\Candidate;
+use App\Entity\Interview;
 use App\Entity\Resume;
 use App\Transformation\TransformToDocumentStrategyInterface;
 use App\Transformation\TransformToEntityStrategyInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\MappingException;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag("app.transform_to_entity_strategy", ['type' => 'candidate'])]
@@ -44,22 +46,16 @@ readonly class CandidateTransformationStrategy implements TransformToDocumentStr
         return $candidateDocument;
     }
 
+    /**
+     * @param object $document
+     * @return Candidate
+     */
     public function transformToEntity(object $document): Candidate
     {
-        $candidate = new Candidate();
-        $candidate
-            ->setFirstName($document->getFirstName())
-            ->setLastName($document->getLastName())
-            ->setPhone($document->getPhone())
-            ->setEmail($document->getEmail())
-            ->setAddress($document->getAddress())
-            ->setHireDate($document->getHireDate());
-        $resume = new Resume();
-        $resume
-            ->setCandidate($candidate)
-            ->setFilePath($document->getResume()->getFilePath());
-        $candidate->setResume($resume);
+        if (!$document instanceof CandidateDocument){
+            throw new \InvalidArgumentException("Document must be an instance of CandidateDocument");
+        }
 
-        return $candidate;
+        return $this->entityManager->getRepository(Candidate::class)->find($document->getEntityId());
     }
 }

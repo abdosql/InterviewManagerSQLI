@@ -35,6 +35,7 @@ class InterviewCrudController extends AbstractCrudController
         private readonly EntityManagerInterface $entityManager,
         private readonly CommandHandlerInterface $commandHandler,
         private readonly MessageBusInterface $messageBus,
+        private readonly InterviewService $interviewService,
         private readonly FindCandidate $findCandidate
      )
     {
