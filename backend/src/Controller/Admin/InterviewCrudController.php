@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Candidate\Query\FindCandidate;
+use App\Entity\User;
 use App\Interview\Command\DeleteInterviewCommand;
 use App\Interview\Command\Handler\CommandHandlerInterface;
 use App\Entity\Candidate;
@@ -11,6 +12,7 @@ use App\Entity\Interview;
 use App\Form\InterviewType;
 use App\Interview\Command\CreateInterviewCommand;
 use App\Services\Impl\InterviewService;
+use App\User\Query\FindUser;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -36,7 +38,8 @@ class InterviewCrudController extends AbstractCrudController
         private readonly CommandHandlerInterface $commandHandler,
         private readonly MessageBusInterface $messageBus,
         private readonly InterviewService $interviewService,
-        private readonly FindCandidate $findCandidate
+        private readonly FindCandidate $findCandidate,
+        private readonly FindUser $findUser,
      )
     {
     }
@@ -141,7 +144,7 @@ class InterviewCrudController extends AbstractCrudController
                     ], Response::HTTP_BAD_REQUEST);
                 }
                 foreach ($data['evaluators'] as $evaluator) {
-                    $evaluator = $this->entityManager->getRepository(Evaluator::class)->find($evaluator);
+                    $evaluator = $this->findUser->findItem($evaluator);
                     if (!$evaluator) {
                         return new JsonResponse([
                             'success' => false,

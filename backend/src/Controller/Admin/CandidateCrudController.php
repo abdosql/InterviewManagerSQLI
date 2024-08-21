@@ -85,13 +85,14 @@ class CandidateCrudController extends AbstractCrudController
                 'property' => $field->getAsDto()->getProperty(),
             ];
         }
-
+        $entityName = $crud->getEntityFqcn();
         $actions = $crud->getActionsConfig()->getActions();
 //        dd($actions, $entityName);
         return $this->render('@EasyAdmin/crud/index.html.twig', [
             'entities' => $entities,
             'fields' => $fieldMetadata,
             'actions' => $actions,
+            'entityName' => $entityName,
             'entityLabel' => $entityLabel,
         ]);
     }

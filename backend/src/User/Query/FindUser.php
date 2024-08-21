@@ -7,8 +7,8 @@
 namespace App\User\Query;
 
 use App\Adapter\DataTransformationAdapter;
-use App\Document\CandidateDocument;
-use App\Entity\Candidate;
+use App\Document\UserDocument;
+use App\Entity\User;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -41,13 +41,13 @@ class FindUser extends AbstractQuery implements ItemQueryInterface
      * @throws NotFoundExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function findItem(int $id): ?Candidate
+    public function findItem(int $id): ?User
     {
         try {
-            $url = $this->apiBaseUrl."api/candidates/{$id}";
+            $url = $this->apiBaseUrl."api/users/{$id}";
             $response = $this->httpClient->request('GET', $url)->getContent();
-            $candidateDocument = $this->serializer->deserialize($response, CandidateDocument::class, 'json');
-            return $this->transformationAdapter->transformToEntity($candidateDocument, 'candidate');
+            $candidateDocument = $this->serializer->deserialize($response, UserDocument::class, 'json');
+            return $this->transformationAdapter->transformToEntity($candidateDocument, 'user');
         } catch (HttpExceptionInterface $e) {
             if ($e->getResponse()->getStatusCode() === Response::HTTP_NOT_FOUND) {
 

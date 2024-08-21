@@ -16,10 +16,23 @@
     <script>
         $(document).ready(function() {
             $('#dataTable').DataTable({
-                // DataTables options
                 paging: true,
                 searching: true,
                 ordering: true
+            });
+
+            // Handle delete action
+            $('.action-delete').click(function(e) {
+                e.preventDefault();
+                const deleteUrl = $(this).attr('href');
+                $('#modal-delete').modal('show').data('delete-url', deleteUrl);
+            });
+
+            // Handle delete button in modal
+            $('#modal-delete-button').click(function(e) {
+                e.preventDefault();
+                const deleteUrl = $('#modal-delete').data('delete-url');
+                $('#delete-form').attr('action', deleteUrl).submit();
             });
         });
     </script>
@@ -27,10 +40,8 @@
 
 {% block content_title %}
     {%- apply spaceless -%}
-        {% set custom_page_title = ea.crud.customPageTitle('index', null, ea.i18n.translationParameters, ea.i18n.translationDomain) %}
-        {{ custom_page_title is null
-        ? ea.crud.defaultPageTitle('index', null, ea.i18n.translationParameters)|trans|raw
-        : custom_page_title|trans|raw }}
+        {% set custom_page_title = ea.crud.customPageTitle('index', null, ea.i18n.translationParameters) %}
+        {{ custom_page_title is null ? ea.crud.defaultPageTitle('index', null, ea.i18n.translationParameters)|trans|raw : custom_page_title|trans|raw }}
     {%- endapply -%}
 {% endblock %}
 
@@ -41,7 +52,6 @@
         </a>
     </div>
 {% endblock %}
-
 
 {% block main %}
     <table id="dataTable" class="table">
@@ -61,17 +71,26 @@
                 {% endfor %}
                 <td>
                     {% for action in actions %}
-                        {% set actionUrl = ea_url().setAction(action.name).setEntityId(entity.id) %}
-                        <a href="{{ actionUrl }}"
-                           class="btn btn-sm {{ action.cssClass }} {% if action.type == "batch" or action.type == "global" %}d-none{% endif %}"
-                           title="{{ action.label|trans }}"
-                        >
-                            {% if action.icon %}
-                                <i class="fa {{ action.icon }}"></i>
-                            {% else %}
-                                {{ action.label|trans }}
-                            {% endif %}
-                        </a>
+                        {% if action.name == 'delete' %}
+                            <a href="{{ ea_url().setAction('delete').setEntityId(entity.id) }}"
+                               class="btn btn-sm {{ action.cssClass }} action-delete"
+                               title="{{ action.label|trans }}">
+                                {% if action.icon %}
+                                    <i class="fa {{ action.icon }}"></i>
+                                {% else %}
+                                    {{ action.label|trans }}
+                                {% endif %}
+                            </a>
+                        {% else %}
+                            {% set actionUrl = ea_url().setAction(action.name).setEntityId(entity.id) %}
+                            <a href="{{ actionUrl }}" class="btn btn-sm {{ action.cssClass }} {% if action.type == "batch" or action.type == "global" %}d-none{% endif %}" title="{{ action.label|trans }}">
+                                {% if action.icon %}
+                                    <i class="fa {{ action.icon }}"></i>
+                                {% else %}
+                                    {{ action.label|trans }}
+                                {% endif %}
+                            </a>
+                        {% endif %}
                     {% endfor %}
                 </td>
             </tr>
@@ -82,4 +101,5 @@
         {% endfor %}
         </tbody>
     </table>
-{% endblock %}
+
+    {{ include('@EasyAdmin/crud/includes/_delete_form.html.twig', with_context = false) }}{% endblock %}

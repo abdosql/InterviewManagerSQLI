@@ -37,7 +37,7 @@ Abstract class UserCrudController extends AbstractCrudController
         private readonly AdminUrlGenerator $adminUrlGenerator,
     )
     {}
-    
+
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
