@@ -2,9 +2,35 @@
 
 namespace App\Document;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use App\Provider\Data\UserDataProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+
+#[ApiResource(
+    operations: [
+        new GetCollection(provider: UserDataProvider::class),
+        new Get(provider: UserDataProvider::class),
+        new GetCollection(
+            uriTemplate: '/users/by-type',
+            openapiContext: [
+                'parameters' => [
+                    [
+                        'name' => 'type',
+                        'in' => 'query',
+                        'required' => true,
+                        'type' => 'string',
+                        'description' => 'Filter users by type'
+                    ]
+                ]
+            ],
+            provider: UserDataProvider::class
+        )
+    ]
+)]
 
 #[MongoDB\Document(collection: "users")]
 #[MongoDB\InheritanceType("SINGLE_COLLECTION")]

@@ -4,11 +4,12 @@
  * @Linkedin https://www.linkedin.com/abdelaziz-saqqal
  */
 
-namespace App\Candidate\Query;
+namespace App\User\Query;
 
 use App\Adapter\DataTransformationAdapter;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -40,6 +41,7 @@ abstract class AbstractQuery
         return $this->httpClient->request('GET', $url, $options);
     }
 
+
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -53,12 +55,11 @@ abstract class AbstractQuery
         foreach ($data as $document) {
             $deserializedDocument = $this->serializer->deserialize(json_encode($document), $type, 'json');
 
-            $transformedDocument = $this->transformationAdapter->transformToEntity($deserializedDocument, 'candidate');
+            $transformedDocument = $this->transformationAdapter->transformToEntity($deserializedDocument, 'user');
 
             $documents[] = $transformedDocument;
         }
 
         return $documents;
     }
-
 }

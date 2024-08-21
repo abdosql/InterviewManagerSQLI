@@ -4,10 +4,10 @@
  * @Linkedin https://www.linkedin.com/abdelaziz-saqqal
  */
 
-namespace App\Candidate\Query;
+namespace App\User\Query;
 
 use App\Adapter\DataTransformationAdapter;
-use App\Document\CandidateDocument;
+use App\Document\UserDocument;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -18,15 +18,15 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class GetAllCandidates extends AbstractQuery implements ItemsQueryInterface
+class GetUsersByRole extends AbstractQuery implements ItemsQueryInterface
 {
     public function __construct
     (
-        protected HttpClientInterface $httpClient,
-        protected SerializerInterface $serializer,
+        protected HttpClientInterface       $httpClient,
+        protected SerializerInterface       $serializer,
         protected DataTransformationAdapter $transformationAdapter,
         #[Autowire('%apiBaseUrl%')]
-        private readonly string $apiBaseUrl,
+        private readonly string             $apiBaseUrl,
     )
     {
         parent::__construct($httpClient, $serializer, $transformationAdapter);
@@ -36,25 +36,23 @@ class GetAllCandidates extends AbstractQuery implements ItemsQueryInterface
      * @param array $criteria
      * @return array
      * @throws ClientExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      * @throws \Exception
      */
     public function findItems(array $criteria = []): array
     {
-        $url = $this->apiBaseUrl . 'api/candidates';
+        $url = $this->apiBaseUrl . 'api/users/by-type';
 
         $response = $this->makeRequest($url, $criteria);
 
         if ($response->getStatusCode() !== 200) {
-            throw new \Exception('Failed to fetch candidates: ' . $response->getContent(false));
+            throw new \Exception('Failed to fetch users: ' . $response->getContent(false));
         }
 
-        return $this->deserializeArray($response->getContent(), CandidateDocument::class);
-
+        return $this->deserializeArray($response->getContent(), UserDocument::class);
     }
-
 }

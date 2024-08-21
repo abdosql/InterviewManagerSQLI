@@ -9,11 +9,17 @@ use App\User\Command\UpdateUserCommand;
 use App\Entity\User;
 use App\Manager\UserCredentialManager;
 use App\Services\Impl\UserService;
+use App\User\Query\FindUser;
+use App\User\Query\GetUsersByRole;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -21,16 +27,19 @@ use Symfony\Component\Messenger\MessageBusInterface;
 Abstract class UserCrudController extends AbstractCrudController
 {
     public function __construct(
-        private UserService $userService,
-        private UserCredentialManager $credentialManager,
-        private DefaultCommandHandler $commandHandler,
-        private MessageBusInterface $messageBus,
+        private UserService                $userService,
+        private UserCredentialManager      $credentialManager,
+        private DefaultCommandHandler      $commandHandler,
+        private MessageBusInterface        $messageBus,
+        private readonly FindUser          $findUsereQuery,
+        protected readonly GetUsersByRole  $getUsersByRole,
+        private readonly AdminUrlGenerator $adminUrlGenerator,
     )
     {}
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield FormField::addPanel('Personal information');
+        yield FormField::addPanel('Personal information')->hideOnIndex();
         yield TextField::new("fullName", "Full Name")->hideOnForm();
         yield TextField::new('firstName', "First name")
             ->onlyOnForms(true)
@@ -38,7 +47,7 @@ Abstract class UserCrudController extends AbstractCrudController
         yield TextField::new('lastName', "Last name")
             ->onlyOnForms(true)
         ;
-        yield FormField::addPanel('Contact Information');
+        yield FormField::addPanel('Contact Information')->hideOnIndex();
         yield TextField::new('phone', "Phone Number");
         yield TextField::new('email', "Email");
     }
@@ -59,7 +68,20 @@ Abstract class UserCrudController extends AbstractCrudController
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }
     }
+    public function configureActions(Actions $actions): Actions
+    {
+        $actions
+            ->update(Crud::PAGE_INDEX, Action::EDIT, function (Action $action) {
+                return $action
+                    ->setIcon('fa fa-edit');
+            })
+            ->update(Crud::PAGE_INDEX, Action::DELETE, function (Action $action) {
+                return $action
+                    ->setIcon('fa fa-trash');
+            });
 
+        return $actions;
+    }
     /**
      * @param User $user
      */
@@ -76,7 +98,6 @@ Abstract class UserCrudController extends AbstractCrudController
     /**
      * @param EntityManagerInterface $entityManager
      * @param $entityInstance
-     * @throws ExceptionInterface
      */
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
@@ -86,7 +107,6 @@ Abstract class UserCrudController extends AbstractCrudController
     /**
      * @param EntityManagerInterface $entityManager
      * @param $entityInstance
-     * @throws ExceptionInterface
      */
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
@@ -94,7 +114,8 @@ Abstract class UserCrudController extends AbstractCrudController
     }
 
     /**
-     * @throws ExceptionInterface
+     * @param EntityManagerInterface $entityManager
+     * @param $entityInstance
      */
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {

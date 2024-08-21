@@ -8,33 +8,38 @@ namespace App\Provider\Data;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use App\Document\Candidate;
-use App\Provider\CandidateProvider;
-use App\Provider\ProviderInterface as CandidateProviderInterface;
+use App\Document\User;
+use App\Provider\ProviderInterface as UserProviderInterface;
+use App\Provider\UserProvider;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-readonly class CandidateDataProvider implements ProviderInterface
+readonly class UserDataProvider implements ProviderInterface
 {
     public function __construct(
-        #[Autowire(service: CandidateProvider::class)]
-        private CandidateProviderInterface $candidateProvider
+        #[Autowire(service: UserProvider::class)]
+        private UserProviderInterface $userProvider
     )
     {
-    }
 
+    }
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         $resourceClass = $operation->getClass();
-        if ($resourceClass !== Candidate::class) {
+        if ($resourceClass !== User::class) {
             throw new \RuntimeException(\sprintf('Unsupported resource class: %s', $resourceClass));
         }
-        if (isset($uriVariables['id'])) {
-            return $this->candidateProvider->getByEntityId((int)$uriVariables['id']);
+        if (isset($uriVariables['id']) && is_int($uriVariables['id'])) {
+            return $this->userProvider->getByEntityId($uriVariables['id']);
         } else {
             $criteria = $context['filters'] ?? [];
+
+            if (isset($context['filters']['roles'])) {
+                $criteria['roles'] = $context['filters']['roles'];
+            }
+
             return !empty($criteria)
-                ? $this->candidateProvider->getAllOrBy($criteria)
-                : $this->candidateProvider->getAllOrBy();
+                ? $this->userProvider->getAllOrBy($criteria)
+                : $this->userProvider->getAllOrBy();
         }
     }
 }

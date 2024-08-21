@@ -8,16 +8,16 @@ namespace App\Provider\Data;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use App\Document\Candidate;
-use App\Provider\CandidateProvider;
-use App\Provider\ProviderInterface as CandidateProviderInterface;
+use App\Document\Interview;
+use App\Provider\InterviewProvider;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use App\Provider\ProviderInterface as InterviewProviderInterface;
 
-readonly class CandidateDataProvider implements ProviderInterface
+readonly class InterviewDataProvider implements ProviderInterface
 {
     public function __construct(
-        #[Autowire(service: CandidateProvider::class)]
-        private CandidateProviderInterface $candidateProvider
+        #[Autowire(service: InterviewProvider::class)]
+        private InterviewProviderInterface $interviewProvider
     )
     {
     }
@@ -25,16 +25,18 @@ readonly class CandidateDataProvider implements ProviderInterface
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         $resourceClass = $operation->getClass();
-        if ($resourceClass !== Candidate::class) {
+        if ($resourceClass !== Interview::class) {
             throw new \RuntimeException(\sprintf('Unsupported resource class: %s', $resourceClass));
         }
+
         if (isset($uriVariables['id'])) {
-            return $this->candidateProvider->getByEntityId((int)$uriVariables['id']);
+            return $this->interviewProvider->getByEntityId((int)$uriVariables['id']);
         } else {
             $criteria = $context['filters'] ?? [];
+
             return !empty($criteria)
-                ? $this->candidateProvider->getAllOrBy($criteria)
-                : $this->candidateProvider->getAllOrBy();
+                ? $this->interviewProvider->getAllOrBy($criteria)
+                : $this->interviewProvider->getAllOrBy();
         }
     }
 }

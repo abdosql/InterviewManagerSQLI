@@ -4,55 +4,57 @@
  * @Linkedin https://www.linkedin.com/abdelaziz-saqqal
  */
 
-namespace App\Candidate\Query;
+namespace App\User\Query;
 
 use App\Adapter\DataTransformationAdapter;
 use App\Document\CandidateDocument;
-use App\Entity\Candidate;
+use App\Document\UserDocument;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class FindCandidate extends AbstractQuery implements ItemQueryInterface
+class GetAllUsers extends AbstractQuery implements ItemsQueryInterface
 {
-    public function __construct(
+    public function __construct
+    (
         protected HttpClientInterface $httpClient,
         protected SerializerInterface $serializer,
         protected DataTransformationAdapter $transformationAdapter,
         #[Autowire('%apiBaseUrl%')]
         private readonly string $apiBaseUrl,
-    ) {
+    )
+    {
         parent::__construct($httpClient, $serializer, $transformationAdapter);
     }
 
     /**
-     * @param int $id
-     *
-     * @return object|null
-     *
+     * @param array $criteria
+     * @return array
+     * @throws ClientExceptionInterface
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws \Exception
      */
-    public function findItem(int $id): ?Candidate
+    public function findItems(array $criteria = []): array
     {
-        try {
-            $url = $this->apiBaseUrl."api/candidates/{$id}";
-            $response = $this->httpClient->request('GET', $url)->getContent();
-            $candidateDocument = $this->serializer->deserialize($response, CandidateDocument::class, 'json');
-            return $this->transformationAdapter->transformToEntity($candidateDocument, 'candidate');
-        } catch (HttpExceptionInterface $e) {
-            if ($e->getResponse()->getStatusCode() === Response::HTTP_NOT_FOUND) {
+        $url = $this->apiBaseUrl . 'api/users';
 
-                return null;
-            }
+        $response = $this->makeRequest($url, $criteria);
 
-            throw $e->getResponse();
+        if ($response->getStatusCode() !== 200) {
+            throw new \Exception('Failed to fetch users: ' . $response->getContent(false));
         }
+
+        return $this->deserializeArray($response->getContent(), UserDocument::class);
     }
+
 }

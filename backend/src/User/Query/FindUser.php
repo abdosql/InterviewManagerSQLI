@@ -4,7 +4,7 @@
  * @Linkedin https://www.linkedin.com/abdelaziz-saqqal
  */
 
-namespace App\Candidate\Query;
+namespace App\User\Query;
 
 use App\Adapter\DataTransformationAdapter;
 use App\Document\CandidateDocument;
@@ -18,15 +18,17 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class FindCandidate extends AbstractQuery implements ItemQueryInterface
+class FindUser extends AbstractQuery implements ItemQueryInterface
 {
-    public function __construct(
+    public function __construct
+    (
         protected HttpClientInterface $httpClient,
         protected SerializerInterface $serializer,
         protected DataTransformationAdapter $transformationAdapter,
         #[Autowire('%apiBaseUrl%')]
         private readonly string $apiBaseUrl,
-    ) {
+    )
+    {
         parent::__construct($httpClient, $serializer, $transformationAdapter);
     }
 
