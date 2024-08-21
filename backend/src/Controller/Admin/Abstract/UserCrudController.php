@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
@@ -36,6 +37,7 @@ Abstract class UserCrudController extends AbstractCrudController
         private readonly AdminUrlGenerator $adminUrlGenerator,
     )
     {}
+    
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
