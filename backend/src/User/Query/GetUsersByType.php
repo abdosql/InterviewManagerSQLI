@@ -18,7 +18,7 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class GetUsersByRole extends AbstractQuery implements ItemsQueryInterface
+class GetUsersByType extends AbstractQuery implements ItemsQueryInterface
 {
     public function __construct
     (

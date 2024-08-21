@@ -7,7 +7,7 @@ use App\Entity\Evaluator;
 use App\Manager\UserCredentialManager;
 use App\Services\Impl\UserService;
 use App\User\Query\FindUser;
-use App\User\Query\GetUsersByRole;
+use App\User\Query\GetUsersByType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -23,10 +23,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class EvaluatorCrudController extends UserCrudController
 {
-    public function __construct(UserService $userService, UserCredentialManager $credentialManager, DefaultCommandHandler $commandHandler, MessageBusInterface $messageBus, FindUser $findUsereQuery, GetUsersByRole $getUsersByRole, AdminUrlGenerator $adminUrlGenerator)
-    {
-        parent::__construct($userService, $credentialManager, $commandHandler, $messageBus, $findUsereQuery, $getUsersByRole, $adminUrlGenerator);
-    }
+
 
     public static function getEntityFqcn(): string
     {
@@ -44,7 +41,7 @@ class EvaluatorCrudController extends UserCrudController
     public function index(AdminContext $context): Response
     {
         $crud = $context->getCrud();
-        $entities = $this->getUsersByRole->findItems(["dType" => "evaluator"]);
+        $entities = $this->getUsersByType->findItems(["dType" => "evaluator"]);
         $fields = $this->configureFields(Crud::PAGE_INDEX);
         $fieldMetadata = [];
         $entityLabel = $crud->getEntityLabelInSingular();

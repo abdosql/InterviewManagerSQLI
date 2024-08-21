@@ -9,9 +9,10 @@ use App\Entity\Evaluator;
 use App\Entity\HRManager;
 use App\Entity\User;
 use App\Transformation\TransformToDocumentStrategyInterface;
+use App\Transformation\TransformToEntityStrategyInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-abstract class AbstractUserTransformationStrategy implements TransformToDocumentStrategyInterface
+abstract class AbstractUserTransformationStrategy implements TransformToDocumentStrategyInterface, TransformToEntityStrategyInterface
 {
     public function __construct(private readonly EntityManagerInterface $entityManager)
     {

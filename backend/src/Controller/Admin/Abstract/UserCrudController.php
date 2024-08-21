@@ -10,7 +10,7 @@ use App\Entity\User;
 use App\Manager\UserCredentialManager;
 use App\Services\Impl\UserService;
 use App\User\Query\FindUser;
-use App\User\Query\GetUsersByRole;
+use App\User\Query\GetUsersByType;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -32,7 +32,7 @@ Abstract class UserCrudController extends AbstractCrudController
         private DefaultCommandHandler      $commandHandler,
         private MessageBusInterface        $messageBus,
         private readonly FindUser          $findUsereQuery,
-        protected readonly GetUsersByRole  $getUsersByRole,
+        protected readonly GetUsersByType  $getUsersByType,
         private readonly AdminUrlGenerator $adminUrlGenerator,
     )
     {}
