@@ -139,12 +139,28 @@ services:
         command: server /data --console-address ":9001"
         networks:
             - inner_net
+    mercury:
+        image: dunglas/mercure
+        container_name: "mercury_server"
+        environment:
+            - MERCURE_PUBLISHER_JWT_KEY=!ChangeThisMercureHubJWTSecretKey!
+            - MERCURE_SUBSCRIBER_JWT_KEY=!ChangeThisMercureHubJWTSecretKey!
+            - MERCURE_EXTRA_DIRECTIVES=cors_origins *
+            - SERVER_NAME=:80
+        ports:
+            - "3000:80"
+        command: /usr/bin/caddy run --config /etc/caddy/Caddyfile
+        volumes:
+            - ./docker/mercure/Caddyfile.dev:/etc/caddy/Caddyfile.dev
+            - mercure_data:/data
+        networks:
+            - inner_net
 
 volumes:
     mysql_admin_data:
     mongodb_data:
     mysql_data:
     minio-data:
-
+    mercure_data:
 networks:
     inner_net:

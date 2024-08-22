@@ -1,0 +1,20 @@
+{
+  auto_https off
+}
+
+:80
+
+log
+
+route {
+  mercure {
+    publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY}
+    subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY}
+    cors_origins *
+    publish_origins *
+    demo
+    anonymous
+    subscriptions
+  }
+  respond "Not Found" 404
+}
