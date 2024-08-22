@@ -34,4 +34,11 @@ readonly class UserProvider extends AbstractProvider implements ProviderInterfac
             ;
 
     }
+
+    public function getAllByIds(array $ids): array
+    {
+        return $this->documentManager
+            ->getRepository(User::class)
+            ->findBy(['entityId' => ['$in' => $ids]]);
+    }
 }

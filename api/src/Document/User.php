@@ -15,15 +15,33 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
         new GetCollection(provider: UserDataProvider::class),
         new Get(provider: UserDataProvider::class),
         new GetCollection(
-            uriTemplate: '/users/by-type',
+            uriTemplate: '/users',
             openapiContext: [
                 'parameters' => [
                     [
-                        'name' => 'type',
+                        'name' => 'dType',
                         'in' => 'query',
                         'required' => true,
-                        'type' => 'string',
+                        'type' => 'array',
                         'description' => 'Filter users by type'
+                    ]
+                ]
+            ],
+            provider: UserDataProvider::class
+        ),
+        new GetCollection(
+            uriTemplate: '/users/by-ids',
+            openapiContext: [
+                'parameters' => [
+                    [
+                        'name' => 'ids',
+                        'in' => 'query',
+                        'required' => true,
+                        'type' => 'array',
+                        'items' => [
+                            'type' => 'string'
+                        ],
+                        'description' => 'Array of user IDs to retrieve'
                     ]
                 ]
             ],

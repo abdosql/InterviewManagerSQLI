@@ -3,7 +3,6 @@
 namespace App\Controller\Admin;
 
 use App\Candidate\Query\FindCandidate;
-use App\Entity\User;
 use App\Interview\Command\DeleteInterviewCommand;
 use App\Interview\Command\Handler\CommandHandlerInterface;
 use App\Entity\Candidate;
@@ -13,6 +12,7 @@ use App\Form\InterviewType;
 use App\Interview\Command\CreateInterviewCommand;
 use App\Services\Impl\InterviewService;
 use App\User\Query\FindUser;
+use App\User\Query\GetUsersByIds;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -29,6 +29,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class InterviewCrudController extends AbstractCrudController
@@ -40,6 +43,7 @@ class InterviewCrudController extends AbstractCrudController
         private readonly InterviewService $interviewService,
         private readonly FindCandidate $findCandidate,
         private readonly FindUser $findUser,
+        private readonly GetUsersByIds $getUsersByIds,
      )
     {
     }
@@ -109,9 +113,14 @@ class InterviewCrudController extends AbstractCrudController
     //The Get Method Is temporarily don't panic a chef (:
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws ContainerExceptionInterface
-     * @throws TransportExceptionInterface
      * @throws NotFoundExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
      */
     #[Route('/api/interviews', name: 'api_create_interview', methods: ["post", "get"])]
     public function createInterview(Request $request): JsonResponse
@@ -119,12 +128,12 @@ class InterviewCrudController extends AbstractCrudController
         if ($request->isMethod('POST')){
             $data = json_decode($request->getContent(), true);
 
-            if (!$this->isCsrfTokenValid('interview', $data['token'] ?? '')) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Invalid CSRF token'],
-                    Response::HTTP_BAD_REQUEST);
-            }
+//            if (!$this->isCsrfTokenValid('interview', $data['token'] ?? '')) {
+//                return new JsonResponse([
+//                    'success' => false,
+//                    'message' => 'Invalid CSRF token'],
+//                    Response::HTTP_BAD_REQUEST);
+//            }
 
             if (empty($data['date']) || empty($data['location']) || empty($data['candidate']) || empty($data['evaluators'])) {
                 return new JsonResponse([
@@ -143,17 +152,18 @@ class InterviewCrudController extends AbstractCrudController
                         'message' => 'Invalid candidate',
                     ], Response::HTTP_BAD_REQUEST);
                 }
-                foreach ($data['evaluators'] as $evaluator) {
-                    $evaluator = $this->findUser->findItem($evaluator);
-                    if (!$evaluator) {
-                        return new JsonResponse([
-                            'success' => false,
-                            'message' => 'Invalid candidate or evaluator',
-                        ], Response::HTTP_BAD_REQUEST);
-                    }
-                    $interview->addEvaluator($evaluator);
-
+                $evaluators = $this->getUsersByIds->findItems(["ids" => $data['evaluators']]);
+                if (!$evaluators) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'message' => 'Invalid candidate or evaluator',
+                    ], Response::HTTP_BAD_REQUEST);
                 }
+                foreach ($evaluators as $evaluator) {
+                    $interview->addEvaluator($evaluator);
+                }
+
+
 
 
                 $interviewDate = \DateTime::createFromFormat('Y-m-d\TH:i', $data['date']);

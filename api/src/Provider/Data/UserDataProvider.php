@@ -32,10 +32,17 @@ readonly class UserDataProvider implements ProviderInterface
             return $this->userProvider->getByEntityId($uriVariables['id']);
         } else {
             $criteria = $context['filters'] ?? [];
-
             if (isset($context['filters']['roles'])) {
                 $criteria['roles'] = $context['filters']['roles'];
             }
+            if (isset($criteria['ids'])) {
+                $ids = $context['filters']['ids'];
+                if (is_string($ids)) {
+                    $ids = explode(',', $ids);
+                } elseif (!is_array($ids)) {
+                    throw new \InvalidArgumentException('The "ids" parameter must be an array or a comma-separated string.');
+                }
+                return $this->userProvider->getAllByIds($ids);            }
 
             return !empty($criteria)
                 ? $this->userProvider->getAllOrBy($criteria)
