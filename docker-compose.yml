@@ -139,28 +139,36 @@ services:
         command: server /data --console-address ":9001"
         networks:
             - inner_net
-    mercury:
+
+    mercure:
         image: dunglas/mercure
-        container_name: "mercury_server"
         environment:
-            - MERCURE_PUBLISHER_JWT_KEY=!ChangeThisMercureHubJWTSecretKey!
-            - MERCURE_SUBSCRIBER_JWT_KEY=!ChangeThisMercureHubJWTSecretKey!
-            - MERCURE_EXTRA_DIRECTIVES=cors_origins *
-            - SERVER_NAME=:80
+            DEBUG: "debug"
+            SERVER_NAME: ':80'
+            # Uncomment and set this if you have a specific transport URL
+            # MERCURE_TRANSPORT_URL: "bolt://mercure.db"
+            MERCURE_PUBLISHER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+            MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+            # Configure CORS settings
+            MERCURE_EXTRA_DIRECTIVES: |-
+                cors_origins "http://localhost:9595"
+                cors_allow_credentials true
+                anonymous
         ports:
             - "3000:80"
-        command: /usr/bin/caddy run --config /etc/caddy/Caddyfile
-        volumes:
-            - ./docker/mercure/Caddyfile.dev:/etc/caddy/Caddyfile.dev
-            - mercure_data:/data
         networks:
             - inner_net
+        restart: unless-stopped
+
+
 
 volumes:
     mysql_admin_data:
     mongodb_data:
     mysql_data:
     minio-data:
-    mercure_data:
+#    mercure_data:
+    caddy_data:
+    caddy_config:
 networks:
     inner_net:

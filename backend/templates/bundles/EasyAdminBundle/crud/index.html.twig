@@ -95,11 +95,17 @@
                 </td>
             </tr>
         {% else %}
-            <tr>
-                <td colspan="{{ fields|length + 1 }}">{{ 'No results found'|trans }}</td>
-            </tr>
+            {% if entities is empty %}
+                <tr>
+                    {% for field in fields %}
+                        <td></td>
+                    {% endfor %}
+                    <td>{{ 'No results found'|trans }}</td>
+                </tr>
+            {% endif %}
         {% endfor %}
         </tbody>
     </table>
 
-    {{ include('@EasyAdmin/crud/includes/_delete_form.html.twig', with_context = false) }}{% endblock %}
+    {{ include('@EasyAdmin/crud/includes/_delete_form.html.twig', with_context = false) }}
+{% endblock %}

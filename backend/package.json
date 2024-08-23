@@ -12,6 +12,7 @@
     "@fullcalendar/daygrid": "^6.0.0",
     "@fullcalendar/interaction": "^6.0.0",
     "@fullcalendar/timegrid": "^6.1.15",
+    "@hotwired/turbo": "^8.0.5",
     "@symfony/webpack-encore": "^1.0.0",
     "bootstrap": "^5.3.3",
     "chosen-js": "^1.8.7",

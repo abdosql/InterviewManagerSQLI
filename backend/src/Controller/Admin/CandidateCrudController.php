@@ -16,6 +16,7 @@ use App\EasyAdmin\Fields\ResumeUploadField;
 use App\Entity\Candidate;
 use App\File\FileUploaderInterface;
 use App\File\Uploader\MinioUploader;
+use App\Notification\MercurePublisher;
 use App\Services\Impl\CandidateService;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -52,6 +53,7 @@ class CandidateCrudController extends AbstractCrudController
         private readonly FindCandidate           $findCandidateQuery,
         private readonly GetAllCandidates        $allCandidates,
         private readonly AdminUrlGenerator       $adminUrlGenerator,
+        private readonly MercurePublisher  $mercurePublisher,
     )
     {}
 
@@ -182,6 +184,7 @@ class CandidateCrudController extends AbstractCrudController
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $this->createOrUpdateCandidate($entityInstance);
+        $this->mercurePublisher->publish(["message" => "You Have a new interview"], $this->getUser());
     }
 
     /**

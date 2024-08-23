@@ -10,6 +10,7 @@ use App\Entity\Evaluator;
 use App\Entity\Interview;
 use App\Form\InterviewType;
 use App\Interview\Command\CreateInterviewCommand;
+use App\Notification\MercurePublisher;
 use App\Services\Impl\InterviewService;
 use App\User\Query\FindUser;
 use App\User\Query\GetUsersByIds;
@@ -44,7 +45,8 @@ class InterviewCrudController extends AbstractCrudController
         private readonly FindCandidate $findCandidate,
         private readonly FindUser $findUser,
         private readonly GetUsersByIds $getUsersByIds,
-     )
+        private readonly MercurePublisher  $mercurePublisher,
+    )
     {
     }
 
@@ -161,6 +163,7 @@ class InterviewCrudController extends AbstractCrudController
                 }
                 foreach ($evaluators as $evaluator) {
                     $interview->addEvaluator($evaluator);
+                    $this->mercurePublisher->publish(["message" => "You Have a new interview"], $evaluator);
                 }
 
 
@@ -177,7 +180,6 @@ class InterviewCrudController extends AbstractCrudController
                     ->setCandidate($candidate)
                     ->setHrManager($this->getUser());
                 ;
-
                 $command = new CreateInterviewCommand($interview, $this->interviewService, $this->messageBus);
                 $this->commandHandler->handle($command);
 

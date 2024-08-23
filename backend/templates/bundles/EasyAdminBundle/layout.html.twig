@@ -1,0 +1,34 @@
+{% extends '@!EasyAdmin/layout.html.twig' %}
+
+{% block head_javascript %}
+    {{ parent() }}
+    <script src="{{ asset('build/app.js') }}"></script>
+    <script>
+        const eventSource = new EventSource("{{ mercure('test', { subscribe: 'test' })|escape('js') }}", {
+            withCredentials: true
+        });
+
+        eventSource.onmessage = event => {
+            alert('Hello');
+            console.log(JSON.parse(event.data));
+        }
+    </script>
+{% endblock %}
+
+{% block header_navbar %}
+    {{ parent() }}
+
+        <div class="dropdown notifications-menu-wrapper">
+            <a class="notifications-toggle" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
+                <i class="fas fa-bell"></i>
+                <span id="notification-counter-main" class="badge bg-danger">0</span>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end" id="notification-list-main">
+                <li class="dropdown-header">Notifications</li>
+                {# Notifications will be inserted here dynamically #}
+            </ul>
+        </div>
+
+
+{% endblock %}

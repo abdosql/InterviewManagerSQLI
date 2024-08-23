@@ -1,0 +1,16 @@
+:80 {
+    log {
+        format json
+    }
+    encode gzip
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+    mercure {
+        transport_url {$MERCURE_TRANSPORT_URL:bolt://mercure.db}
+        publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY}
+        subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY}
+    }
+}
