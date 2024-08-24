@@ -1,34 +1,249 @@
 {% extends '@!EasyAdmin/layout.html.twig' %}
+{% block configured_stylesheets %}
+    {{ parent() }}
+    <style>
+        .dropdown-menu-scrollable {
+            max-height: 300px; /* Increased height for more content */
+            overflow-x: auto;
+            width: 350px; /* Match the width we set earlier */
+        }
 
+        /* Custom scrollbar styles */
+        .dropdown-menu-scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .dropdown-menu-scrollable::-webkit-scrollbar-thumb {
+            background-color: #6c757d; /* Color of the scrollbar thumb */
+            border-radius: 4px; /* Rounded corners */
+        }
+
+        .dropdown-menu-scrollable::-webkit-scrollbar-thumb:hover {
+            background-color: #495057; /* Darker color on hover */
+        }
+
+        .dropdown-menu-scrollable::-webkit-scrollbar-track {
+            background-color: #e9ecef; /* Background color of the scrollbar track */
+        }
+
+        /* Additional styles for notification items */
+        .dropdown-item {
+            white-space: normal; /* Allow text to wrap */
+            padding: 0.5rem 1rem;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            color: #6c757d;
+        }
+
+        .notification-content {
+            margin-left: 1rem;
+        }
+
+        .notification-title {
+            font-weight: bold;
+        }
+
+        .notification-message, .notification-time {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .di{
+            height: 5rem !important;
+
+        }
+        .notif{
+            padding: 0 17px
+        }
+    </style>
+{% endblock %}
 {% block head_javascript %}
     {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="{{ asset('build/app.js') }}"></script>
     <script>
-        const eventSource = new EventSource("{{ mercure('test', { subscribe: 'test' })|escape('js') }}", {
-            withCredentials: true
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            const notificationList = notificationDropdown.nextElementSibling;
+            const notificationCounter = notificationDropdown.querySelector('.badge');
 
-        eventSource.onmessage = event => {
-            alert('Hello');
-            console.log(JSON.parse(event.data));
-        }
+            const eventSource = new EventSource("{{ mercure('user_' ~ app.user.getId() , { subscribe: 'user_' ~ app.user.getId() })|escape('js') }}", {
+                withCredentials: true
+            });
+
+            eventSource.onmessage = event => {
+                const data = JSON.parse(event.data);
+
+                const newNotification = document.createElement('li');
+                newNotification.innerHTML = `
+            <a class="dropdown-item d-flex align-items-center di" href="${data.url || '#'}">
+                <div class="flex-shrink-0 me-3">
+                    <i class="bi bi-bell-fill fs-4"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-bold">${data.title || 'New Notification'}</div>
+                    <div class="small text-muted">${data.message || 'You have a new notification'}</div>
+                    <div class="small text-muted">Just now</div>
+                </div>
+                <div class="flex-shrink-0 ms-2">
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+            </a>
+        `;
+
+                // Insert the new notification after the first li element (which is the header)
+                notificationList.insertBefore(newNotification, notificationList.children[1]);
+
+                // Add a divider after the new notification
+                const divider = document.createElement('li');
+                divider.innerHTML = '<hr class="dropdown-divider">';
+                notificationList.insertBefore(divider, newNotification.nextSibling);
+
+                // Update notification counter
+                let currentCount = parseInt(notificationCounter.textContent, 10);
+                notificationCounter.textContent = currentCount + 1;
+
+                // Remove the oldest notification if there are more than 5 (excluding header and "View all" items)
+                const notificationItems = notificationList.querySelectorAll('li:not(:first-child):not(:last-child)');
+                if (notificationItems.length > 10) { // 5 notifications * 2 (notification + divider)
+                    notificationList.removeChild(notificationItems[notificationItems.length - 1]); // Remove oldest notification
+                    notificationList.removeChild(notificationItems[notificationItems.length - 2]); // Remove its divider
+                }
+            };
+
+            eventSource.onerror = error => {
+                console.error('Error:', error);
+            };
+        });
     </script>
 {% endblock %}
 
-{% block header_navbar %}
-    {{ parent() }}
-
-        <div class="dropdown notifications-menu-wrapper">
-            <a class="notifications-toggle" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
-                <i class="fas fa-bell"></i>
-                <span id="notification-counter-main" class="badge bg-danger">0</span>
-            </a>
-
-            <ul class="dropdown-menu dropdown-menu-end" id="notification-list-main">
-                <li class="dropdown-header">Notifications</li>
-                {# Notifications will be inserted here dynamically #}
-            </ul>
+{% block content_top_header %}
+    {% block search_wrapper %}
+        <div class="content-search">
+            {% if has_search %}
+                {% block search %}
+                    <form class="form-action-search" method="get">
+                        {% block search_form %}
+                            {% block search_form_filters %}
+                                {% for field, fieldValue in ea.search.appliedFilters %}
+                                    {% if fieldValue is iterable %}
+                                        {% for key, value in fieldValue %}
+                                            {% if value is iterable %}
+                                                {% for index, iterValue in value %}
+                                                    {% if iterValue is iterable %}
+                                                        {% for subIndex, subIterValue in iterValue %}
+                                                            <input type="hidden" name="filters[{{ field }}][{{ key }}][{{ index }}][{{ subIndex }}]" value="{{ subIterValue }}">
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <input type="hidden" name="filters[{{ field }}][{{ key }}][{{ index }}]" value="{{ iterValue }}">
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                <input type="hidden" name="filters[{{ field }}][{{ key }}]" value="{{ value }}">
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <input type="hidden" name="filters[{{ field }}]" value="{{ fieldValue }}">
+                                    {% endif %}
+                                {% endfor %}
+                            {% endblock %}
+                            <input type="hidden" name="crudAction" value="index">
+                            <input type="hidden" name="crudControllerFqcn" value="{{ ea.request.query.get('crudControllerFqcn') }}">
+                            <input type="hidden" name="page" value="1">
+                            <div class="form-group">
+                                <div class="form-widget">
+                                    <i class="fas fa-search content-search-icon"></i>
+                                    <label class="content-search-label" data-value="{{ app.request.get('query') }}">
+                                        <input class="form-control {{ app.request.get('query') is null ? 'is-blank' }}" type="search" name="query" value="{{ app.request.get('query') ?? '' }}" placeholder="{{ t('action.search', ea.i18n.translationParameters, 'EasyAdminBundle')|trans }}" spellcheck="false" autocorrect="off" onInput="this.parentNode.dataset.value=this.value"{% if ea.crud.currentAction == 'index' and ea.crud.autofocusSearch == true %} autofocus="autofocus"{% endif %}>
+                                    </label>
+                                    {% if app.request.get('query') %}
+                                        <a href="{{ ea_url().unset('query') }}" class="content-search-reset">
+                                            <i class="fas fa-fw fa-times"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endblock %}
+                    </form>
+                {% endblock search %}
+            {% endif %}
         </div>
+    {% endblock search_wrapper %}
 
 
-{% endblock %}
+
+    <!-- Notification Dropdown -->
+    <div class="dropdown notif">
+        <a class="position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            0 <!-- Notifications Counter -->
+            <span class="visually-hidden">unread messages</span>
+        </span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-scrollable" aria-labelledby="notificationDropdown">
+            <li><h6 class="dropdown-header">Notifications</h6></li>
+            <li>
+                <a class="dropdown-item d-flex align-items-center di" href="https://example.com">
+                    <div class="notification-icon">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">New message received</div>
+                        <div class="notification-message">You have a new message from John Doe.</div>
+                        <div class="notification-time">2 minutes ago</div>
+                    </div>
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item d-flex align-items-center di" href="https://example.com">
+                    <div class="notification-icon">
+                        <i class="bi bi-envelope-fill"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">Subscription renewed</div>
+                        <div class="notification-message">Your subscription has been successfully renewed.</div>
+                        <div class="notification-time">1 hour ago</div>
+                    </div>
+                </a>
+            </li>
+            <!-- Add more notification items here -->
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-center" href="#">View all notifications</a></li>
+        </ul>
+    </div>
+{#    <div class="dropdown notifications-menu-wrapper">#}
+{#        <a class="notifications-toggle" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">#}
+{#            <i class="fas fa-bell"></i>#}
+{#            <span id="notification-counter-main" class="badge bg-danger">0</span>#}
+{#        </a>#}
+{#        <ul class="dropdown-menu dropdown-menu-end" id="notification-list-main">#}
+{#            <li class="dropdown-header">Notifications</li>#}
+{#            #}{# Notifications will be inserted here dynamically #}
+{#        </ul>#}
+{#    </div>#}
+    {% block header_custom_menu_wrapper %}
+        <div class="navbar-custom-menu">
+            {% block header_custom_menu %}
+                <div class="dropdown user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
+                    <a class="user-details" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
+                        {{ user_menu_avatar }}
+                        {% if ea.userMenu.isNameDisplayed %}
+                            <span class="user-name">{{ ea.userMenu.name }}</span>
+                        {% endif %}
+                    </a>
+                    {{ user_menu_dropdown }}
+                </div>
+
+            {% endblock header_custom_menu %}
+        </div>
+    {% endblock header_custom_menu_wrapper %}
+
+    {% block settings_dropdown_wrapper %}
+        {{ settings_dropdown }}
+    {% endblock settings_dropdown_wrapper %}
+
+{% endblock content_top_header %}

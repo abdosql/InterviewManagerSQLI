@@ -53,7 +53,6 @@ class CandidateCrudController extends AbstractCrudController
         private readonly FindCandidate           $findCandidateQuery,
         private readonly GetAllCandidates        $allCandidates,
         private readonly AdminUrlGenerator       $adminUrlGenerator,
-        private readonly MercurePublisher  $mercurePublisher,
     )
     {}
 
@@ -184,7 +183,6 @@ class CandidateCrudController extends AbstractCrudController
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $this->createOrUpdateCandidate($entityInstance);
-        $this->mercurePublisher->publish(["message" => "You Have a new interview"], $this->getUser());
     }
 
     /**

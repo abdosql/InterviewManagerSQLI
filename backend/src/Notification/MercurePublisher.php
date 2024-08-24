@@ -21,9 +21,8 @@ class MercurePublisher implements PublisherInterface
 
     public function publish(array $data, ?User $user): void
     {
-        // Publish to Mercure
         $update = new Update(
-            'user_'.$user->getId(),
+            'user_1',
             json_encode($data)
             , private: true
         );

@@ -24,7 +24,7 @@ class SubscriptionPublisherCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->publisher->publish(['status' => 'OutOfStock'], new User());
+        $this->publisher->publish(['message' => 'You have new Interview', 'url' => 'http://interview_url'], new User());
 
         return self::SUCCESS;
     }
