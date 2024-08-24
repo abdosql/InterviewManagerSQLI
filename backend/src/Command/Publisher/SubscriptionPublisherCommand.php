@@ -2,9 +2,8 @@
 
 namespace App\Command\Publisher;
 
-use App\Entity\Candidate;
 use App\Entity\User;
-use App\Notification\PublisherInterface;
+use App\Publisher\PublisherInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

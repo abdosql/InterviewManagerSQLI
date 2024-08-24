@@ -4,10 +4,8 @@
  * @Linkedin https://www.linkedin.com/abdelaziz-saqqal
  */
 
-namespace App\Notification;
+namespace App\Publisher;
 
-use App\Entity\Candidate;
-use App\Entity\Notification;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mercure\HubInterface;
@@ -22,7 +20,7 @@ class MercurePublisher implements PublisherInterface
     public function publish(array $data, ?User $user): void
     {
         $update = new Update(
-            'user_1',
+            'user_3',
             json_encode($data)
             , private: true
         );
@@ -35,5 +33,16 @@ class MercurePublisher implements PublisherInterface
 //
 //        $this->entityManager->persist($notification);
 //        $this->entityManager->flush();
+    }
+
+    public function publishToMultipleUsers(array $data, array $users): void
+    {
+        foreach ($users as $user){
+            if (!$user instanceof User){
+                throw new \InvalidArgumentException($data["title"]);
+            }
+
+            $this->publish($data, $user);
+        }
     }
 }

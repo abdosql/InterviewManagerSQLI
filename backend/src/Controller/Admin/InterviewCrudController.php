@@ -3,14 +3,13 @@
 namespace App\Controller\Admin;
 
 use App\Candidate\Query\FindCandidate;
-use App\Interview\Command\DeleteInterviewCommand;
-use App\Interview\Command\Handler\CommandHandlerInterface;
-use App\Entity\Candidate;
-use App\Entity\Evaluator;
 use App\Entity\Interview;
 use App\Form\InterviewType;
 use App\Interview\Command\CreateInterviewCommand;
-use App\Notification\MercurePublisher;
+use App\Interview\Command\DeleteInterviewCommand;
+use App\Interview\Command\Handler\CommandHandlerInterface;
+use App\Publisher\MercurePublisher;
+use App\Publisher\PublisherInterface;
 use App\Services\Impl\InterviewService;
 use App\User\Query\FindUser;
 use App\User\Query\GetUsersByIds;
@@ -23,6 +22,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use phpDocumentor\Reflection\Types\This;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -45,7 +46,9 @@ class InterviewCrudController extends AbstractCrudController
         private readonly FindCandidate $findCandidate,
         private readonly FindUser $findUser,
         private readonly GetUsersByIds $getUsersByIds,
-        private readonly MercurePublisher  $mercurePublisher,
+        private readonly PublisherInterface  $mercurePublisher,
+        private readonly AdminUrlGenerator       $adminUrlGenerator,
+
     )
     {
     }
@@ -182,7 +185,14 @@ class InterviewCrudController extends AbstractCrudController
                 ;
                 $command = new CreateInterviewCommand($interview, $this->interviewService, $this->messageBus);
                 $this->commandHandler->handle($command);
-
+                //hna notifications
+                $message = "You have a new interview session at ".$interviewDate->format("Y-m-d H:i:s");
+                $url = $this->adminUrlGenerator
+                    ->setController(InterviewCrudController::class)
+                    ->setAction('detail')
+                    ->setEntityId($interview->getId())
+                    ->generateUrl();
+                $this->mercurePublisher->publishToMultipleUsers(["title" => "Interview", "message" => $message, "url" => $url], $evaluators);
                 return new JsonResponse(['success' => true, 'id' => $interview->getId()], Response::HTTP_OK);
 
             } catch (\Exception $e) {

@@ -4,9 +4,8 @@
  * @Linkedin https://www.linkedin.com/abdelaziz-saqqal
  */
 
-namespace App\Notification;
+namespace App\Publisher;
 
-use App\Entity\Candidate;
 use App\Entity\User;
 
 interface PublisherInterface

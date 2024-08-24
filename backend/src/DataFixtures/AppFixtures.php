@@ -2,6 +2,8 @@
 
 namespace App\DataFixtures;
 
+use App\Factory\CandidateFactory;
+use App\Factory\EvaluatorFactory;
 use App\Factory\HRManagerFactory;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;

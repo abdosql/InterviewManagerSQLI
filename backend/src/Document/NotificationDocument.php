@@ -19,6 +19,9 @@ class NotificationDocument
     #[MongoDB\ReferenceOne(targetDocument: UserDocument::class, inversedBy: "notifications")]
     private $user;
 
+    #[MongoDB\Field(type: "int")]
+    protected ?int $entityId;
+
     public function getId(): ?string
     {
         return $this->id;
@@ -54,6 +57,20 @@ class NotificationDocument
     public function setUser(?UserDocument $user): self
     {
         $this->user = $user;
+        return $this;
+    }
+    public function getEntityId():?int
+    {
+        return $this->entityId;
+    }
+
+    /**
+     * @param int|null $entityId
+     * @return NotificationDocument
+     */
+    public function setEntityId(?int $entityId): self
+    {
+        $this->entityId = $entityId;
         return $this;
     }
 }
