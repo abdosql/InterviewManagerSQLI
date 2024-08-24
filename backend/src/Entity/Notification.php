@@ -24,6 +24,12 @@ class Notification
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user_ = null;
 
+    #[ORM\Column]
+    private ?bool $is_read = false;
+
+    #[ORM\Column(length: 255)]
+    private ?string $link = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -61,6 +67,30 @@ class Notification
     public function setUser(?User $user_): static
     {
         $this->user_ = $user_;
+
+        return $this;
+    }
+
+    public function isRead(): ?bool
+    {
+        return $this->is_read;
+    }
+
+    public function setRead(bool $is_read): static
+    {
+        $this->is_read = $is_read;
+
+        return $this;
+    }
+
+    public function getLink(): ?string
+    {
+        return $this->link;
+    }
+
+    public function setLink(string $link): static
+    {
+        $this->link = $link;
 
         return $this;
     }

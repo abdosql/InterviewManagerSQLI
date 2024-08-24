@@ -166,7 +166,6 @@ class InterviewCrudController extends AbstractCrudController
                 }
                 foreach ($evaluators as $evaluator) {
                     $interview->addEvaluator($evaluator);
-                    $this->mercurePublisher->publish(["message" => "You Have a new interview"], $evaluator);
                 }
 
 
@@ -186,13 +185,12 @@ class InterviewCrudController extends AbstractCrudController
                 $command = new CreateInterviewCommand($interview, $this->interviewService, $this->messageBus);
                 $this->commandHandler->handle($command);
                 //hna notifications
-                $message = "You have a new interview session at ".$interviewDate->format("Y-m-d H:i:s");
                 $url = $this->adminUrlGenerator
                     ->setController(InterviewCrudController::class)
                     ->setAction('detail')
                     ->setEntityId($interview->getId())
                     ->generateUrl();
-                $this->mercurePublisher->publishToMultipleUsers(["title" => "Interview", "message" => $message, "url" => $url], $evaluators);
+                $this->mercurePublisher->publishToMultipleUsers(["title" => "Interview", "message" => "You have a new interview session at", "date" => $interviewDate, "url" => $url], $evaluators);
                 return new JsonResponse(['success' => true, 'id' => $interview->getId()], Response::HTTP_OK);
 
             } catch (\Exception $e) {

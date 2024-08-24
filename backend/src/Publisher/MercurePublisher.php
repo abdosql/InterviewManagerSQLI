@@ -7,42 +7,45 @@
 namespace App\Publisher;
 
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Notification\Command\Handler\DefaultCommandHandler;
+use App\Notification\Command\SendNotificationCommand;
+use App\Services\Impl\NotificationService;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
+use Symfony\Component\Messenger\MessageBusInterface;
 
-class MercurePublisher implements PublisherInterface
+class MercurePublisher extends AbstractPublisher
 {
-    public function __construct(private HubInterface $hub, private EntityManagerInterface $entityManager)
+    public function __construct(
+        private readonly HubInterface          $hub,
+        private readonly DefaultCommandHandler $notificationHandler,
+        private readonly notificationService   $notificationService,
+        protected MessageBusInterface          $messageBus,
+    )
     {
+        parent::__construct($messageBus);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function publish(array $data, ?User $user): void
     {
         $update = new Update(
-            'user_3',
-            json_encode($data)
-            , private: true
+            'user_'.$user->getId(),
+            json_encode($data),
+            private: true
         );
+
+        $notification = $this->createNotificationInstance($data, $user);
+
+        $command = new SendNotificationCommand($notification, $this->notificationService, $this->messageBus);
+
+        $this->notificationHandler->handle($command);
         $this->hub->publish($update);
 
-//        $notification = new Notification();
-//        $notification->setContent(json_encode($data));
-//        $notification->setNotificationDate(new \DateTime());
-//        $notification->setUser($user);
-//
-//        $this->entityManager->persist($notification);
-//        $this->entityManager->flush();
+
     }
 
-    public function publishToMultipleUsers(array $data, array $users): void
-    {
-        foreach ($users as $user){
-            if (!$user instanceof User){
-                throw new \InvalidArgumentException($data["title"]);
-            }
 
-            $this->publish($data, $user);
-        }
-    }
 }

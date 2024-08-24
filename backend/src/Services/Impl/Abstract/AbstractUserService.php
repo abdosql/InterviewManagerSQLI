@@ -73,7 +73,7 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
 
     public function findDocument($id)
     {
-        // TODO: Implement findDocument() method.
+        return $this->documentManager->getRepository(UserDocument::class)->findOneBy(["entityId", $id]);
     }
 
     public function findAllDocuments(): array

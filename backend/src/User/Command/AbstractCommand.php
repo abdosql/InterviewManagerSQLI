@@ -11,7 +11,7 @@ use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 
 readonly abstract class AbstractCommand implements CommandInterface
 {
-    public function __construct(private readonly EntityPersistenceServiceInterface $service)
+    public function __construct(protected EntityPersistenceServiceInterface $service)
     {
     }
 

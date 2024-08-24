@@ -23,7 +23,7 @@ readonly class SendNotificationCommand extends AbstractCommand
 
     )
     {
-        parent::__construct($notificationService, $this->messageBus);
+        parent::__construct($notificationService);
     }
 
     /**
