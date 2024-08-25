@@ -5,7 +5,8 @@
         .dropdown-menu-scrollable {
             max-height: 300px; /* Increased height for more content */
             overflow-x: auto;
-            width: 350px; /* Match the width we set earlier */
+            overflow-y: auto;
+            max-width: 450px; /* Match the width we set earlier */
         }
 
         /* Custom scrollbar styles */
@@ -51,7 +52,7 @@
         }
         .di{
             height: 5rem !important;
-
+            width: 25rem    ;
         }
         .notif{
             padding: 0 17px
@@ -171,8 +172,9 @@
             {% endif %}
         </div>
     {% endblock search_wrapper %}
-
-
+    {% for notification in notifications %}
+        {{ notification.getContent() }}
+    {% endfor %}
     <!-- Notification Dropdown -->
     <div class="dropdown notif">
         <a class="position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">

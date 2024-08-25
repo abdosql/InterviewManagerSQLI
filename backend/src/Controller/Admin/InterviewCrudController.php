@@ -133,12 +133,12 @@ class InterviewCrudController extends AbstractCrudController
         if ($request->isMethod('POST')){
             $data = json_decode($request->getContent(), true);
 
-//            if (!$this->isCsrfTokenValid('interview', $data['token'] ?? '')) {
-//                return new JsonResponse([
-//                    'success' => false,
-//                    'message' => 'Invalid CSRF token'],
-//                    Response::HTTP_BAD_REQUEST);
-//            }
+            if (!$this->isCsrfTokenValid('interview', $data['token'] ?? '')) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid CSRF token'],
+                    Response::HTTP_BAD_REQUEST);
+            }
 
             if (empty($data['date']) || empty($data['location']) || empty($data['candidate']) || empty($data['evaluators'])) {
                 return new JsonResponse([
@@ -164,6 +164,7 @@ class InterviewCrudController extends AbstractCrudController
                         'message' => 'Invalid candidate or evaluator',
                     ], Response::HTTP_BAD_REQUEST);
                 }
+
                 foreach ($evaluators as $evaluator) {
                     $interview->addEvaluator($evaluator);
                 }

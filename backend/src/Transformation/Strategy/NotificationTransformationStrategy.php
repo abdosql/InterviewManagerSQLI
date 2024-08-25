@@ -29,13 +29,14 @@ readonly class NotificationTransformationStrategy implements TransformToDocument
     {
         $entity = $this->notificationService->findEntity($entityId);
         $userDocument = $this->userService->findDocument($entity->getUser()->getId());
-
         $notificationDocument = new NotificationDocument();
         $notificationDocument
             ->setEntityId($entityId)
             ->setUser($userDocument)
             ->setContent($entity->getContent())
             ->setNotificationDate($entity->getNotificationDate())
+            ->setRead($entity->isRead())
+            ->setLink($entity->getLink())
         ;
         return $notificationDocument;
     }
@@ -50,6 +51,6 @@ readonly class NotificationTransformationStrategy implements TransformToDocument
             throw new \InvalidArgumentException("Document must be an instance of NotificationDocument");
         }
 
-        return $this->entityManager->getRepository(Notification::class)->find($document->getEntityId());
+        return $this->notificationService->findEntity($document->getEntityId());
     }
 }

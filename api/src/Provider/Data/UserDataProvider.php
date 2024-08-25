@@ -42,7 +42,8 @@ readonly class UserDataProvider implements ProviderInterface
                 } elseif (!is_array($ids)) {
                     throw new \InvalidArgumentException('The "ids" parameter must be an array or a comma-separated string.');
                 }
-                return $this->userProvider->getAllByIds($ids);            }
+                return $this->userProvider->getAllByIds($ids);
+            }
 
             return !empty($criteria)
                 ? $this->userProvider->getAllOrBy($criteria)

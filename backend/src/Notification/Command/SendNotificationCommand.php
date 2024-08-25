@@ -31,7 +31,9 @@ readonly class SendNotificationCommand extends AbstractCommand
      */
     public function execute(): int
     {
+
         $this->notificationService->saveEntity($this->notification);
+
         $message = new NotificationCreatedMessage($this->notification->getId());
         try {
             $this->messageBus->dispatch($message);
