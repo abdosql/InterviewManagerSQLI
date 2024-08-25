@@ -37,7 +37,8 @@ abstract class AbstractPublisher implements PublisherInterface
             ->setNotificationDate($data["date"])
             ->setLink($data["url"])
             ->setRead(false)
-            ->setUser($user);
+            ->setUser($user)
+            ;
         return $notification;
     }
 }

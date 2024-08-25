@@ -172,9 +172,7 @@
             {% endif %}
         </div>
     {% endblock search_wrapper %}
-    {% for notification in notifications %}
-        {{ notification.getContent() }}
-    {% endfor %}
+
     <!-- Notification Dropdown -->
     <div class="dropdown notif">
         <a class="position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -186,31 +184,27 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-scrollable" aria-labelledby="notificationDropdown">
             <li><h6 class="dropdown-header">Notifications</h6></li>
-            <li>
-                <a class="dropdown-item d-flex align-items-center di" href="https://example.com">
-                    <div class="notification-icon">
-                        <i class="bi bi-bell-fill"></i>
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-title">New message received</div>
-                        <div class="notification-message">You have a new message from John Doe.</div>
-                        <div class="notification-time">2 minutes ago</div>
-                    </div>
-                </a>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-                <a class="dropdown-item d-flex align-items-center di" href="https://example.com">
-                    <div class="notification-icon">
-                        <i class="bi bi-envelope-fill"></i>
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-title">Subscription renewed</div>
-                        <div class="notification-message">Your subscription has been successfully renewed.</div>
-                        <div class="notification-time">1 hour ago</div>
-                    </div>
-                </a>
-            </li>
+
+            {% for notification in notifications %}
+                <li>
+                    <a class="dropdown-item d-flex align-items-center di" href="{{ notification.getLink() }}">
+                        <div class="notification-icon">
+                            <i class="bi bi-bell-fill"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">New message received</div>
+                            <div class="notification-message">
+                                {{ notification.getContent() }}
+                                {{ notification.getNotificationDate()|date('g:i a') }}
+                            </div>
+                            <div class="notification-time">
+                                {{ notification.createdAt|ago }} Ago
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+            {% endfor %}
             <!-- Add more notification items here -->
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-center" href="#">View all notifications</a></li>

@@ -38,6 +38,7 @@ class DatabasesInitialisation extends Command
             ['php', 'bin/console', 'doctrine:migrations:migrate', '--no-interaction'],
             ['php', 'bin/console', 'doctrine:fixtures:load', '--no-interaction'],
             ['php', 'bin/console', 'doctrine:mongodb:schema:create', '--no-interaction'],
+            ['php', 'bin/console', 'doctrine:mongodb:schema:create', '--no-interaction'],
         ];
 
         foreach ($commands as $command) {
