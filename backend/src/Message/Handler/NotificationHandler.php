@@ -11,6 +11,7 @@ use App\Message\Candidate\CandidateCreatedMessage;
 use App\Message\Candidate\CandidateDeletedMessage;
 use App\Message\Candidate\CandidateUpdatedMessage;
 use App\Message\Notification\NotificationCreatedMessage;
+use App\Message\Notification\NotificationMarkedAsReadMessage;
 use App\Services\Impl\CandidateService;
 use App\Services\Impl\NotificationService;
 use Doctrine\ODM\MongoDB\MongoDBException;
@@ -35,6 +36,18 @@ class NotificationHandler
     {
         $notificationDocument = $this->transformationAdapter->transformToDocument($message->getId(), 'notification');
         $this->notificationService->saveDocument($notificationDocument);
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws MongoDBException
+     */
+    #[AsMessageHandler]
+    public function handleNotificationMarkedAsRead(NotificationMarkedAsReadMessage $message): void
+    {
+        $notificationDocument = $this->transformationAdapter->transformToDocument($message->getId(), 'notification');
+        $this->notificationService->updateDocument($message->getId(), $notificationDocument);
     }
 
 //    /**

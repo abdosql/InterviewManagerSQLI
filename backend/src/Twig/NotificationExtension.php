@@ -13,7 +13,10 @@ use Twig\Extension\GlobalsInterface;
 
 class NotificationExtension extends AbstractExtension implements GlobalsInterface
 {
-    public function __construct(private readonly ItemsQueryInterface $getAllNotificationsQuery, private Security $security)
+    public function __construct(
+        private readonly ItemsQueryInterface     $getAllNotificationsQuery,
+        private readonly Security                $security,
+    )
     {
     }
 
@@ -21,8 +24,10 @@ class NotificationExtension extends AbstractExtension implements GlobalsInterfac
     {
         $user = $this->security->getUser();
         $userId = $user ? $user->getId() : null;
+        $notifications = $this->getAllNotificationsQuery->findItems(["userId" => $userId]);
         return [
-            'notifications' => $this->getAllNotificationsQuery->findItems(["userId" => $userId]),
+            'notifications' => $notifications,
+            'unreadCount' => $this->getAllNotificationsQuery->unreadCount($notifications)
         ];
     }
 }

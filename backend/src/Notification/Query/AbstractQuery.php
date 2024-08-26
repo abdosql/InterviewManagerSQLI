@@ -54,12 +54,14 @@ abstract class AbstractQuery
         $documents = [];
         foreach ($data as $document) {
             $deserializedDocument = $this->serializer->deserialize(json_encode($document), $type, 'json');
-
             $transformedDocument = $this->transformationAdapter->transformToEntity($deserializedDocument, 'notification');
 
             $documents[] = $transformedDocument;
         }
 
+        \usort($documents, function ($a, $b) {
+            return $a->getCreatedAt() < $b->getCreatedAt();
+        });
         return $documents;
     }
 }

@@ -19,16 +19,18 @@ use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class FindInterviewQuery extends AbstractQuery implements ItemQueryInterface
+class FindInterview extends AbstractQuery implements ItemQueryInterface
 {
-    public function __construct(
+    public function __construct
+    (
         protected HttpClientInterface $httpClient,
         protected SerializerInterface $serializer,
-        private readonly DataTransformationAdapter $transformationAdapter,
+        protected DataTransformationAdapter $transformationAdapter,
         #[Autowire('%apiBaseUrl%')]
         private readonly string $apiBaseUrl,
-    ) {
-        parent::__construct($httpClient, $serializer);
+    )
+    {
+        parent::__construct($httpClient, $serializer, $transformationAdapter);
     }
 
     /**
@@ -47,7 +49,6 @@ class FindInterviewQuery extends AbstractQuery implements ItemQueryInterface
                 'verify_host' => false,
             ])->getContent();
             $interviewDocument = $this->serializer->deserialize($response, InterviewDocument::class, 'json');
-            dd($interviewDocument);
             return $this->transformationAdapter->transformToEntity($interviewDocument, 'Interview');
         } catch (HttpExceptionInterface $e) {
             if ($e->getResponse()->getStatusCode() === Response::HTTP_NOT_FOUND) {

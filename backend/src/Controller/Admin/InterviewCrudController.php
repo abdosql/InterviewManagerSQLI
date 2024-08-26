@@ -8,6 +8,7 @@ use App\Form\InterviewType;
 use App\Interview\Command\CreateInterviewCommand;
 use App\Interview\Command\DeleteInterviewCommand;
 use App\Interview\Command\Handler\CommandHandlerInterface;
+use App\Interview\Query\GetAllInterviews;
 use App\Publisher\MercurePublisher;
 use App\Publisher\PublisherInterface;
 use App\Services\Impl\InterviewService;
@@ -17,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
@@ -44,49 +46,71 @@ class InterviewCrudController extends AbstractCrudController
         private readonly MessageBusInterface $messageBus,
         private readonly InterviewService $interviewService,
         private readonly FindCandidate $findCandidate,
-        private readonly FindUser $findUser,
         private readonly GetUsersByIds $getUsersByIds,
         private readonly PublisherInterface  $mercurePublisher,
         private readonly AdminUrlGenerator       $adminUrlGenerator,
+        private readonly GetAllInterviews $getAllInterviews
+
 
     )
     {
     }
 
-//    public function configureCrud(Crud $crud): Crud
-//    {
-//        return $crud
-//            ->setEntityLabelInSingular('Custom Entity')
-//            ->setEntityLabelInPlural('Custom Entities')
-//            ->setPageTitle(Crud::PAGE_DETAIL, 'Details of %entity_label_singular%')
-//            ->overrideTemplates(
-//                [
-//                    'crud/detail' => 'interview/show.html.twig',
-//                ]
-//            );
-//    }
+    public function index(AdminContext $context): Response
+    {
+        $crud = $context->getCrud();
+        $entities = $this->getAllInterviews->findItems();
+        $fields = $this->configureFields(Crud::PAGE_INDEX);
+        $fieldMetadata = [];
+        $entityLabel = $crud->getEntityLabelInSingular();
+
+        foreach ($fields as $field) {
+            if (!$field->getAsDto()->getDisplayedOn()->has('index')) {
+                continue;
+            }
+            $fieldMetadata[] = [
+                'label' => $field->getAsDto()->getLabel(),
+                'property' => $field->getAsDto()->getProperty(),
+            ];
+        }
+        $entityName = $crud->getEntityFqcn();
+        $actions = $crud->getActionsConfig()->getActions();
+//        dd($actions, $entityName);
+        return $this->render('@EasyAdmin/crud/index.html.twig', [
+            'entities' => $entities,
+            'fields' => $fieldMetadata,
+            'actions' => $actions,
+            'entityName' => $entityName,
+            'entityLabel' => $entityLabel,
+        ]);
+    }
 
 
     public static function getEntityFqcn(): string
     {
         return Interview::class;
     }
+
     public function configureActions(Actions $actions): Actions
     {
-        return $actions
-            ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            ->disable(Action::DELETE, Action::EDIT, Action::NEW);
-    }
+        $actions
+            ->update(Crud::PAGE_INDEX, Action::EDIT, function (Action $action) {
+                return $action
+                    ->setIcon('fa fa-edit');
+            })->disable(Action::DELETE, Action::EDIT, Action::NEW);
 
+
+        return $actions;
+    }
 
 
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnForms();
-        yield TextField::new('interview_location')->hideOnForm();
-        yield DateField::new('interview_date')->hideOnForm();
+        yield TextField::new('interview_location', "Location")->hideOnForm();
+        yield DateField::new('interview_date', "Date and Time")->hideOnForm();
 
-        yield AssociationField::new('candidate')
+        yield AssociationField::new('candidate', 'Candidates')
             ->formatValue(function ($value) {
                 return $value->getFirstName() . ' ' . $value->getLastName();
             });
@@ -100,8 +124,9 @@ class InterviewCrudController extends AbstractCrudController
                 return implode(', ', $evaluators);
             });
 
-
     }
+
+
 
     #[Route('/interview/calendar', name: 'interview_calendar', methods: ["GET"])]
 

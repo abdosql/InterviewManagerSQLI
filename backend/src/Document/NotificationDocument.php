@@ -25,6 +25,9 @@ class NotificationDocument
     #[MongoDB\Field(type: "string")]
     private ?string $link = null;
 
+    #[MongoDB\Field(type: "date")]
+    private ?\DateTimeInterface $createdAt = null;
+
     #[MongoDB\Field(type: "int")]
     protected ?int $entityId;
 
@@ -103,4 +106,26 @@ class NotificationDocument
 
         return $this;
     }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+    public function setCreatedAt(?\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function setDocument(NotificationDocument $notificationDocument): void
+    {
+        $this->content = $notificationDocument->getContent();
+        $this->notificationDate = $notificationDocument->getNotificationDate();
+        $this->user = $notificationDocument->getUser();
+        $this->is_read = $notificationDocument->isRead();
+        $this->link = $notificationDocument->getLink();
+        $this->createdAt = $notificationDocument->getCreatedAt();
+        $this->entityId = $notificationDocument->getEntityId();
+    }
+
 }

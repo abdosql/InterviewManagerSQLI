@@ -37,6 +37,7 @@ readonly class NotificationTransformationStrategy implements TransformToDocument
             ->setNotificationDate($entity->getNotificationDate())
             ->setRead($entity->isRead())
             ->setLink($entity->getLink())
+            ->setCreatedAt($entity->getCreatedAt())
         ;
         return $notificationDocument;
     }

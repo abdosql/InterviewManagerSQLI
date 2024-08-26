@@ -45,7 +45,9 @@ abstract class AbstractUserTransformationStrategy implements TransformToDocument
         }
         $document = new EvaluatorDocument();
         $this->transformCommonFields($user, $document);
-        $document->setSpecialization($user->getSpecialization());
+        $document->
+            setSpecialization($user->getSpecialization())
+        ;
 
         return $document;
     }

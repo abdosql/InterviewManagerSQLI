@@ -61,13 +61,36 @@
 {% endblock %}
 {% block head_javascript %}
     {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="{{ asset('build/app.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const notificationDropdown = document.getElementById('notificationDropdown');
-            const notificationList = notificationDropdown.nextElementSibling;
+            const notificationList = document.querySelector('.notification-list');
             const notificationCounter = notificationDropdown.querySelector('.badge');
+            const allTab = document.getElementById('all-notifications');
+            const unreadTab = document.getElementById('unread-notifications');
+            const readTab = document.getElementById('read-notifications');
+
+            populateFilteredTabs();
+
+            ['all-tab', 'unread-tab', 'read-tab'].forEach(tabId => {
+                document.getElementById(tabId).addEventListener('shown.bs.tab', populateFilteredTabs);
+            });
+
+            function populateFilteredTabs() {
+                const allNotifications = allTab.querySelectorAll('.notification-item');
+                unreadTab.innerHTML = '<ul class="list-group list-group-flush"></ul>';
+                readTab.innerHTML = '<ul class="list-group list-group-flush"></ul>';
+
+                allNotifications.forEach(notification => {
+                    const clone = notification.cloneNode(true);
+                    if (notification.classList.contains('unread')) {
+                        unreadTab.querySelector('ul').appendChild(clone);
+                    } else {
+                        readTab.querySelector('ul').appendChild(clone);
+                    }
+                });
+            }
 
             const eventSource = new EventSource("{{ mercure('user_' ~ app.user.getId() , { subscribe: 'user_' ~ app.user.getId() })|escape('js') }}", {
                 withCredentials: true
@@ -77,50 +100,66 @@
                 const data = JSON.parse(event.data);
 
                 const newNotification = document.createElement('li');
+                newNotification.classList.add('list-group-item', 'notification-item', 'unread');
                 newNotification.innerHTML = `
-            <a class="dropdown-item d-flex align-items-center di" href="${data.url || '#'}">
-                <div class="flex-shrink-0 me-3">
+            <a class="d-flex align-items-center" href="${data.url || '#'}">
+                <div class="flex-shrink-0 me-3 position-relative">
                     <i class="bi bi-bell-fill fs-4"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                        <span class="visually-hidden">Unread notification</span>
+                    </span>
                 </div>
                 <div class="flex-grow-1">
                     <div class="fw-bold">${data.title || 'New Notification'}</div>
-                    <div class="small text-muted">${data.message || 'You have a new notification'}</div>
+                    <div class="small">${data.message || 'You have a new notification'}</div>
                     <div class="small text-muted">Just now</div>
-                </div>
-                <div class="flex-shrink-0 ms-2">
-                    <i class="bi bi-chevron-right"></i>
                 </div>
             </a>
         `;
 
-                // Insert the new notification after the first li element (which is the header)
-                notificationList.insertBefore(newNotification, notificationList.children[1]);
+                notificationList.insertBefore(newNotification, notificationList.firstChild);
 
-                // Add a divider after the new notification
-                const divider = document.createElement('li');
-                divider.innerHTML = '<hr class="dropdown-divider">';
-                notificationList.insertBefore(divider, newNotification.nextSibling);
-
-                // Update notification counter
                 let currentCount = parseInt(notificationCounter.textContent, 10);
                 notificationCounter.textContent = currentCount + 1;
 
-                // Remove the oldest notification if there are more than 5 (excluding header and "View all" items)
-                const notificationItems = notificationList.querySelectorAll('li:not(:first-child):not(:last-child)');
-                if (notificationItems.length > 10) { // 5 notifications * 2 (notification + divider)
-                    notificationList.removeChild(notificationItems[notificationItems.length - 1]); // Remove oldest notification
-                    notificationList.removeChild(notificationItems[notificationItems.length - 2]); // Remove its divider
+                const notificationItems = notificationList.querySelectorAll('.notification-item');
+                if (notificationItems.length > 5) {
+                    notificationList.removeChild(notificationItems[notificationItems.length - 1]);
                 }
+
+                populateFilteredTabs();
             };
 
             eventSource.onerror = error => {
                 console.error('Error:', error);
             };
-        });
+
+            document.getElementById('unread').addEventListener('click', function(event) {
+                var notificationId = event.currentTarget.getAttribute('data-id');
+
+                fetch('/api/notifications/' + notificationId + '/mark-read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            {% set unreadCount = unreadCount - 1 %}
+                        } else {
+                            console.error('Error marking notification as read:', data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        })
+
     </script>
 {% endblock %}
 
 {% block content_top_header %}
+
     {% block search_wrapper %}
         <div class="content-search">
             {% if has_search %}
@@ -175,40 +214,63 @@
 
     <!-- Notification Dropdown -->
     <div class="dropdown notif">
-        <a class="position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <a class="position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
             <i class="fa-solid fa-bell"></i>
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            0 <!-- Notifications Counter -->
-            <span class="visually-hidden">unread messages</span>
+                {{ unreadCount }}
+        <span class="visually-hidden">unread messages</span>
         </span>
         </a>
-        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-scrollable" aria-labelledby="notificationDropdown">
-            <li><h6 class="dropdown-header">Notifications</h6></li>
-
-            {% for notification in notifications %}
-                <li>
-                    <a class="dropdown-item d-flex align-items-center di" href="{{ notification.getLink() }}">
-                        <div class="notification-icon">
-                            <i class="bi bi-bell-fill"></i>
+        <div class="dropdown-menu dropdown-menu-end p-0 dropdown-menu-scrollable" aria-labelledby="notificationDropdown" >
+            <div class="card border-0" style="width: 20rem;">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-notifications" type="button" role="tab" aria-controls="all-notifications" aria-selected="true">All</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="unread-tab" data-bs-toggle="tab" data-bs-target="#unread-notifications" type="button" role="tab" aria-controls="unread-notifications" aria-selected="false">Unread</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="read-tab" data-bs-toggle="tab" data-bs-target="#read-notifications" type="button" role="tab" aria-controls="read-notifications" aria-selected="false">Read</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="all-notifications" role="tabpanel" aria-labelledby="all-tab">
+                            <ul class="list-group list-group-flush notification-list">
+                                {% for notification in notifications %}
+                                    <li data-id="{{  notification.getId() }}" id="{% if not notification.isRead() %}unread{% endif %}" class="list-group-item notification-item {% if not notification.isRead() %}unread{% endif %}">
+                                        <a class="d-flex align-items-center text-decoration-none" href="{{ notification.getLink() }}">
+                                            <div class="flex-shrink-0 me-3 position-relative">
+                                                <i class="bi bi-bell-fill fs-4"></i>
+                                                {% if not notification.isRead() %}
+                                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                                    <span class="visually-hidden">Unread notification</span>
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="{% if not notification.isRead() %}fw-bold{% endif %}">New message received</div>
+                                                <div class="small">{{ notification.getContent() }}</div>
+                                                <div class="small text-muted">{{ notification.createdAt|ago }} Ago</div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         </div>
-                        <div class="notification-content">
-                            <div class="notification-title">New message received</div>
-                            <div class="notification-message">
-                                {{ notification.getContent() }}
-                                {{ notification.getNotificationDate()|date('g:i a') }}
-                            </div>
-                            <div class="notification-time">
-                                {{ notification.createdAt|ago }} Ago
-                            </div>
+                        <div class="tab-pane fade" id="unread-notifications" role="tabpanel" aria-labelledby="unread-tab">
+                            <!-- Unread notifications will be dynamically populated here -->
                         </div>
-                    </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-            {% endfor %}
-            <!-- Add more notification items here -->
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-center" href="#">View all notifications</a></li>
-        </ul>
+                        <div class="tab-pane fade" id="read-notifications" role="tabpanel" aria-labelledby="read-tab">
+                            <!-- Read notifications will be dynamically populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {#    <div class="dropdown notifications-menu-wrapper">#}
 {#        <a class="notifications-toggle" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">#}

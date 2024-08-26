@@ -2,10 +2,12 @@
 
 namespace App\Document;
 
+use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
+#[ApiResource]
 #[MongoDB\Document(collection: "interviews")]
 class Interview
 {

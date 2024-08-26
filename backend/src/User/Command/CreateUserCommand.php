@@ -3,6 +3,8 @@
 namespace App\User\Command;
 
 use App\Candidate\Command\AbstractCommand;
+use App\Entity\Evaluator;
+use App\Entity\HRManager;
 use App\Entity\User;
 use App\Manager\UserCredentialManager;
 use App\Message\User\UserCreatedMessage;
@@ -32,6 +34,12 @@ readonly class CreateUserCommand extends AbstractCommand
     public function execute(): int
     {
         $credentialManager = $this->credentialManager->generateCredentials($this->user);
+        if ($this->user instanceof Evaluator){
+            $this->user->setRoles(['ROLE_EVALUATOR', 'PUBLIC_ACCESS']);
+        }
+        if ($this->user instanceof HRManager){
+            $this->user->setRoles(['ROLE_HR', 'PUBLIC_ACCESS']);
+        }
         $this->credentialManager->applyCredentialsToUser($this->user, $credentialManager);
         $this->userService->saveEntity($this->user);
         $message = new UserCreatedMessage($this->user->getId());

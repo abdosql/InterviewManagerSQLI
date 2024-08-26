@@ -71,7 +71,7 @@ class AbstractUserService implements DocumentPersistenceServiceInterface, Entity
 
     }
 
-    public function findDocument($id): UserDocument
+    public function findDocument($id): mixed
     {
         return $this->documentManager->getRepository(UserDocument::class)->findOneBy(["entityId" => $id]);
     }

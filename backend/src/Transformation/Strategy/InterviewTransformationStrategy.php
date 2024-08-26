@@ -6,9 +6,11 @@
 
 namespace App\Transformation\Strategy;
 
+use App\Document\EvaluatorDocument;
 use App\Document\InterviewDocument;
 use App\Entity\Interview;
 use App\Services\Impl\InterviewService;
+use App\Services\Impl\UserService;
 use App\Transformation\TransformToDocumentStrategyInterface;
 use App\Transformation\TransformToEntityStrategyInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -17,7 +19,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 #[AutoconfigureTag("app.transform_to_document_strategy", ['type' => 'interview'])]
 readonly class InterviewTransformationStrategy implements TransformToDocumentStrategyInterface, TransformToEntityStrategyInterface
 {
-    public function __construct(private InterviewService $interviewService)
+    public function __construct(private InterviewService $interviewService, private UserService $userService)
     {
     }
     public function transformToDocument(int $entityId): InterviewDocument
@@ -28,8 +30,15 @@ readonly class InterviewTransformationStrategy implements TransformToDocumentStr
         $interviewDocument
             ->setInterviewDate($entity->getInterviewDate())
             ->setInterviewLocation($entity->getInterviewLocation())
-            ->setEntityId($entity->getId());
+            ->setEntityId($entity->getId())
+            ->setCandidate($entity->getCandidate())
+            ->setHrManager($entity->getHrManager())
         ;
+        foreach ($entity->getEvaluators() as $evaluator)
+        {
+            $evaluatorDocument = $this->userService->findDocument($evaluator->getId());
+            $interviewDocument->addEvaluator($evaluatorDocument);
+        }
         return $interviewDocument;
     }
 

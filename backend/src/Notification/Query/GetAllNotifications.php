@@ -20,7 +20,7 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class GetNotificationsByUser extends AbstractQuery implements ItemsQueryInterface
+class GetAllNotifications extends AbstractQuery implements ItemsQueryInterface
 {
     public function __construct
     (
@@ -52,10 +52,21 @@ class GetNotificationsByUser extends AbstractQuery implements ItemsQueryInterfac
         $response = $this->makeRequest($url, $criteria);
 
         if ($response->getStatusCode() !== 200) {
-            throw new \Exception('Failed to fetch users: ' . $response->getContent(false));
+            throw new \Exception('Failed to fetch notifications: ' . $response->getContent(false));
         }
 
         return $this->deserializeArray($response->getContent(), NotificationDocument::class);
+    }
+
+    public function unreadCount(array $notifications): int
+    {
+        $count = 0;
+        foreach ($notifications as $notification) {
+            if (!$notification->isRead()) {
+                $count++;
+            }
+        }
+        return $count;
     }
 
 }
