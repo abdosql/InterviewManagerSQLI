@@ -1,25 +1,21 @@
 <?php
 declare(strict_types=1);
 namespace App\Controller\Admin;
-use App\Candidate\Command\Handler\DefaultCommandHandler;
 use App\Controller\Admin\Abstract\UserCrudController;
 use App\Entity\Evaluator;
-use App\Manager\UserCredentialManager;
-use App\Services\Impl\UserService;
-use App\User\Query\FindUser;
-use App\User\Query\GetUsersByType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+
+#[isGranted("ROLE_HR_MANAGER")]
 
 class EvaluatorCrudController extends UserCrudController
 {

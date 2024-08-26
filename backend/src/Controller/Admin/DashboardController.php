@@ -21,13 +21,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DashboardController extends AbstractDashboardController
 {
-    public function __construct(
-        #[Autowire(service: "App\Services\Impl\CandidateService")]
-        private readonly EntityPersistenceServiceInterface $candidateService,
-        #[Autowire(service: "App\Services\Impl\EvaluatorService")]
-        private readonly EntityPersistenceServiceInterface $evaluatorService
-    )
+    public function __construct()
     {
+
     }
 
     /**
@@ -39,8 +35,11 @@ class DashboardController extends AbstractDashboardController
     public function index(): Response
     {
         $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
+        if ($this->isGranted("ROLE_HR_MANAGER")){
+            return $this->redirect($adminUrlGenerator->setController(CandidateCrudController::class)->generateUrl());
+        }
+        return $this->redirect($adminUrlGenerator->setController(InterviewCrudController::class)->generateUrl());
 
-        return $this->redirect($adminUrlGenerator->setController(CandidateCrudController::class)->generateUrl());
 
     }
 
@@ -53,17 +52,20 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
-        if($this->isGranted('ROLE_HR')){
-            yield MenuItem::linkToCrud('Candidates', 'fa-solid fa-user-tie', Candidate::class)->setPermission("ROLE_HR");
-            yield MenuItem::linkToCrud('Evaluators', 'fa-solid fa-users', Evaluator::class)->setPermission("ROLE_HR");
-            yield MenuItem::subMenu('Interviews', 'fa-solid fa-clipboard-question')->setSubItems([
-                MenuItem::linkToRoute('Calendar', 'fa-regular fa-calendar-days', "interview_calendar"),
-                MenuItem::LinkToCrud('List', 'fa fa-list', Interview::class),
-            ])
+        if($this->isGranted('ROLE_HR_MANAGER')){
+            yield MenuItem::linkToCrud('Candidates', 'fa-solid fa-user-tie', Candidate::class)
                 ->setPermission("ROLE_EVALUATOR");
+            yield MenuItem::linkToCrud('Evaluators', 'fa-solid fa-users', Evaluator::class)
+                ->setPermission("ROLE_HR_MANAGER");
         }
+        yield MenuItem::subMenu('Interviews', 'fa-solid fa-clipboard-question')->setSubItems([
+            MenuItem::linkToRoute('Calendar', 'fa-regular fa-calendar-days', "interview_calendar"),
+            MenuItem::LinkToCrud('List', 'fa fa-list', Interview::class),
+        ])
+            ->setPermission("ROLE_EVALUATOR");
         if ($this->isGranted('ROLE_ADMIN')) {
-            yield MenuItem::linkToCrud('HR Manager', 'fa-solid fa-people-line', HRManager::class)->setPermission("ROLE_ADMIN");
+            yield MenuItem::linkToCrud('HR Manager', 'fa-solid fa-people-line', HRManager::class)
+                ->setPermission("ROLE_ADMIN");
         }
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);
     }
