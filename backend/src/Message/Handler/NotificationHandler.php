@@ -19,7 +19,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class NotificationHandler
+readonly class NotificationHandler
 {
     public function __construct(
         private DataTransformationAdapter $transformationAdapter,

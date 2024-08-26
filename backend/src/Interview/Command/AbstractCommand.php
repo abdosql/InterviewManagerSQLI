@@ -13,8 +13,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
 readonly abstract class AbstractCommand implements CommandInterface
 {
     public function __construct(
-        private readonly EntityPersistenceServiceInterface $service,
-        private readonly MessageBusInterface $messageBus,
+        private EntityPersistenceServiceInterface $service,
+        private MessageBusInterface      $messageBus,
     )
     {
 

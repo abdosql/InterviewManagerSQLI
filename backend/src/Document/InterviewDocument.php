@@ -31,7 +31,7 @@ class InterviewDocument
     private ArrayCollection $appreciations;
 
     #[MongoDB\Field(type: "int")]
-    protected ?int $entityId;
+    private ?int $entityId;
 
     public function __construct()
     {

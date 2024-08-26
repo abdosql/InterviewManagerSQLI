@@ -17,10 +17,10 @@ class Interview
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $interview_date = null;
+    private ?\DateTimeInterface $interviewDate = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $interview_location = null;
+    private ?string $interviewLocation = null;
 
     #[ORM\ManyToOne(inversedBy: 'interviews')]
     #[ORM\JoinColumn(nullable: false)]
@@ -28,7 +28,7 @@ class Interview
 
     #[ORM\ManyToOne(inversedBy: 'interviews')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?HRManager $hr_manager = null;
+    private ?HRManager $hrManager = null;
 
     /**
      * @var Collection<int, Appreciation>
@@ -55,24 +55,24 @@ class Interview
 
     public function getInterviewDate(): ?\DateTimeInterface
     {
-        return $this->interview_date;
+        return $this->interviewDate;
     }
 
-    public function setInterviewDate(\DateTimeInterface $interview_date): static
+    public function setInterviewDate(\DateTimeInterface $interviewDate): static
     {
-        $this->interview_date = $interview_date;
+        $this->interviewDate = $interviewDate;
 
         return $this;
     }
 
     public function getInterviewLocation(): ?string
     {
-        return $this->interview_location;
+        return $this->interviewLocation;
     }
 
-    public function setInterviewLocation(string $interview_location): static
+    public function setInterviewLocation(string $interviewLocation): static
     {
-        $this->interview_location = $interview_location;
+        $this->interviewLocation = $interviewLocation;
 
         return $this;
     }
@@ -91,12 +91,12 @@ class Interview
 
     public function getHrManager(): ?HRManager
     {
-        return $this->hr_manager;
+        return $this->hrManager;
     }
 
-    public function setHrManager(?HRManager $hr_manager): static
+    public function setHrManager(?HRManager $hrManager): static
     {
-        $this->hr_manager = $hr_manager;
+        $this->hrManager = $hrManager;
 
         return $this;
     }

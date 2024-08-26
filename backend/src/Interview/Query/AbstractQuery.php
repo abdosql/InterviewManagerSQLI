@@ -57,9 +57,6 @@ abstract class AbstractQuery
             $documents[] = $transformedDocument;
         }
 
-        \usort($documents, function ($a, $b) {
-            return $a->getCreatedAt() < $b->getCreatedAt();
-        });
         return $documents;
     }
 }

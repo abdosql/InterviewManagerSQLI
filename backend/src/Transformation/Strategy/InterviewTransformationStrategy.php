@@ -7,7 +7,9 @@
 namespace App\Transformation\Strategy;
 
 use App\Document\InterviewDocument;
+use App\Entity\Candidate;
 use App\Entity\Interview;
+use App\Services\Impl\CandidateService;
 use App\Services\Impl\InterviewService;
 use App\Services\Impl\UserService;
 use App\Transformation\TransformToDocumentStrategyInterface;
@@ -18,20 +20,21 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 #[AutoconfigureTag("app.transform_to_document_strategy", ['type' => 'interview'])]
 readonly class InterviewTransformationStrategy implements TransformToDocumentStrategyInterface, TransformToEntityStrategyInterface
 {
-    public function __construct(private InterviewService $interviewService, private UserService $userService)
+    public function __construct(private InterviewService $interviewService, private UserService $userService, private CandidateService $candidateService)
     {
     }
     public function transformToDocument(int $entityId): InterviewDocument
     {
         $entity = $this->interviewService->findEntity($entityId);
-
+        $hrManagerDocument = $this->userService->findDocument($entity->getHrManager()->getId());
+        $candidateDocument = $this->candidateService->findDocument($entity->getCandidate()->getId());
         $interviewDocument = new InterviewDocument();
         $interviewDocument
             ->setInterviewDate($entity->getInterviewDate())
             ->setInterviewLocation($entity->getInterviewLocation())
             ->setEntityId($entity->getId())
-            ->setCandidate($entity->getCandidate())
-            ->setHrManager($entity->getHrManager())
+            ->setHrManager($hrManagerDocument)
+            ->setCandidate($candidateDocument)
         ;
         foreach ($entity->getEvaluators() as $evaluator)
         {

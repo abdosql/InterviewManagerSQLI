@@ -29,11 +29,13 @@ readonly class InterviewDataProvider implements ProviderInterface
             throw new \RuntimeException(\sprintf('Unsupported resource class: %s', $resourceClass));
         }
 
+        if (str_contains(strtolower($context["uri"]), 'upcoming')) {
+            return $this->interviewProvider->getUpcomingInterviews();
+        }
         if (isset($uriVariables['id'])) {
             return $this->interviewProvider->getByEntityId((int)$uriVariables['id']);
         } else {
             $criteria = $context['filters'] ?? [];
-
             return !empty($criteria)
                 ? $this->interviewProvider->getAllOrBy($criteria)
                 : $this->interviewProvider->getAllOrBy();

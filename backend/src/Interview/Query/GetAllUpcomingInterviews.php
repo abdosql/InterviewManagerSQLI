@@ -18,7 +18,7 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class GetAllInterviews extends AbstractQuery implements ItemsQueryInterface
+class GetAllUpcomingInterviews extends AbstractQuery implements ItemsQueryInterface
 {
     public function __construct
     (
@@ -43,7 +43,7 @@ class GetAllInterviews extends AbstractQuery implements ItemsQueryInterface
      */
     public function findItems(array $criteria = []): array
     {
-        $url = $this->apiBaseUrl . 'api/interviews';
+        $url = $this->apiBaseUrl . 'api/interviews/upcoming';
 
         $response = $this->makeRequest($url, $criteria);
 

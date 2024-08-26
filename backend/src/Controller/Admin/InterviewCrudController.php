@@ -9,6 +9,7 @@ use App\Interview\Command\CreateInterviewCommand;
 use App\Interview\Command\DeleteInterviewCommand;
 use App\Interview\Command\Handler\CommandHandlerInterface;
 use App\Interview\Query\GetAllInterviews;
+use App\Interview\Query\GetAllUpcomingInterviews;
 use App\Publisher\MercurePublisher;
 use App\Publisher\PublisherInterface;
 use App\Services\Impl\InterviewService;
@@ -49,13 +50,22 @@ class InterviewCrudController extends AbstractCrudController
         private readonly GetUsersByIds $getUsersByIds,
         private readonly PublisherInterface  $mercurePublisher,
         private readonly AdminUrlGenerator       $adminUrlGenerator,
-        private readonly GetAllInterviews $getAllInterviews
+        private readonly GetAllInterviews $getAllInterviews,
+        private readonly GetAllUpcomingInterviews $allUpcomingInterviews
 
 
     )
     {
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws ClientExceptionInterface
+     */
     public function index(AdminContext $context): Response
     {
         $crud = $context->getCrud();
@@ -73,6 +83,7 @@ class InterviewCrudController extends AbstractCrudController
                 'property' => $field->getAsDto()->getProperty(),
             ];
         }
+
         $entityName = $crud->getEntityFqcn();
         $actions = $crud->getActionsConfig()->getActions();
 //        dd($actions, $entityName);
@@ -106,9 +117,12 @@ class InterviewCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield IdField::new('id')->onlyOnForms();
-        yield TextField::new('interview_location', "Location")->hideOnForm();
-        yield DateField::new('interview_date', "Date and Time")->hideOnForm();
+        yield IdField::new('id')->hideOnForm();
+        yield TextField::new('interviewLocation', "Location")->hideOnForm();
+        yield DateField::new('interviewDate', "Date and Time")->hideOnForm()
+            ->formatValue(function ($value) {
+                return $value->format("Y-m-d H:i:s");
+            });
 
         yield AssociationField::new('candidate', 'Candidates')
             ->formatValue(function ($value) {
@@ -127,7 +141,14 @@ class InterviewCrudController extends AbstractCrudController
     }
 
 
-
+    /**
+     * @throws TransportExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     */
     #[Route('/interview/calendar', name: 'interview_calendar', methods: ["GET"])]
 
     public function viewCalendar(): Response
@@ -137,6 +158,7 @@ class InterviewCrudController extends AbstractCrudController
 
         return $this->render('interview/index.html.twig', [
             'form' => $form->createView(),
+            'upcomingInterviews' => $this->getUpcomingInterviews(),
         ]);
     }
 
@@ -223,7 +245,7 @@ class InterviewCrudController extends AbstractCrudController
                 return new JsonResponse(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }elseif ($request->isMethod("GET")){
-            $interviews = $this->entityManager->getRepository(Interview::class)->findAll();
+            $interviews = $this->getAllInterviews->findItems();
             $data = array_map(function ($interview) {
                 return [
                     'id' => $interview->getId(),
@@ -255,23 +277,30 @@ class InterviewCrudController extends AbstractCrudController
             return new JsonResponse(['success' => false,'message' => 'An error occurred: '. $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-//    #[Route('/api/upcoming-interviews', name: 'api_upcoming_interviews', methods: ["GET"])]
-//
-//    public function getUpcomingInterviews(): JsonResponse
-//    {
-//        $interviews = $this->entityManager->getRepository(Interview::class)->findUpcomingInterviews();
-//        $formattedInterviews = [];
-//
-//        foreach ($interviews as $interview) {
-//            $formattedInterviews[] = [
-//                'id' => $interview->getId(),
-//                'title' => $interview->getCandidate()->getFullName(),
-//                'start' => $interview->getDateTime()->format('Y-m-d\TH:i:s'),
-//                'location' => $interview->getLocation(),
-//            ];
-//        }
-//
-//        return new JsonResponse($formattedInterviews);
-//    }
+
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws ClientExceptionInterface
+     */
+    public function getUpcomingInterviews(): array
+    {
+        $interviews = $this->allUpcomingInterviews->findItems();
+        $formattedInterviews = [];
+
+        foreach ($interviews as $interview) {
+            $formattedInterviews[] = [
+                'candidate' => $interview->getCandidate()->getFullName(),
+                'date' => $interview->getInterviewDate()->format('Y-m-d'),
+                'evaluators' => $interview->getEvaluators(),
+                'time' => $interview->getInterviewDate()->format('H:i'),
+                'location' => $interview->getInterviewLocation(),
+            ];
+        }
+        return $formattedInterviews;
+    }
 
 }

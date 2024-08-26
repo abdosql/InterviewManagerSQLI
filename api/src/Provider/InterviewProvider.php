@@ -36,4 +36,11 @@ readonly class InterviewProvider extends AbstractProvider implements ProviderInt
             ;
 
     }
+
+    public function getUpcomingInterviews(): array
+    {
+        return $this->documentManager
+            ->getRepository(Interview::class)
+            ->findUpcomingEvents();
+    }
 }

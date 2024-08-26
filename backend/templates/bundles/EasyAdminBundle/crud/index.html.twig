@@ -3,9 +3,7 @@
 
 {% block configured_stylesheets %}
     {{ parent() }}
-    <!-- Core DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
-    <!-- FontAwesome CSS for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 {% endblock %}
 
@@ -21,14 +19,12 @@
                 ordering: true
             });
 
-            // Handle delete action
             $('.action-delete').click(function(e) {
                 e.preventDefault();
                 const deleteUrl = $(this).attr('href');
                 $('#modal-delete').modal('show').data('delete-url', deleteUrl);
             });
 
-            // Handle delete button in modal
             $('#modal-delete-button').click(function(e) {
                 e.preventDefault();
                 const deleteUrl = $('#modal-delete').data('delete-url');
@@ -40,8 +36,7 @@
 
 {% block content_title %}
     {%- apply spaceless -%}
-        {% set custom_page_title = ea.crud.customPageTitle('index', null, ea.i18n.translationParameters) %}
-        {{ custom_page_title is null ? ea.crud.defaultPageTitle('index', null, ea.i18n.translationParameters)|trans|raw : custom_page_title|trans|raw }}
+        {{ entityLabel|trans }}
     {%- endapply -%}
 {% endblock %}
 
@@ -67,7 +62,21 @@
         {% for entity in entities %}
             <tr>
                 {% for field in fields %}
-                    <td>{{ attribute(entity, field.property) }}</td>
+                    <td>
+                        {% if field.property == 'interviewDate' %}
+                            {{ attribute(entity, field.property)|date("Y-m-d H:i:s") }}
+                        {% elseif field.property == 'candidate' %}
+                            <span class="badge badge-danger">{{ attribute(entity, field.property).firstName ~ ' ' ~ attribute(entity, field.property).lastName }}</span>
+                        {% elseif field.property == 'evaluators' %}
+                            {% set evaluators = [] %}
+                            {% for evaluator in attribute(entity, field.property) %}
+                                {% set evaluators = evaluators|merge([evaluator.firstName ~ ' ' ~ evaluator.lastName]) %}
+                            {% endfor %}
+                            <span class="badge badge-secondary">{{ evaluators|join(', ') }}</span>
+                        {% else %}
+                            {{ attribute(entity, field.property) }}
+                        {% endif %}
+                    </td>
                 {% endfor %}
                 <td>
                     {% for action in actions %}
@@ -95,14 +104,9 @@
                 </td>
             </tr>
         {% else %}
-            {% if entities is empty %}
-                <tr>
-                    {% for field in fields %}
-                        <td></td>
-                    {% endfor %}
-                    <td>{{ 'No results found'|trans }}</td>
-                </tr>
-            {% endif %}
+            <tr>
+                <td colspan="{{ fields|length + 1 }}">{{ 'No results found'|trans }}</td>
+            </tr>
         {% endfor %}
         </tbody>
     </table>
