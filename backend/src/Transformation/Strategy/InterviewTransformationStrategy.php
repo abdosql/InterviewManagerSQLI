@@ -6,7 +6,6 @@
 
 namespace App\Transformation\Strategy;
 
-use App\Document\EvaluatorDocument;
 use App\Document\InterviewDocument;
 use App\Entity\Interview;
 use App\Services\Impl\InterviewService;

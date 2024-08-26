@@ -3,5 +3,6 @@
   "build/app.js": "/build/app.js",
   "build/calendar.js": "/build/calendar.js",
   "build/runtime.js": "/build/runtime.js",
-  "build/vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js-node_modules_core-js_modules_es_array-0a85b4.js": "/build/vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js-node_modules_core-js_modules_es_array-0a85b4.js"
+  "build/vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js-node_modules_core-js_modules_es_array-a71f0d.js": "/build/vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js-node_modules_core-js_modules_es_array-a71f0d.js",
+  "build/vendors-node_modules_hotwired_turbo_dist_turbo_es2017-esm_js.js": "/build/vendors-node_modules_hotwired_turbo_dist_turbo_es2017-esm_js.js"
 }
