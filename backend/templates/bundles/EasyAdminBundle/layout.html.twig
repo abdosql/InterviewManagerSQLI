@@ -3,33 +3,31 @@
     {{ parent() }}
     <style>
         .dropdown-menu-scrollable {
-            max-height: 300px; /* Increased height for more content */
+            max-height: 300px;
             overflow-x: auto;
             overflow-y: auto;
-            max-width: 450px; /* Match the width we set earlier */
+            max-width: 450px;
         }
 
-        /* Custom scrollbar styles */
         .dropdown-menu-scrollable::-webkit-scrollbar {
             width: 8px;
         }
 
         .dropdown-menu-scrollable::-webkit-scrollbar-thumb {
-            background-color: #6c757d; /* Color of the scrollbar thumb */
-            border-radius: 4px; /* Rounded corners */
+            background-color: #6c757d;
+            border-radius: 4px;
         }
 
         .dropdown-menu-scrollable::-webkit-scrollbar-thumb:hover {
-            background-color: #495057; /* Darker color on hover */
+            background-color: #495057;
         }
 
         .dropdown-menu-scrollable::-webkit-scrollbar-track {
-            background-color: #e9ecef; /* Background color of the scrollbar track */
+            background-color: #e9ecef;
         }
 
-        /* Additional styles for notification items */
         .dropdown-item {
-            white-space: normal; /* Allow text to wrap */
+            white-space: normal;
             padding: 0.5rem 1rem;
         }
 
@@ -240,25 +238,29 @@
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="all-notifications" role="tabpanel" aria-labelledby="all-tab">
                             <ul class="list-group list-group-flush notification-list">
-                                {% for notification in notifications %}
-                                    <li data-id="{{  notification.getId() }}" id="{% if not notification.isRead() %}unread{% endif %}" class="list-group-item notification-item {% if not notification.isRead() %}unread{% endif %}">
-                                        <a class="d-flex align-items-center text-decoration-none" href="{{ notification.getLink() }}">
-                                            <div class="flex-shrink-0 me-3 position-relative">
-                                                <i class="bi bi-bell-fill fs-4"></i>
-                                                {% if not notification.isRead() %}
-                                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                {% if notifications %}
+                                    {% for notification in notifications %}
+                                        <li data-id="{{  notification.getId() }}" id="{% if not notification.isRead() %}unread{% endif %}" class="list-group-item notification-item {% if not notification.isRead() %}unread{% endif %}">
+                                            <a class="d-flex align-items-center text-decoration-none" href="{{ notification.getLink() }}">
+                                                <div class="flex-shrink-0 me-3 position-relative">
+                                                    <i class="bi bi-bell-fill fs-4"></i>
+                                                    {% if not notification.isRead() %}
+                                                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
                                                     <span class="visually-hidden">Unread notification</span>
                                                 </span>
-                                                {% endif %}
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <div class="{% if not notification.isRead() %}fw-bold{% endif %}">New message received</div>
-                                                <div class="small">{{ notification.getContent() }}</div>
-                                                <div class="small text-muted">{{ notification.createdAt|ago }} Ago</div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                {% endfor %}
+                                                    {% endif %}
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="{% if not notification.isRead() %}fw-bold{% endif %}">New message received</div>
+                                                    <div class="small">{{ notification.getContent() }}</div>
+                                                    <div class="small text-muted">{{ notification.createdAt|ago }} Ago</div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center pb-2 pt-2">No notifications yet.</div>
+                                {% endif %}
                             </ul>
                         </div>
                         <div class="tab-pane fade" id="unread-notifications" role="tabpanel" aria-labelledby="unread-tab">

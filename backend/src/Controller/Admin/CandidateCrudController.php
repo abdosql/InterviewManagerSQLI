@@ -34,6 +34,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -68,6 +69,7 @@ class CandidateCrudController extends AbstractCrudController
      * @throws ContainerExceptionInterface
      * @throws ClientExceptionInterface
      */
+    #[isGranted("ROLE_HR_MANAGER")]
     public function index(AdminContext $context): Response
     {
         $crud = $context->getCrud();
@@ -100,7 +102,7 @@ class CandidateCrudController extends AbstractCrudController
     {
 //        dd($this->candidateService->findDocumentByEntity(1));
         yield IdField::new('id')->hideOnForm();
-        yield FormField::addPanel('Personal information');
+        yield FormField::addPanel('Personal information')->onlyOnForms();
         yield TextField::new("fullName", "Full Name")->hideOnForm();
         yield TextField::new('firstName')
             ->onlyOnForms(true)
@@ -108,7 +110,7 @@ class CandidateCrudController extends AbstractCrudController
         yield TextField::new('lastName')
             ->onlyOnForms(true)
         ;
-        yield FormField::addPanel('Contact Information');
+        yield FormField::addPanel('Contact Information')->onlyOnForms();
         yield TextField::new('phone', "Phone Number");
         yield TextField::new('email', 'Email Address');
         $resumeField = ResumeUploadField::new('resume.filePath', 'Resume')
@@ -128,11 +130,11 @@ class CandidateCrudController extends AbstractCrudController
             ->update(Crud::PAGE_INDEX, Action::EDIT, function (Action $action) {
                 return $action
                     ->setIcon('fa fa-edit');
-            })
+            })->setPermission(Action::EDIT,'ROLE_HR_MANAGER')
             ->update(Crud::PAGE_INDEX, Action::DELETE, function (Action $action) {
                 return $action
                     ->setIcon('fa fa-trash');
-            });
+            })->setPermission(Action::DELETE,'ROLE_HR_MANAGER');
 
         return $actions;
     }
@@ -169,6 +171,8 @@ class CandidateCrudController extends AbstractCrudController
      * @param $entityInstance
      * @throws \Exception
      */
+    #[isGranted("ROLE_HR_MANAGER")]
+
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $this->createOrUpdateCandidate($entityInstance);
@@ -179,6 +183,7 @@ class CandidateCrudController extends AbstractCrudController
      * @param $entityInstance
      * @throws \Exception
      */
+    #[isGranted("ROLE_HR_MANAGER")]
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $this->createOrUpdateCandidate($entityInstance);
@@ -188,6 +193,7 @@ class CandidateCrudController extends AbstractCrudController
      * @param EntityManagerInterface $entityManager
      * @param $entityInstance
      */
+    #[isGranted("ROLE_HR_MANAGER")]
     public function deleteEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $this->deleteCandidate($entityInstance);

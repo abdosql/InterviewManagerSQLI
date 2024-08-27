@@ -34,6 +34,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -105,10 +106,13 @@ class InterviewCrudController extends AbstractCrudController
     public function configureActions(Actions $actions): Actions
     {
         $actions
-            ->update(Crud::PAGE_INDEX, Action::EDIT, function (Action $action) {
+            ->remove(Crud::PAGE_INDEX, Action::DELETE)->setPermission(Action::DELETE, "ROLE_HR_MANAGER")
+            ->remove(Crud::PAGE_INDEX, Action::EDIT)->setPermission(Action::EDIT, "ROLE_HR_MANAGER")
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
+            ->update(Crud::PAGE_INDEX, Action::DETAIL, function (Action $action) {
                 return $action
-                    ->setIcon('fa fa-edit');
-            })->disable(Action::DELETE, Action::EDIT, Action::NEW);
+                    ->setIcon('fa fa-eye');
+            });
 
 
         return $actions;
@@ -124,7 +128,7 @@ class InterviewCrudController extends AbstractCrudController
                 return $value->format("Y-m-d H:i:s");
             });
 
-        yield AssociationField::new('candidate', 'Candidates')
+        yield AssociationField::new('candidate', 'Candidate')
             ->formatValue(function ($value) {
                 return $value->getFirstName() . ' ' . $value->getLastName();
             });
@@ -216,9 +220,6 @@ class InterviewCrudController extends AbstractCrudController
                     $interview->addEvaluator($evaluator);
                 }
 
-
-
-
                 $interviewDate = \DateTime::createFromFormat('Y-m-d\TH:i', $data['date']);
                 if (!$interviewDate) {
                     return new JsonResponse(['success' => false, 'message' => 'Invalid date format'], Response::HTTP_BAD_REQUEST);
@@ -245,7 +246,10 @@ class InterviewCrudController extends AbstractCrudController
                 return new JsonResponse(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         }elseif ($request->isMethod("GET")){
-            $interviews = $this->getAllInterviews->findItems();
+            $interviews = $this->isGranted("ROLE_HR_MANAGER")
+                ? $this->getAllInterviews->findItems()
+                : $this->getAllInterviews->findItems(['userId' => $this->getUser()->getId()])
+            ;
             $data = array_map(function ($interview) {
                 return [
                     'id' => $interview->getId(),
@@ -265,6 +269,7 @@ class InterviewCrudController extends AbstractCrudController
         return new JsonResponse(['success' => false, 'message' => 'Method not allowed'], Response::HTTP_METHOD_NOT_ALLOWED);
     }
 
+    #[IsGranted("ROLE_HR_MANAGER")]
     #[Route('/api/interviews/{id}', name: 'api_delete_interview', methods: ["DELETE"])]
     public function deleteInterview(Interview $interview): JsonResponse
     {
@@ -288,7 +293,10 @@ class InterviewCrudController extends AbstractCrudController
      */
     public function getUpcomingInterviews(): array
     {
-        $interviews = $this->allUpcomingInterviews->findItems();
+        $interviews = $this->isGranted("ROLE_HR_MANAGER")
+            ? $this->allUpcomingInterviews->findItems()
+            : $this->allUpcomingInterviews->findItems(['userId' => $this->getUser()->getId()])
+        ;
         $formattedInterviews = [];
 
         foreach ($interviews as $interview) {

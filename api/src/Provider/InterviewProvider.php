@@ -8,6 +8,7 @@ namespace App\Provider;
 
 use App\Document\Interview;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use MongoDB\BSON\ObjectId;
 
 readonly class InterviewProvider extends AbstractProvider implements ProviderInterface
 {
@@ -37,10 +38,19 @@ readonly class InterviewProvider extends AbstractProvider implements ProviderInt
 
     }
 
-    public function getUpcomingInterviews(): array
+    public function getUpcomingInterviews(?ObjectId $userId = null): array
     {
-        return $this->documentManager
-            ->getRepository(Interview::class)
-            ->findUpcomingEvents();
+        $criteria = ['interviewDate' => ['$gte' => new \DateTime()]];
+        if ($userId) {
+            $criteria['evaluators.$id'] = $userId;
+        }
+
+        return $this->getAllOrBy($criteria, ['interviewDate' => 'ASC']);
     }
+//    public function getUpcomingInterviews(): array
+//    {
+//        return $this->documentManager
+//            ->getRepository(Interview::class)
+//            ->findUpcomingEvents();
+//    }
 }

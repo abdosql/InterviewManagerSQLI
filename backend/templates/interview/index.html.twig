@@ -11,10 +11,12 @@
 {% block main %}
     <div class="row">
         <div class="col-3">
-            <div class="mb-4">
-                <button id="add-interview"  class="btn btn-primary w-100 pb-2 pt-2"><i class="fa-solid fa-plus"></i> Create New Event</button>
+            {% if is_granted("ROLE_HR_MANAGER") %}
+                <div class="mb-4">
+                    <button id="add-interview"  class="btn btn-primary w-100 pb-2 pt-2"><i class="fa-solid fa-plus"></i> Create New Event</button>
 
-            </div>
+                </div>
+            {% endif  %}
             <div>
                 <h5 class="mb-2">Upcoming Interviews</h5>
                 <p class="text-muted mb-4">Don't miss scheduled events</p>
@@ -109,6 +111,6 @@
 
 {% block body_javascript %}
     {{ parent() }}
-{#    {{ encore_entry_script_tags('chosen') }}}#}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     {{ encore_entry_script_tags('calendar') }}
 {% endblock %}

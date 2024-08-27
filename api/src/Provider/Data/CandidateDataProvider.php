@@ -32,6 +32,7 @@ readonly class CandidateDataProvider implements ProviderInterface
             return $this->candidateProvider->getByEntityId((int)$uriVariables['id']);
         } else {
             $criteria = $context['filters'] ?? [];
+
             return !empty($criteria)
                 ? $this->candidateProvider->getAllOrBy($criteria)
                 : $this->candidateProvider->getAllOrBy();
