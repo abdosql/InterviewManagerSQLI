@@ -6,8 +6,9 @@
 
 namespace App\Transformation\Strategy;
 
+
 use App\Document\InterviewDocument;
-use App\Entity\Candidate;
+use App\Document\InterviewStatusDocument;
 use App\Entity\Interview;
 use App\Services\Impl\CandidateService;
 use App\Services\Impl\InterviewService;
@@ -29,6 +30,17 @@ readonly class InterviewTransformationStrategy implements TransformToDocumentStr
         $hrManagerDocument = $this->userService->findDocument($entity->getHrManager()->getId());
         $candidateDocument = $this->candidateService->findDocument($entity->getCandidate()->getId());
         $interviewDocument = new InterviewDocument();
+        foreach ($entity->getInterviewStatuses() as $interviewStatus){
+            $interviewStatusDocument = new InterviewStatusDocument();
+            $interviewStatusDocument
+                ->setStatus($interviewStatus->getStatus())
+                ->setEntityId($interviewStatus->getId())
+                ->setStatusDate($interviewStatus->getStatusDate())
+                ->setInterview($interviewDocument)
+            ;
+            $interviewDocument->addInterviewStatus($interviewStatusDocument);
+        }
+
         $interviewDocument
             ->setInterviewDate($entity->getInterviewDate())
             ->setInterviewLocation($entity->getInterviewLocation())

@@ -42,10 +42,18 @@ class Interview
     #[ORM\ManyToMany(targetEntity: Evaluator::class, mappedBy: 'interviews')]
     private Collection $evaluators;
 
+    /**
+     * @var Collection<int, InterviewStatus>
+     */
+    #[ORM\OneToMany(targetEntity: InterviewStatus::class, mappedBy: 'interview', cascade: ['persist'])]
+    private Collection $interviewStatuses;
+
+
     public function __construct()
     {
         $this->appreciations = new ArrayCollection();
         $this->evaluators = new ArrayCollection();
+        $this->interviewStatuses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -157,4 +165,35 @@ class Interview
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, InterviewStatus>
+     */
+    public function getInterviewStatuses(): Collection
+    {
+        return $this->interviewStatuses;
+    }
+
+    public function addInterviewStatus(InterviewStatus $interviewStatus): static
+    {
+        if (!$this->interviewStatuses->contains($interviewStatus)) {
+            $this->interviewStatuses->add($interviewStatus);
+            $interviewStatus->setInterview($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInterviewStatus(InterviewStatus $interviewStatus): static
+    {
+        if ($this->interviewStatuses->removeElement($interviewStatus)) {
+            // set the owning side to null (unless already changed)
+            if ($interviewStatus->getInterview() === $this) {
+                $interviewStatus->setInterview(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

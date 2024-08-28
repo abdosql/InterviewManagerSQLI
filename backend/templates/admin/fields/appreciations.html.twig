@@ -1,0 +1,9 @@
+{# templates/admin/fields/appreciations.html.twig #}
+{% for appreciation in field.value %}
+    <div class="appreciation">
+        <h5>{{ appreciation.comment }}</h5>
+        <p>Score: {{ appreciation.score }}</p>
+    </div>
+{% else %}
+    <p>No appreciations available.</p>
+{% endfor %}

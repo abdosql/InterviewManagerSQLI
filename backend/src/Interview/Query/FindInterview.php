@@ -7,7 +7,6 @@
 namespace App\Interview\Query;
 
 use App\Adapter\DataTransformationAdapter;
-use App\Document\CandidateDocument;
 use App\Document\InterviewDocument;
 use App\Entity\Interview;
 use Psr\Container\ContainerExceptionInterface;
@@ -41,15 +40,16 @@ class FindInterview extends AbstractQuery implements ItemQueryInterface
     public function findItem(int $id): ?Interview
     {
         try {
-            $url = $this->apiBaseUrl."api/candidates/{$id}";
+            $url = $this->apiBaseUrl."api/interviews/{$id}";
             $response = $this->httpClient->request('GET', $url, [
                 'timeout' => 10,
                 'max_redirects' => 0,
                 'verify_peer' => false,
                 'verify_host' => false,
             ])->getContent();
+
             $interviewDocument = $this->serializer->deserialize($response, InterviewDocument::class, 'json');
-            return $this->transformationAdapter->transformToEntity($interviewDocument, 'Interview');
+            return $this->transformationAdapter->transformToEntity($interviewDocument, 'interview');
         } catch (HttpExceptionInterface $e) {
             if ($e->getResponse()->getStatusCode() === Response::HTTP_NOT_FOUND) {
                 return null;

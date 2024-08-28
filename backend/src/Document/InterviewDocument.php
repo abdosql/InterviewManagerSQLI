@@ -13,7 +13,7 @@ class InterviewDocument
     private $id;
 
     #[MongoDB\Field(type: "date")]
-    private $interviewDate;
+    private ?\DateTimeInterface $interviewDate;
 
     #[MongoDB\Field(type: "string")]
     private ?string $interviewLocation;
@@ -22,13 +22,16 @@ class InterviewDocument
     private ?CandidateDocument $candidate;
 
     #[MongoDB\ReferenceMany(targetDocument: EvaluatorDocument::class, inversedBy: "interviews")]
-    private ArrayCollection $evaluators;
+    private Collection $evaluators;
 
     #[MongoDB\ReferenceOne(targetDocument: HRManagerDocument::class, inversedBy: "interviews")]
     private ?HRManagerDocument $hrManager;
 
     #[MongoDB\ReferenceMany(targetDocument: AppreciationDocument::class, mappedBy: "interview")]
-    private ArrayCollection $appreciations;
+    private Collection $appreciations;
+
+    #[MongoDB\ReferenceMany(targetDocument: InterviewStatusDocument::class, cascade: ['persist', 'remove'], mappedBy: 'interview')]
+    private Collection $interviewStatuses;
 
     #[MongoDB\Field(type: "int")]
     private ?int $entityId;
@@ -37,6 +40,7 @@ class InterviewDocument
     {
         $this->appreciations = new ArrayCollection();
         $this->evaluators = new ArrayCollection();
+        $this->interviewStatuses = new ArrayCollection();
     }
 
     public function getId(): ?string
@@ -134,13 +138,38 @@ class InterviewDocument
         return $this;
     }
 
-    public function getEntityId():?int
+    public function getEntityId(): ?int
     {
         return $this->entityId;
     }
+
     public function setEntityId(?int $entityId): self
     {
         $this->entityId = $entityId;
+        return $this;
+    }
+
+    public function getInterviewStatuses(): Collection
+    {
+        return $this->interviewStatuses;
+    }
+
+    public function addInterviewStatus(InterviewStatusDocument $interviewStatus): self
+    {
+        if (!$this->interviewStatuses->contains($interviewStatus)) {
+            $this->interviewStatuses[] = $interviewStatus;
+            $interviewStatus->setInterview($this);
+        }
+        return $this;
+    }
+
+    public function removeInterviewStatus(InterviewStatusDocument $interviewStatus): self
+    {
+        if ($this->interviewStatuses->removeElement($interviewStatus)) {
+            if ($interviewStatus->getInterview() === $this) {
+                $interviewStatus->setInterview(null);
+            }
+        }
         return $this;
     }
 }

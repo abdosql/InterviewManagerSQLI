@@ -20,9 +20,9 @@ class InterviewStatus
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $status_date = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(cascade: ["persist"], inversedBy: 'interviewStatuses')]
     private ?Interview $interview = null;
+
 
     public function getId(): ?int
     {
@@ -58,10 +58,12 @@ class InterviewStatus
         return $this->interview;
     }
 
-    public function setInterview(Interview $interview): static
+    public function setInterview(?Interview $interview): static
     {
         $this->interview = $interview;
 
         return $this;
     }
+    
+
 }

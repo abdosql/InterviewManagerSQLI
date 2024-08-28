@@ -6,7 +6,7 @@
 
 namespace App\Interview\Command;
 
-use App\Candidate\Command\CommandInterface;
+use App\Appreciation\Command\CommandInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 

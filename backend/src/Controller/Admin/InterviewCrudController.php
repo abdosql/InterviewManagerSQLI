@@ -3,17 +3,20 @@
 namespace App\Controller\Admin;
 
 use App\Candidate\Query\FindCandidate;
+use App\Document\InterviewStatusDocument;
 use App\Entity\Interview;
-use App\Form\InterviewType;
+use App\Entity\InterviewStatus;
+use App\Form\Type\FroalaEditorType;
+use App\Form\Type\InterviewType;
 use App\Interview\Command\CreateInterviewCommand;
 use App\Interview\Command\DeleteInterviewCommand;
 use App\Interview\Command\Handler\CommandHandlerInterface;
+use App\Interview\Query\FindInterview;
 use App\Interview\Query\GetAllInterviews;
 use App\Interview\Query\GetAllUpcomingInterviews;
-use App\Publisher\MercurePublisher;
+use App\Interview\Query\ItemQueryInterface;
 use App\Publisher\PublisherInterface;
 use App\Services\Impl\InterviewService;
-use App\User\Query\FindUser;
 use App\User\Query\GetUsersByIds;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -23,12 +26,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use phpDocumentor\Reflection\Types\This;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,6 +43,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use function Symfony\Component\Clock\now;
 
 class InterviewCrudController extends AbstractCrudController
 {
@@ -52,7 +57,9 @@ class InterviewCrudController extends AbstractCrudController
         private readonly PublisherInterface  $mercurePublisher,
         private readonly AdminUrlGenerator       $adminUrlGenerator,
         private readonly GetAllInterviews $getAllInterviews,
-        private readonly GetAllUpcomingInterviews $allUpcomingInterviews
+        private readonly GetAllUpcomingInterviews $allUpcomingInterviews,
+        #[Autowire(service: FindInterview::class)]
+        private readonly ItemQueryInterface $interviewItemQuery,
 
 
     )
@@ -97,6 +104,13 @@ class InterviewCrudController extends AbstractCrudController
         ]);
     }
 
+    public function configureCrud(Crud $crud): Crud
+    {
+        return parent::configureCrud($crud)
+            ->overrideTemplates([
+            'crud/detail' => 'admin/interview/detail.html.twig',
+        ]);
+    }
 
     public static function getEntityFqcn(): string
     {
@@ -111,16 +125,17 @@ class InterviewCrudController extends AbstractCrudController
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->update(Crud::PAGE_INDEX, Action::DETAIL, function (Action $action) {
                 return $action
-                    ->setIcon('fa fa-eye');
+                    ->setIcon('fa fa-eye')
+                    ;
             });
 
 
         return $actions;
     }
 
-
     public function configureFields(string $pageName): iterable
     {
+        yield FormField::addPanel('Candidate information')->onlyOnDetail();
         yield IdField::new('id')->hideOnForm();
         yield TextField::new('interviewLocation', "Location")->hideOnForm();
         yield DateField::new('interviewDate', "Date and Time")->hideOnForm()
@@ -130,7 +145,8 @@ class InterviewCrudController extends AbstractCrudController
 
         yield AssociationField::new('candidate', 'Candidate')
             ->formatValue(function ($value) {
-                return $value->getFirstName() . ' ' . $value->getLastName();
+                $resumePath = $value->getResume()->getFilePath();
+                return $value->getFirstName() . ' ' . $value->getLastName(). '<a class="btn btn-sm btn-secondary ms-3" href='.$resumePath.'>Download Resume<a/>';
             });
 
         yield AssociationField::new('evaluators', 'Evaluators')
@@ -142,6 +158,24 @@ class InterviewCrudController extends AbstractCrudController
                 return implode(', ', $evaluators);
             });
 
+    }
+
+    public function detail(AdminContext $context): Response
+    {
+        $keyValueStore = parent::detail($context);
+//        $entityId = $context->getRequest()->query->get("entityId");
+//        $interviewInstance = $this->interviewItemQuery->findItem($entityId);
+//        dd($interviewInstance);
+
+        $parameters = $keyValueStore->all();
+        // Create an empty Froala form
+        $form = $this->createForm(FroalaEditorType::class);
+
+        // Add the form view to the parameters
+        $parameters['froalaForm'] = $form->createView();
+
+        // Render the response with the additional parameter
+        return $this->render($context->getTemplatePath('crud/detail'), $parameters);
     }
 
 
@@ -224,13 +258,21 @@ class InterviewCrudController extends AbstractCrudController
                 if (!$interviewDate) {
                     return new JsonResponse(['success' => false, 'message' => 'Invalid date format'], Response::HTTP_BAD_REQUEST);
                 }
-
+                $interviewStatus = new InterviewStatus();
+                $interviewStatus
+                    ->setStatus('Scheduled')
+                    ->setInterview($interview)
+                    ->setStatusDate(now())
+                ;
                 $interview
                     ->setInterviewDate($interviewDate)
                     ->setInterviewLocation($data['location'])
                     ->setCandidate($candidate)
-                    ->setHrManager($this->getUser());
+                    ->setHrManager($this->getUser())
+                    ->addInterviewStatus($interviewStatus)
+
                 ;
+
                 $command = new CreateInterviewCommand($interview, $this->interviewService, $this->messageBus);
                 $this->commandHandler->handle($command);
                 //hna notifications

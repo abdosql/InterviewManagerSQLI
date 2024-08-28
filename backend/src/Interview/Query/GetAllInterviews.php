@@ -7,6 +7,7 @@
 namespace App\Interview\Query;
 
 use App\Adapter\DataTransformationAdapter;
+use App\Document\Interview;
 use App\Document\InterviewDocument;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;

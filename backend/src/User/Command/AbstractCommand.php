@@ -6,7 +6,7 @@
 
 namespace App\User\Command;
 
-use App\Candidate\Command\CommandInterface;
+use App\Appreciation\Command\CommandInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 
 readonly abstract class AbstractCommand implements CommandInterface

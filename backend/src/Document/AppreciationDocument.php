@@ -8,16 +8,19 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 class AppreciationDocument
 {
     #[MongoDB\Id]
-    private $id;
+    private ?string $id;
 
     #[MongoDB\Field(type: "string")]
-    private $comment;
+    private ?string $comment;
 
     #[MongoDB\Field(type: "int")]
-    private $score;
+    private ?int $score;
 
     #[MongoDB\ReferenceOne(targetDocument: InterviewDocument::class, inversedBy: "appreciations")]
-    private $interview;
+    private ?InterviewDocument $interview;
+
+    #[MongoDB\Field(type: "int")]
+    protected ?int $entityId;
 
     public function getId(): ?string
     {
@@ -56,4 +59,19 @@ class AppreciationDocument
         $this->interview = $interview;
         return $this;
     }
+    public function getEntityId():?int
+    {
+        return $this->entityId;
+    }
+
+    /**
+     * @param int|null $entityId
+     * @return AppreciationDocument
+     */
+    public function setEntityId(?int $entityId): self
+    {
+        $this->entityId = $entityId;
+        return $this;
+    }
+
 }

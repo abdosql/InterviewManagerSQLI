@@ -51,7 +51,7 @@ class HRManagerDocument extends UserDocument
         return $this->interviews;
     }
 
-    public function addInterview(InterviewDocument $interview): self
+    public function addInterview(Interview $interview): self
     {
         if (!$this->interviews->contains($interview)) {
             $this->interviews->add($interview);

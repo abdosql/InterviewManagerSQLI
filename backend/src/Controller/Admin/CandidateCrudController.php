@@ -7,15 +7,14 @@
 namespace App\Controller\Admin;
 
 use App\Candidate\Command\CreateCandidateCommand;
-use App\Candidate\Command\DeleteCandidateCommand;
 use App\Candidate\Command\Handler\CommandHandlerInterface;
-use App\Candidate\Command\UpdateCandidateCommand;
 use App\Candidate\Query\FindCandidate;
 use App\Candidate\Query\GetAllCandidates;
 use App\EasyAdmin\Fields\ResumeUploadField;
 use App\Entity\Candidate;
 use App\File\FileUploaderInterface;
-use App\File\Uploader\MinioUploader;
+use App\File\Uploader\DefaultFileUploader;
+use App\Form\Type\PdfViewerType;
 use App\Services\Impl\CandidateService;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -46,13 +45,15 @@ class CandidateCrudController extends AbstractCrudController
 
     public function __construct(
         private readonly CommandHandlerInterface $commandHandler,
-        #[Autowire(service: MinioUploader::class)]
+        #[Autowire(service: DefaultFileUploader::class)]
         private readonly FileUploaderInterface   $resumeUploadService,
         private readonly CandidateService        $candidateService,
         private readonly MessageBusInterface     $messageBus,
         private readonly FindCandidate           $findCandidateQuery,
         private readonly GetAllCandidates        $allCandidates,
         private readonly AdminUrlGenerator       $adminUrlGenerator,
+        #[Autowire(env: "BASE_DIR")]
+        private readonly string $baseDir
     )
     {}
 
@@ -123,10 +124,14 @@ class CandidateCrudController extends AbstractCrudController
         }
         yield $resumeField;
         yield TextField::new('address', "Address");
+        yield PdfViewerType::new('resume.filePath', 'Resume')
+            ->setCustomOption('pdfBaseDir', $this->baseDir)
+            ->onlyOnDetail();
     }
     public function configureActions(Actions $actions): Actions
     {
         $actions
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
             ->update(Crud::PAGE_INDEX, Action::EDIT, function (Action $action) {
                 return $action
                     ->setIcon('fa fa-edit');

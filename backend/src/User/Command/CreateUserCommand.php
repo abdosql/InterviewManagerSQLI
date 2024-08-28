@@ -2,7 +2,7 @@
 
 namespace App\User\Command;
 
-use App\Candidate\Command\AbstractCommand;
+use App\Appreciation\Command\AbstractCommand;
 use App\Entity\Evaluator;
 use App\Entity\HRManager;
 use App\Entity\User;

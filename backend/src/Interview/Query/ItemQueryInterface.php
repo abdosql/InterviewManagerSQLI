@@ -6,7 +6,6 @@
 
 namespace App\Interview\Query;
 
-use App\Entity\Candidate;
 
 interface ItemQueryInterface
 {

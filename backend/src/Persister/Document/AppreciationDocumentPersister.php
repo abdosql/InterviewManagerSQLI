@@ -2,7 +2,7 @@
 
 namespace App\Persister\Document;
 
-class AppreciationDocumentPersister
+class AppreciationDocumentPersister extends AbstractDocumentPersister
 {
 
 }

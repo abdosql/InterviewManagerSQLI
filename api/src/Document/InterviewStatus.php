@@ -4,7 +4,7 @@ namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
-#[MongoDB\Document(collection: "interview_statuses")]
+#[MongoDB\Document(collection: "interviewStatuses")]
 class InterviewStatus
 {
     #[MongoDB\Id]
@@ -16,8 +16,10 @@ class InterviewStatus
     #[MongoDB\Field(type: "date")]
     private ?\DateTimeInterface $statusDate;
 
-    #[MongoDB\ReferenceOne(targetDocument: Interview::class, inversedBy: "status")]
-    private ?Interview $interview;
+    #[MongoDB\ReferenceOne(targetDocument: Interview::class, inversedBy: "interviewStatuses")]
+    private ?Interview $interview = null;
+    #[MongoDB\Field(type: "int")]
+    private ?int $entityId;
 
     public function getId(): ?string
     {
@@ -51,9 +53,19 @@ class InterviewStatus
         return $this->interview;
     }
 
-    public function setInterview(Interview $interview): self
+    public function setInterview(?Interview $interview): self
     {
         $this->interview = $interview;
+        return $this;
+    }
+    public function getEntityId(): ?int
+    {
+        return $this->entityId;
+    }
+
+    public function setEntityId(?int $entityId): self
+    {
+        $this->entityId = $entityId;
         return $this;
     }
 }

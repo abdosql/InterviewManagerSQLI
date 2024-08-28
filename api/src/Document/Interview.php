@@ -47,7 +47,8 @@ class Interview
 
     #[MongoDB\ReferenceMany(targetDocument: Appreciation::class, mappedBy: "interview")]
     private ArrayCollection $appreciations;
-
+    #[MongoDB\ReferenceMany(targetDocument: InterviewStatus::class, cascade: ['persist', 'remove'], mappedBy: 'interview')]
+    private Collection $interviewStatuses;
     #[MongoDB\Field(type: "int")]
     private ?int $entityId;
 
@@ -55,6 +56,8 @@ class Interview
     {
         $this->appreciations = new ArrayCollection();
         $this->evaluators = new ArrayCollection();
+        $this->interviewStatuses = new ArrayCollection();
+
     }
 
     public function getId(): ?string
@@ -160,4 +163,30 @@ class Interview
         $this->entityId = $entityId;
         return $this;
     }
+
+    public function getInterviewStatuses(): Collection
+    {
+        return $this->interviewStatuses;
+    }
+
+    public function addInterviewStatus(InterviewStatus $interviewStatus): self
+    {
+        if (!$this->interviewStatuses->contains($interviewStatus)) {
+            $this->interviewStatuses[] = $interviewStatus;
+            $interviewStatus->setInterview($this);
+        }
+        return $this;
+    }
+
+    public function removeInterviewStatus(InterviewStatus $interviewStatus): self
+    {
+        if ($this->interviewStatuses->removeElement($interviewStatus)) {
+            if ($interviewStatus->getInterview() === $this) {
+                $interviewStatus->setInterview(null);
+            }
+        }
+        return $this;
+    }
+
+
 }
