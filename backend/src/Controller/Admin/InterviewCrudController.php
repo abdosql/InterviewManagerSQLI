@@ -392,17 +392,21 @@ class InterviewCrudController extends AbstractCrudController
 
 
 
-    #[Route('/interview/ai-feedback', name: 'interview_ai_feedback')]
-    public function getAIFeedback(): Response
+    #[Route('/interview/ai-reformulation', name: 'interview_ai_reformulation')]
+    public function getAIReformulation(Request $request): Response
     {
-        $prompt = "
-            {
-              'comment': 'The candidate's performance was poor. They didn't seem to know much about the job. Their communication skills were lacking',
-              'score': 5/20
-            }
-        ";
-        $jsonResponse = $this->AIInterviewService->generateInterviewFeedback($prompt);
+        $content = $request->getContent();
 
-        return new JsonResponse(['aiFeedback' => $aiFeedback]);
+        $data = json_decode($content, true);
+
+        if (isset($data['prompt'])) {
+            $prompt = $data['prompt'];
+        } else {
+            return new JsonResponse(['error' => 'Prompt is missing from the request body'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $arrayResponse = $this->AIInterviewService->generateInterviewReformulation($prompt);
+
+        return new JsonResponse(['aiReformulation' => $arrayResponse]);
     }
 }

@@ -20,14 +20,14 @@ readonly class AIFacade
         #[Autowire(env: "AI_DEFAULT_MODEL")]
         private string $DefaultModel
     ) {}
-    public function getAIResponse(string $prompt): string
+    public function getAIResponse(string $prompt): array
     {
         $aiService = $this->aiServiceFactory->createService($this->ServiceType);
         $response = $aiService->generateResponse($prompt, $this->DefaultModel);
         return $this->collectResponse($response);
     }
 
-    private function collectResponse(array $response): string
+    private function collectResponse(array $response): array
     {
         if ($response['status'] === 'error') {
             throw new \RuntimeException('AI Service error: ' . ($response['message'] ?? 'Unknown error'));
@@ -46,17 +46,15 @@ readonly class AIFacade
                 $comment = $matches[1];
                 $score = floatval($matches[2]);
 
-                $result = [
+                return [
                     'comment' => $comment,
                     'score' => $score
                 ];
-
-                dd($result);
             } else {
                 echo "Failed to parse the response.";
             }
         }
+        return [];
 
-        throw new \RuntimeException('Unexpected response format from AI service');
     }
 }
