@@ -108,6 +108,8 @@
                     <span class="badge badge-success p-2" style="font-size: 1rem">Interview Done, Candidate Passed !</span>
                 {% elseif latestStatus and latestStatus.getStatus() == "IS_FAILED" %}
                     <span class="badge badge-danger p-2" style="font-size: 1rem">Interview Done, Candidate Failed !</span>
+                {% else %}
+                    <span class="badge badge-warning p-2" style="font-size: 1rem">Interview is scheduled.</span>
                 {% endif %}
             </span>
 
@@ -138,7 +140,7 @@
             {% elseif interviewDate|date("Y-m-d") == currentDate %}
                 <span class="badge badge-warning p-2" style="font-size: 1rem">Interview Scheduled for Today</span>
             {% else %}
-                <span class="badge badge-danger p-2" style="font-size: 1rem">Interview Not Started Yet</span>
+                <span class="badge badge-warning p-2" style="font-size: 1rem">Interview is scheduled.</span>
             {% endif %}
         {% endif %}
         {% block delete_form %}
