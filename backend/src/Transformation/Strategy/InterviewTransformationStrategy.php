@@ -7,6 +7,7 @@
 namespace App\Transformation\Strategy;
 
 
+use App\Document\AppreciationDocument;
 use App\Document\InterviewDocument;
 use App\Document\InterviewStatusDocument;
 use App\Entity\Interview;
@@ -40,6 +41,18 @@ readonly class InterviewTransformationStrategy implements TransformToDocumentStr
             ;
             $interviewDocument->addInterviewStatus($interviewStatusDocument);
         }
+
+        // Transform Appreciations
+        foreach ($entity->getAppreciations() as $appreciation) {
+            $appreciationDocument = new AppreciationDocument();
+            $appreciationDocument
+                ->setComment($appreciation->getComment())
+                ->setScore($appreciation->getScore())
+                ->setEntityId($appreciation->getId())
+                ->setInterview($interviewDocument);
+            $interviewDocument->addAppreciation($appreciationDocument);
+        }
+
 
         $interviewDocument
             ->setInterviewDate($entity->getInterviewDate())

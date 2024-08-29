@@ -16,7 +16,7 @@ class InterviewStatusDocument
     #[MongoDB\Field(type: "date")]
     private ?\DateTimeInterface $statusDate;
 
-    #[MongoDB\ReferenceOne(targetDocument: InterviewDocument::class, inversedBy: "interviewStatuses")]
+    #[MongoDB\ReferenceOne(targetDocument: InterviewDocument::class, cascade: ["persist"], inversedBy: "interviewStatuses")]
     private ?InterviewDocument $interview = null;
 
     #[MongoDB\Field(type: "int")]

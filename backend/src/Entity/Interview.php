@@ -33,7 +33,7 @@ class Interview
     /**
      * @var Collection<int, Appreciation>
      */
-    #[ORM\OneToMany(targetEntity: Appreciation::class, mappedBy: 'interview')]
+    #[ORM\OneToMany(targetEntity: Appreciation::class, mappedBy: 'interview', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $appreciations;
 
     /**
@@ -45,7 +45,7 @@ class Interview
     /**
      * @var Collection<int, InterviewStatus>
      */
-    #[ORM\OneToMany(targetEntity: InterviewStatus::class, mappedBy: 'interview', cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: InterviewStatus::class, mappedBy: 'interview', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $interviewStatuses;
 
 

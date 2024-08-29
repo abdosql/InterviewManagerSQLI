@@ -7,9 +7,11 @@ namespace App\Controller\Api;
 use App\Appreciation\Command\AddAppreciationCommand;
 use App\Appreciation\Command\Handler\CommandHandlerInterface;
 use App\Appreciation\Command\Handler\DefaultCommandHandler;
+use App\Appreciation\Query\GetAllAppreciationsByInterview;
 use App\Entity\Appreciation;
 use App\Interview\Query\FindInterview;
 use App\Interview\Query\ItemQueryInterface;
+use App\Appreciation\Query\ItemsQueryInterface;
 use App\Services\Impl\AppreciationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -28,8 +30,10 @@ class AppreciationController extends AbstractController
         private readonly CommandHandlerInterface $commandHandler,
         #[Autowire(service: FindInterview::class)]
         private readonly ItemQueryInterface $interviewItemQuery,
+        #[Autowire(service: GetAllAppreciationsByInterview::class)]
+        private readonly ItemsQueryInterface $appreciationsItemsQuery,
     ){}
-    #[Route('/api/interview/appreciation', name: "app-appreciation", methods: ["GET", "POST"])]
+    #[Route('/api/interview/appreciation', name: "app-appreciation", methods: ["POST"])]
     public function index(Request $request): Response
     {
         if ($request->isMethod("GET")){
@@ -63,5 +67,22 @@ class AppreciationController extends AbstractController
         $command = new AddAppreciationCommand($appreciation, $this->appreciationService, $this->messageBus);
         $this->commandHandler->handle($command);
         return new JsonResponse(['status' => 'success', 'id' => $appreciation->getId()], Response::HTTP_OK);
+    }
+
+    #[Route('/api/interview/{interviewId}/appreciations', name: "get-appreciations", methods: ["GET"])]
+    public function getAppreciations(int $interviewId): Response
+    {
+        $appreciations = $this->appreciationsItemsQuery->findItems(["interviewId" => $interviewId]);
+
+        if (!$appreciations) {
+            return new JsonResponse(['error' => 'Interview not found'], Response::HTTP_NOT_FOUND);
+        }
+        $appreciationsArray = array_map(function (Appreciation $appreciation) {
+            return [
+                'comment' => $appreciation->getComment(),
+                'score' => $appreciation->getScore(),
+            ];
+        }, $appreciations);
+        return new JsonResponse($appreciationsArray);
     }
 }

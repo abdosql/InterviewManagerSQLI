@@ -21,6 +21,7 @@ class Appreciation
     private ?int $score = null;
 
     #[ORM\ManyToOne(inversedBy: 'appreciations')]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Interview $interview = null;
 
     public function getId(): ?int

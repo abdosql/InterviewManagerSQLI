@@ -262,7 +262,7 @@ class InterviewCrudController extends AbstractCrudController
                 }
                 $interviewStatus = new InterviewStatus();
                 $interviewStatus
-                    ->setStatus('Scheduled')
+                    ->setStatus('SCHEDULED')
                     ->setInterview($interview)
                     ->setStatusDate(now())
                 ;
@@ -363,6 +363,7 @@ class InterviewCrudController extends AbstractCrudController
     {
         $data = json_decode($request->getContent(), true);
         $status = $data['status'];
+
         $interviewId = $data['interviewId'];
         if (empty($status)) {
             return new JsonResponse([

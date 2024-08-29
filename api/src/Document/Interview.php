@@ -45,9 +45,9 @@ class Interview
     #[MongoDB\ReferenceOne(targetDocument: HRManager::class, inversedBy: "interviews")]
     private ?HRManager $hrManager;
 
-    #[MongoDB\ReferenceMany(targetDocument: Appreciation::class, mappedBy: "interview")]
+    #[MongoDB\ReferenceMany(targetDocument: Appreciation::class, cascade: ["persist", "remove"], mappedBy: "interview")]
     private ArrayCollection $appreciations;
-    #[MongoDB\ReferenceMany(targetDocument: InterviewStatus::class, cascade: ['persist', 'remove'], mappedBy: 'interview')]
+    #[MongoDB\ReferenceMany(targetDocument: InterviewStatus::class, cascade: ["persist", "remove"], mappedBy: 'interview')]
     private Collection $interviewStatuses;
     #[MongoDB\Field(type: "int")]
     private ?int $entityId;

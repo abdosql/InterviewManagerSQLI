@@ -1,10 +1,13 @@
 import FroalaEditor from 'froala-editor/js/froala_editor.pkgd.min';
 import 'froala-editor/css/froala_editor.pkgd.min.css';
 const getElement = (id) => document.getElementById(id);
-const querySelector = (selector) => document.querySelector(selector);
 document.addEventListener('DOMContentLoaded', () => {
         initializeFroalaEditors();
-        addAppreciation();
+        if (getElement('save-notes')) {
+            addAppreciation();
+        }
+        refreshAccordionContent();
+        initializeInterviewStatusButtons();
 });
 
 function animateSaveIndicator() {
@@ -45,27 +48,39 @@ function getFormData() {
     };
 }
 function addAppreciation() {
-    const saveButton = querySelector('#save-notes');
-    saveButton.addEventListener('click', async function(event) {
-        event.preventDefault();
+    const saveButton = getElement('save-notes');
+    if (saveButton) {
+        saveButton.addEventListener('click', function(event) {
+            event.preventDefault();
 
-        const formData = getFormData();
-        saveButton.disabled = true;
-        try {
-            const success = await sendAppreciation(formData);
-            console.log(success)
-            if (success === "success") {
-                animateSaveIndicator();
-                console.log("Appreciation saved successfully!");
-            } else {
-                console.error("There was an error saving the appreciation.");
+            const formData = getFormData();
+            
+            // Check if fields are empty
+            if (!formData.comment || !formData.score) {
+                alert('Please fill in both the comment and score fields before saving.');
+                return;
             }
-        } catch (error) {
-            console.error("Error saving appreciation:", error);
-        } finally {
-            saveButton.disabled = false;
-        }
-    });
+
+            saveButton.disabled = true;
+            
+            sendAppreciation(formData)
+                .then(success => {
+                    if (success === "success") {
+                        animateSaveIndicator();
+                        console.log("Appreciation saved successfully!");
+                        return refreshAccordionContent();
+                    } else {
+                        console.error("There was an error saving the appreciation.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error saving appreciation:", error);
+                })
+                .finally(() => {
+                    saveButton.disabled = false;
+                });
+        });
+    }
 }
 // API interaction
 async function sendAppreciation(formData) {
@@ -94,24 +109,27 @@ async function sendAppreciation(formData) {
 const showEditorBtn = getElement('show-editor');
 const editorContainer = getElement('froala-editor-container');
 
-showEditorBtn.addEventListener('click', function() {
-    addInterviewStatus();
-    editorContainer.style.display = 'block';
-    editorContainer.style.opacity = '0';
-    editorContainer.style.transform = 'translateY(-20px)';
-    editorContainer.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+if (showEditorBtn && editorContainer) {
+    showEditorBtn.addEventListener('click', function() {
+        InterviewStatusInProgress();
+        editorContainer.style.display = 'block';
+        editorContainer.style.opacity = '0';
+        editorContainer.style.transform = 'translateY(-20px)';
+        editorContainer.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
 
-    setTimeout(function() {
-        editorContainer.style.opacity = '1';
-        editorContainer.style.transform = 'translateY(0)';
-    }, 50);
-});
+        setTimeout(function() {
+            editorContainer.style.opacity = '1';
+            editorContainer.style.transform = 'translateY(0)';
+        }, 50);
+    });
+}
 
-async function addInterviewStatus() {
+async function InterviewStatusInProgress() {
     const data = {
-        status: "in_progress",
+        status: "IN_PROGRESS",
         interviewId: getElement('interviewId').value,
     };
+
     try {
         const response = await fetch("/api/interviewStatus", {
             method: 'POST',
@@ -121,14 +139,107 @@ async function addInterviewStatus() {
             },
             body: JSON.stringify(data)
         });
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        return data.status;
+        const responseData = await response.json();
+        return responseData.status;
     } catch (error) {
         console.error('Error:', error);
         return false;
+    }
+}
+
+
+async function refreshAccordionContent() {
+    const interviewId = getElement('interviewId').value;
+    try {
+        const response = await fetch(`/api/interview/${interviewId}/appreciations`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const appreciations = await response.json();
+        const appreciationsList = getElement('appreciationsList');
+        
+        if (appreciations.length === 0) {
+            appreciationsList.innerHTML = `
+                <li class="list-group-item text-muted">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No notes available for this interview.
+                </li>
+            `;
+        } else {
+            appreciationsList.innerHTML = appreciations.map(appreciation => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="d-flex justify-content-center align-items-center">
+                        <i class="fas fa-comment-alt me-2 text-primary"></i>
+                        <div class="d-flex justify-content-center align-items-center">
+                            ${appreciation.comment}
+                        </div>
+                    </span>
+                    <span class="badge bg-primary rounded-pill text-white">
+                        <i class="fas fa-star me-1"></i>
+                        ${appreciation.score}
+                    </span>
+                </li>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error refreshing accordion content:', error);
+        getElement('appreciationsList').innerHTML = `
+            <li class="list-group-item text-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Error loading appreciations. Please try again later.
+            </li>
+        `;
+    }
+}
+
+function initializeInterviewStatusButtons() {
+    const acceptButton = getElement('accept-interview');
+    const rejectButton = getElement('reject-interview');
+    
+    if (acceptButton) {
+        acceptButton.addEventListener('click', () => updateInterviewStatus('IS_PASSED'));
+    }
+    
+    if (rejectButton) {
+        rejectButton.addEventListener('click', () => updateInterviewStatus('IS_FAILED'));
+    }
+}
+
+async function updateInterviewStatus(status) {
+    const interviewId = getElement('interviewId').value;
+    const data = {
+        status: status,
+        interviewId: interviewId,
+    };
+
+    try {
+        const response = await fetch("/api/interviewStatus", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        if (responseData.status === 'success') {
+            alert('Interview status updated successfully');
+            location.reload(); // Refresh the page to reflect the changes
+        } else {
+            alert('Failed to update interview status');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while updating the interview status');
     }
 }

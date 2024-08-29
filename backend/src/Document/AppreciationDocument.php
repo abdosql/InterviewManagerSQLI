@@ -16,7 +16,7 @@ class AppreciationDocument
     #[MongoDB\Field(type: "int")]
     private ?int $score;
 
-    #[MongoDB\ReferenceOne(targetDocument: InterviewDocument::class, inversedBy: "appreciations")]
+    #[MongoDB\ReferenceOne(targetDocument: InterviewDocument::class, cascade: ["persist", "remove"], inversedBy: "appreciations")]
     private ?InterviewDocument $interview;
 
     #[MongoDB\Field(type: "int")]

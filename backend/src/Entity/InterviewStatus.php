@@ -27,7 +27,8 @@ class InterviewStatus
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $status_date = null;
 
-    #[ORM\ManyToOne(cascade: ["persist"], inversedBy: 'interviewStatuses')]
+    #[ORM\ManyToOne(inversedBy: 'interviewStatuses')]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Interview $interview = null;
 
 

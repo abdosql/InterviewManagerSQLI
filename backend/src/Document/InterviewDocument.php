@@ -27,10 +27,10 @@ class InterviewDocument
     #[MongoDB\ReferenceOne(targetDocument: HRManagerDocument::class, inversedBy: "interviews")]
     private ?HRManagerDocument $hrManager;
 
-    #[MongoDB\ReferenceMany(targetDocument: AppreciationDocument::class, mappedBy: "interview")]
+    #[MongoDB\ReferenceMany(targetDocument: AppreciationDocument::class, cascade: ["persist", "remove"], mappedBy: "interview")]
     private Collection $appreciations;
 
-    #[MongoDB\ReferenceMany(targetDocument: InterviewStatusDocument::class, cascade: ['persist', 'remove'], mappedBy: 'interview')]
+    #[MongoDB\ReferenceMany(targetDocument: InterviewStatusDocument::class, cascade: ["persist", "remove"], mappedBy: 'interview')]
     private Collection $interviewStatuses;
 
     #[MongoDB\Field(type: "int")]
