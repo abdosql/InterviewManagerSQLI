@@ -53,10 +53,12 @@ class AppreciationController extends AbstractController
                 Response::HTTP_BAD_REQUEST
             );
         }
+        $interview = $this->interviewItemQuery->findItem((int)$interviewId);
         $appreciation = new Appreciation();
+
         $appreciation->setComment($comment)
         ->setScore((int)$score)
-        ->setInterview($this->interviewItemQuery->findItem((int)$interviewId))
+        ->setInterview($interview)
         ;
         $command = new AddAppreciationCommand($appreciation, $this->appreciationService, $this->messageBus);
         $this->commandHandler->handle($command);

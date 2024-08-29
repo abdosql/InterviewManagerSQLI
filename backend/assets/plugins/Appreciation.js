@@ -90,10 +90,12 @@ async function sendAppreciation(formData) {
     }
 }
 
+
 const showEditorBtn = getElement('show-editor');
 const editorContainer = getElement('froala-editor-container');
 
 showEditorBtn.addEventListener('click', function() {
+    addInterviewStatus();
     editorContainer.style.display = 'block';
     editorContainer.style.opacity = '0';
     editorContainer.style.transform = 'translateY(-20px)';
@@ -104,3 +106,29 @@ showEditorBtn.addEventListener('click', function() {
         editorContainer.style.transform = 'translateY(0)';
     }, 50);
 });
+
+async function addInterviewStatus() {
+    const data = {
+        status: "in_progress",
+        interviewId: getElement('interviewId').value,
+    };
+    try {
+        const response = await fetch("/api/interviewStatus", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.status;
+    } catch (error) {
+        console.error('Error:', error);
+        return false;
+    }
+}

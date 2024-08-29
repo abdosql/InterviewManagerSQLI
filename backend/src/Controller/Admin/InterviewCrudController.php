@@ -8,6 +8,7 @@ use App\Entity\Interview;
 use App\Entity\InterviewStatus;
 use App\Form\Type\FroalaEditorType;
 use App\Form\Type\InterviewType;
+use App\Interview\Command\AddInterviewStatusCommand;
 use App\Interview\Command\CreateInterviewCommand;
 use App\Interview\Command\DeleteInterviewCommand;
 use App\Interview\Command\Handler\CommandHandlerInterface;
@@ -17,6 +18,7 @@ use App\Interview\Query\GetAllUpcomingInterviews;
 use App\Interview\Query\ItemQueryInterface;
 use App\Publisher\PublisherInterface;
 use App\Services\Impl\InterviewService;
+use App\Services\Impl\InterviewStatusService;
 use App\User\Query\GetUsersByIds;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -353,4 +355,38 @@ class InterviewCrudController extends AbstractCrudController
         return $formattedInterviews;
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
+    #[Route('/api/interviewStatus', name: 'api_interview_status', methods: ["POST"])]
+    public function addInterviewStatus(Request $request, InterviewStatusService $interviewStatusService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $status = $data['status'];
+        $interviewId = $data['interviewId'];
+        if (empty($status)) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Status missing'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        if (empty($interviewId)) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Missing interview ID'],
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        $interview = $this->interviewItemQuery->findItem((int)$interviewId);
+        $interviewStatus = new InterviewStatus();
+        $interviewStatus
+            ->setStatus($status)
+            ->setInterview($interview)
+            ->setStatusDate(now())
+        ;
+        $command = new AddInterviewStatusCommand($interviewStatus, $interviewStatusService, $this->messageBus);
+        $this->commandHandler->handle($command);
+        return new JsonResponse(['status' => 'success', 'id' => $interviewStatus->getId()], Response::HTTP_OK);
+    }
 }

@@ -66,17 +66,23 @@
             {% endfor %}
             </tbody>
         </table>
-        {% set interviewDate = entity.getInstance().getInterviewDate() %}
+        {% set interview = entity.getInstance() %}
+        {% set interviewDate = interview.getInterviewDate() %}
         {% set currentDate = "now" | date("Y-m-d") %}
+        {% set latestStatus = interview.getInterviewStatuses()|last %}
         {% if is_granted("ROLE_EVALUATOR") and not is_granted("ROLE_HR_MANAGER") %}
+            {% set latestStatus = entity.getInstance().interviewStatuses|last %}
+            {% set isInProgress = latestStatus and latestStatus.status == 'IN_PROGRESS' %}
 
-
-            <button id="show-editor" class="btn btn-primary mt-3 mb-3"
-                    {% if interviewDate|date("Y-m-d") == currentDate %}
-                        disabled
+            <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Interview In Progress">
+              <button class="btn btn-primary" style="pointer-events: none;" type="button"
+                      {% if isInProgress %}
+                          disabled
                     {% endif %}>
-                Start Interview
-            </button>
+              Start Interview</button>
+            </span>
+
+
             <div id="save-indicator" style="
                 position: fixed;
                 top: 20px;
@@ -94,13 +100,13 @@
                 Saved!
             </div>
         {% else %}
-
-            {% if interviewDate|date("Y-m-d") == currentDate %}
-                <span class="badge badge-info p-2" style="font-size: 1rem">Interview Started</span>
+            {% if latestStatus and latestStatus.getStatus() == constant('App\\Entity\\InterviewStatus::IN_PROGRESS') %}
+                <span class="badge badge-info p-2" style="font-size: 1rem">Interview In Progress</span>
+            {% elseif interviewDate|date("Y-m-d") == currentDate %}
+                <span class="badge badge-warning p-2" style="font-size: 1rem">Interview Scheduled for Today</span>
             {% else %}
-                <span class="badge badge-warning p-2" style="font-size: 1rem">Interview haven't started yet</span>
+                <span class="badge badge-warning p-2" style="font-size: 1rem">Interview Not Started Yet</span>
             {% endif %}
-
         {% endif %}
         {% block delete_form %}
             {{ include('@EasyAdmin/crud/includes/_delete_form.html.twig', { entity_id: entity.primaryKeyValue }, with_context = false) }}

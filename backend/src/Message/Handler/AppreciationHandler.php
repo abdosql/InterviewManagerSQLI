@@ -29,6 +29,7 @@ readonly class AppreciationHandler
     public function handleAddAppreciation(AppreciationAddMessage $message): void
     {
         $appreciationDocument = $this->transformationAdapter->transformToDocument($message->getId(), 'appreciation');
+
         $this->appreciationService->saveDocument($appreciationDocument);
     }
 //

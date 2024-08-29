@@ -156,5 +156,8 @@
   "build/froala-editor/css/third_party/image_tui.css": "/build/froala-editor/css/third_party/image_tui.css",
   "build/froala-editor/css/plugins/draggable.min.css": "/build/froala-editor/css/plugins/draggable.min.css",
   "build/froala-editor/css/plugins/line_breaker.min.css": "/build/froala-editor/css/plugins/line_breaker.min.css",
-  "build/froala-editor/css/third_party/image_tui.min.css": "/build/froala-editor/css/third_party/image_tui.min.css"
+  "build/froala-editor/css/third_party/image_tui.min.css": "/build/froala-editor/css/third_party/image_tui.min.css",
+  "build/vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js-node_modules_core-js_modules_es_array-76c637.js": "/build/vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js-node_modules_core-js_modules_es_array-76c637.js",
+  "build/vendors-node_modules_hotwired_turbo_dist_turbo_es2017-esm_js-node_modules_froala-editor_js_fr-26ac42.css": "/build/vendors-node_modules_hotwired_turbo_dist_turbo_es2017-esm_js-node_modules_froala-editor_js_fr-26ac42.css",
+  "build/vendors-node_modules_hotwired_turbo_dist_turbo_es2017-esm_js-node_modules_froala-editor_js_fr-26ac42.js": "/build/vendors-node_modules_hotwired_turbo_dist_turbo_es2017-esm_js-node_modules_froala-editor_js_fr-26ac42.js"
 }

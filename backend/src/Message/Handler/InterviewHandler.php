@@ -9,7 +9,9 @@ namespace App\Message\Handler;
 use App\Adapter\DataTransformationAdapter;
 use App\Message\Interview\InterviewCreatedMessage;
 use App\Message\Interview\InterviewDeletedMessage;
+use App\Message\Interview\InterviewStatusAddMessage;
 use App\Services\Impl\InterviewService;
+use App\Services\Impl\InterviewStatusService;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -20,6 +22,7 @@ readonly class InterviewHandler
     public function __construct(
         private DataTransformationAdapter $transformationAdapter,
         private InterviewService $interviewService,
+        private InterviewStatusService $interviewStatusService,
     ) {}
 
     /**
@@ -32,6 +35,17 @@ readonly class InterviewHandler
     {
         $interviewDocument = $this->transformationAdapter->transformToDocument($message->getId(), 'interview');
         $this->interviewService->saveDocument($interviewDocument);
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    #[AsMessageHandler]
+    public function handleAddInterviewStatus(InterviewStatusAddMessage $message): void
+    {
+        $interviewDocument = $this->transformationAdapter->transformToDocument($message->getId(), 'interviewStatus');
+        $this->interviewStatusService->saveDocument($interviewDocument);
     }
 
 //    /**

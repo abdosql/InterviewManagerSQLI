@@ -8,12 +8,8 @@ namespace App\Transformation\Strategy;
 
 use App\Document\AppreciationDocument;
 use App\Entity\Appreciation;
-use App\Entity\Candidate;
-use App\Entity\Interview;
 use App\Services\Impl\AppreciationService;
-use App\Services\Impl\CandidateService;
 use App\Services\Impl\InterviewService;
-use App\Services\Impl\UserService;
 use App\Transformation\TransformToDocumentStrategyInterface;
 use App\Transformation\TransformToEntityStrategyInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -28,8 +24,11 @@ readonly class AppreciationTransformationStrategy implements TransformToDocument
     public function transformToDocument(int $entityId): AppreciationDocument
     {
         $entity = $this->appreciationService->findEntity($entityId);
+
         $appreciationDocument = new AppreciationDocument();
+        
         $interviewDocument = $this->interviewService->findDocument($entity->getInterview()->getId());
+
         $appreciationDocument
             ->setInterview($interviewDocument)
             ->setComment($entity->getComment())

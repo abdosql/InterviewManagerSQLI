@@ -4,7 +4,6 @@ namespace App\Appreciation\Command;
 
 use App\Entity\Appreciation;
 use App\Message\Appreciation\AppreciationAddMessage;
-use App\Message\Candidate\CandidateCreatedMessage;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
