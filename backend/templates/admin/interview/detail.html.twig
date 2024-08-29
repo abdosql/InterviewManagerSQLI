@@ -74,12 +74,15 @@
             {% set latestStatus = entity.getInstance().interviewStatuses|last %}
             {% set isInProgress = latestStatus and latestStatus.status == 'IN_PROGRESS' %}
 
-            <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Interview In Progress">
-              <button class="btn btn-primary" style="pointer-events: none;" type="button"
-                      {% if isInProgress %}
-                          disabled
+            <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" 
+                  title="{% if isInProgress %}Interview is already in progress{% else %}Click to start the interview{% endif %}"
+                  data-bs-placement="top" data-bs-custom-class="custom-tooltip">
+                <button id="show-editor" class="btn btn-primary mt-3 mb-3" disabled
+                    {% if isInProgress %}
+
                     {% endif %}>
-              Start Interview</button>
+                    Start Interview
+                </button>
             </span>
 
 
