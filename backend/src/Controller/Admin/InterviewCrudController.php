@@ -401,7 +401,7 @@ class InterviewCrudController extends AbstractCrudController
               'score': 5/20
             }
         ";
-        $aiFeedback = $this->AIInterviewService->generateInterviewFeedback($prompt);
+        $jsonResponse = $this->AIInterviewService->generateInterviewFeedback($prompt);
 
         return new JsonResponse(['aiFeedback' => $aiFeedback]);
     }

@@ -17,7 +17,7 @@ readonly class AIInterviewService
     public function generateInterviewFeedback(string $interviewSummary): string
     {
         $prompt = "
-            You are an expert in human resources and professional development, familiar with the Moroccan education system. Your task is to analyze the following interview summary and provide constructive reformulations of the evaluator's appreciations for the candidate. 
+            You are an expert in human resources and professional development, familiar with the Moroccan education system. Your task is to analyze the following interview summary and provide constructive reformulations of the evaluator's appreciations for the candidate based on the language used in the summary. 
             
             For each appreciation in the summary:
             1. Carefully consider the evaluator's original comment and score.

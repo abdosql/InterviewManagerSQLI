@@ -34,7 +34,27 @@ readonly class AIFacade
         }
 
         if ($response['status'] === 'success' && isset($response['data']['content'])) {
-            return $response['data']['content'];
+
+            $responseContent =  $response['data']['content'];
+
+            $responseContent = trim($responseContent, "{}");
+            $responseContent = str_replace('"aiFeedback": ', '', $responseContent);
+
+            $responseContent = str_replace(['\r\n', '\r', '\n'], '', $responseContent);
+
+            if (preg_match("/\'comment\':\s*\'(.*?)\',\s*\'score\':\s*([\d.]+)/", $responseContent, $matches)) {
+                $comment = $matches[1];
+                $score = floatval($matches[2]);
+
+                $result = [
+                    'comment' => $comment,
+                    'score' => $score
+                ];
+
+                dd($result);
+            } else {
+                echo "Failed to parse the response.";
+            }
         }
 
         throw new \RuntimeException('Unexpected response format from AI service');
