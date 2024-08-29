@@ -34,6 +34,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -393,20 +394,25 @@ class InterviewCrudController extends AbstractCrudController
 
 
     #[Route('/interview/ai-reformulation', name: 'interview_ai_reformulation')]
-    public function getAIReformulation(Request $request): Response
+    public function getAIReformulation(Request $request, LoggerInterface $logger): Response
     {
         $content = $request->getContent();
 
         $data = json_decode($content, true);
 
-        if (isset($data['prompt'])) {
-            $prompt = $data['prompt'];
-        } else {
+        if (!isset($data['prompt'])) {
             return new JsonResponse(['error' => 'Prompt is missing from the request body'], Response::HTTP_BAD_REQUEST);
         }
 
-        $arrayResponse = $this->AIInterviewService->generateInterviewReformulation($prompt);
+        $prompt = $data['prompt'];
 
-        return new JsonResponse(['aiReformulation' => $arrayResponse]);
+        $response = $this->AIInterviewService->generateInterviewReformulation($prompt);
+
+        if (!isset($response['comment']) || !isset($response['score'])) {
+            $logger->error('Invalid response format from AI service: '. json_encode($response));
+            return new JsonResponse(['error' => 'Invalid response format from AI service'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return new JsonResponse(['aiReformulation' => $response]);
     }
 }

@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         refreshAccordionContent();
         initializeInterviewStatusButtons();
+        initializeReformulateButton();
 });
 
 function animateSaveIndicator() {
@@ -54,7 +55,7 @@ function addAppreciation() {
             event.preventDefault();
 
             const formData = getFormData();
-            
+
             // Check if fields are empty
             if (!formData.comment || !formData.score) {
                 alert('Please fill in both the comment and score fields before saving.');
@@ -62,7 +63,7 @@ function addAppreciation() {
             }
 
             saveButton.disabled = true;
-            
+
             sendAppreciation(formData)
                 .then(success => {
                     if (success === "success") {
@@ -162,7 +163,7 @@ async function refreshAccordionContent() {
         }
         const appreciations = await response.json();
         const appreciationsList = getElement('appreciationsList');
-        
+
         if (appreciations.length === 0) {
             appreciationsList.innerHTML = `
                 <li class="list-group-item text-muted">
@@ -200,11 +201,11 @@ async function refreshAccordionContent() {
 function initializeInterviewStatusButtons() {
     const acceptButton = getElement('accept-interview');
     const rejectButton = getElement('reject-interview');
-    
+
     if (acceptButton) {
         acceptButton.addEventListener('click', () => updateInterviewStatus('IS_PASSED'));
     }
-    
+
     if (rejectButton) {
         rejectButton.addEventListener('click', () => updateInterviewStatus('IS_FAILED'));
     }
@@ -241,5 +242,66 @@ async function updateInterviewStatus(status) {
     } catch (error) {
         console.error('Error:', error);
         alert('An error occurred while updating the interview status');
+    }
+}
+
+function initializeReformulateButton() {
+    const reformulateButton = getElement('reformulate');
+    if (reformulateButton) {
+        reformulateButton.addEventListener('click', handleReformulate);
+    }
+}
+
+async function handleReformulate() {
+    const commentEditor = FroalaEditor.INSTANCES[0];
+    const scoreInput = getElement('froala_editor_score');
+    const reformulateButton = getElement('reformulate');
+
+    const comment = commentEditor.html.get();
+    const score = scoreInput.value;
+
+    if (!comment || !score) {
+        alert('Please fill in both the comment and score fields before reformulating.');
+        return;
+    }
+
+    const promptContent = `{ 'comment': '${comment.replace(/'/g, "\\'")}', 'score': ${score}/20 }`;
+    const prompt = JSON.stringify({
+        prompt: promptContent
+    });
+    reformulateButton.disabled = true;
+    reformulateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reformulating...';
+
+    try {
+        const response = await fetch('/interview/ai-reformulation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: prompt
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const data = await response.json();
+        const reformulation = data.aiReformulation;
+
+        if (!reformulation || !reformulation.comment || !reformulation.score) {
+            throw new Error('Invalid response format from AI service');
+        }
+
+        commentEditor.html.set(reformulation.comment);
+        scoreInput.value = reformulation.score.toString().split('/')[0];
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert(`An error occurred while reformulating: ${error.message}. Please check the console for more details and try again.`);
+    } finally {
+        reformulateButton.disabled = false;
+        reformulateButton.innerHTML = 'Reformulate with AI';
     }
 }

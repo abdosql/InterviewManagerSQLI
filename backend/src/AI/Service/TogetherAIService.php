@@ -6,7 +6,6 @@
 
 namespace App\AI\Service;
 
-use App\AI\Service\AiServiceInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;

@@ -34,27 +34,30 @@ readonly class AIFacade
         }
 
         if ($response['status'] === 'success' && isset($response['data']['content'])) {
+            $responseContent = $response['data']['content'];
 
-            $responseContent =  $response['data']['content'];
+            error_log('Raw AI response: ' . $responseContent);
 
-            $responseContent = trim($responseContent, "{}");
-            $responseContent = str_replace('"aiFeedback": ', '', $responseContent);
+            $decodedResponse = json_decode($responseContent, true);
 
-            $responseContent = str_replace(['\r\n', '\r', '\n'], '', $responseContent);
+            if (json_last_error() === JSON_ERROR_NONE && isset($decodedResponse['comment']) && isset($decodedResponse['score'])) {
+                return [
+                    'comment' => $decodedResponse['comment'],
+                    'score' => floatval($decodedResponse['score'])
+                ];
+            }
 
             if (preg_match("/\'comment\':\s*\'(.*?)\',\s*\'score\':\s*([\d.]+)/", $responseContent, $matches)) {
-                $comment = $matches[1];
-                $score = floatval($matches[2]);
-
                 return [
-                    'comment' => $comment,
-                    'score' => $score
+                    'comment' => $matches[1],
+                    'score' => floatval($matches[2])
                 ];
-            } else {
-                echo "Failed to parse the response.";
             }
-        }
-        return [];
 
+            error_log('Failed to parse AI response: ' . $responseContent);
+            throw new \RuntimeException('Failed to parse the AI response.');
+        }
+
+        throw new \RuntimeException('Unexpected response format from AI service');
     }
 }
