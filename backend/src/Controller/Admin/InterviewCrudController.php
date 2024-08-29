@@ -2,8 +2,8 @@
 
 namespace App\Controller\Admin;
 
+use App\AI\Facade\AIFacade;
 use App\Candidate\Query\FindCandidate;
-use App\Document\InterviewStatusDocument;
 use App\Entity\Interview;
 use App\Entity\InterviewStatus;
 use App\Form\Type\FroalaEditorType;
@@ -17,10 +17,10 @@ use App\Interview\Query\GetAllInterviews;
 use App\Interview\Query\GetAllUpcomingInterviews;
 use App\Interview\Query\ItemQueryInterface;
 use App\Publisher\PublisherInterface;
+use App\Services\AIInterviewService;
 use App\Services\Impl\InterviewService;
 use App\Services\Impl\InterviewStatusService;
 use App\User\Query\GetUsersByIds;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -50,7 +50,6 @@ use function Symfony\Component\Clock\now;
 class InterviewCrudController extends AbstractCrudController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
         private readonly CommandHandlerInterface $commandHandler,
         private readonly MessageBusInterface $messageBus,
         private readonly InterviewService $interviewService,
@@ -62,7 +61,7 @@ class InterviewCrudController extends AbstractCrudController
         private readonly GetAllUpcomingInterviews $allUpcomingInterviews,
         #[Autowire(service: FindInterview::class)]
         private readonly ItemQueryInterface $interviewItemQuery,
-
+        private readonly AIInterviewService $AIInterviewService
 
     )
     {
@@ -389,5 +388,21 @@ class InterviewCrudController extends AbstractCrudController
         $command = new AddInterviewStatusCommand($interviewStatus, $interviewStatusService, $this->messageBus);
         $this->commandHandler->handle($command);
         return new JsonResponse(['status' => 'success', 'id' => $interviewStatus->getId()], Response::HTTP_OK);
+    }
+
+
+
+    #[Route('/interview/ai-feedback', name: 'interview_ai_feedback')]
+    public function getAIFeedback(): Response
+    {
+        $prompt = "
+            {
+              'comment': 'The candidate's performance was poor. They didn't seem to know much about the job. Their communication skills were lacking',
+              'score': 5/20
+            }
+        ";
+        $aiFeedback = $this->AIInterviewService->generateInterviewFeedback($prompt);
+
+        return new JsonResponse(['aiFeedback' => $aiFeedback]);
     }
 }
