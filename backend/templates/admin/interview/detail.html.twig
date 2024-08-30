@@ -104,12 +104,17 @@
                         {% endif %}>
                         Start Interview
                     </button>
+                {% elseif isInProgress %}
+                    <button id="show-editor" class="btn btn-primary mt-3 mb-3"
+                        {% if isInProgress %}
+                            disabled
+                        {% endif %}>
+                        Start Interview
+                    </button>
                 {% elseif latestStatus and latestStatus.getStatus() == "IS_PASSED" %}
                     <span class="badge badge-success p-2" style="font-size: 1rem">Interview Done, Candidate Passed !</span>
                 {% elseif latestStatus and latestStatus.getStatus() == "IS_FAILED" %}
                     <span class="badge badge-danger p-2" style="font-size: 1rem">Interview Done, Candidate Failed !</span>
-                {% else %}
-                    <span class="badge badge-warning p-2" style="font-size: 1rem">Interview is scheduled.</span>
                 {% endif %}
             </span>
 
@@ -130,19 +135,57 @@
                 z-index: 9999;">
                 Saved!
             </div>
-        {% else %}
-            {% if latestStatus and latestStatus.getStatus() == "IN_PROGRESS"%}
-                <span class="badge badge-info p-2" style="font-size: 1rem">Interview In Progress</span>
-            {% elseif latestStatus and latestStatus.getStatus() == "IS_PASSED" %}
-                <span class="badge badge-success p-2" style="font-size: 1rem">Interview Done, Candidate Passed !</span>
-            {% elseif latestStatus and latestStatus.getStatus() == "IS_FAILED" %}
-                    <span class="badge badge-danger p-2" style="font-size: 1rem">Interview Done, Candidate Failed !</span>
-            {% elseif interviewDate|date("Y-m-d") == currentDate %}
-                <span class="badge badge-warning p-2" style="font-size: 1rem">Interview Scheduled for Today</span>
+{% else %}
+    <div class="interview-timeline mb-4">
+        <h4 class="mb-3">Interview Timeline</h4>
+        <ul class="list-unstyled">
+            {% set statuses = [
+                {name: 'SCHEDULED', icon: 'fa-clock', variant: 'secondary'},
+                {name: 'IN_PROGRESS', icon: 'fa-play', variant: 'info'},
+                {name: 'IS_PASSED', icon: 'fa-check', variant: 'success'},
+                {name: 'IS_FAILED', icon: 'fa-times', variant: 'danger'}
+            ] %}
+            
+            {% set currentStatus = latestStatus ? latestStatus.getStatus()|upper : 'SCHEDULED' %}
+            {% set currentStatusInfo = statuses|filter(s => s.name == currentStatus)|first %}
+
+            <li class="d-flex justify-content-between align-items-center mb-3">
+                {% for status in statuses %}
+                    {% set isCurrentStatus = status.name == currentStatus %}
+                    <div class="text-center position-relative">
+                        <div class="rounded-circle {% if isCurrentStatus %}bg-{{ status.variant }} text-white{% else %}bg-light text-{{ status.variant }}{% endif %} d-inline-flex justify-content-center align-items-center" style="width: 50px; height: 50px; border: 2px solid {% if isCurrentStatus %}#{{ status.variant }}{% else %}#ccc{% endif %}; transition: all 0.3s ease;">
+                            <i class="fas {{ status.icon }} {% if isCurrentStatus %}fa-lg{% endif %}"></i>
+                        </div>
+                        <p class="mt-2 mb-0 small {% if isCurrentStatus %}font-weight-bold{% endif %}">{{ status.name|replace({'_': ' '})|capitalize }}</p>
+                        {% if isCurrentStatus %}
+                            <div class="position-absolute" style="top: -10px; right: -10px;">
+                                <span class="badge bg-{{ status.variant }} p-2" style="font-size: 0.7rem;">
+                                    Current
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if not loop.last %}
+                        <div class="flex-grow-1 {% if loop.index0 < statuses|filter(s => s.name == currentStatus)|first.name|length %}bg-{{ currentStatusInfo.variant }}{% else %}bg-secondary{% endif %}" style="height: 3px; transition: all 0.3s ease;"></div>
+                    {% endif %}
+                {% endfor %}
+            </li>
+        </ul>
+        
+        <div class="text-center mt-4">
+            <h5>Current Status:</h5>
+            {% if currentStatusInfo %}
+                <span class="badge bg-{{ currentStatusInfo.variant }} p-2" style="font-size: 1.2rem;">
+                    {{ currentStatus|replace({'_': ' '})|capitalize }}
+                </span>
             {% else %}
-                <span class="badge badge-warning p-2" style="font-size: 1rem">Interview is scheduled.</span>
+                <span class="badge bg-secondary p-2" style="font-size: 1.2rem;">
+                    Unknown Status
+                </span>
             {% endif %}
-        {% endif %}
+        </div>
+    </div>
+{% endif %}
         {% block delete_form %}
             {{ include('@EasyAdmin/crud/includes/_delete_form.html.twig', { entity_id: entity.primaryKeyValue }, with_context = false) }}
         {% endblock delete_form %}

@@ -112,7 +112,7 @@ const editorContainer = getElement('froala-editor-container');
 
 if (showEditorBtn && editorContainer) {
     showEditorBtn.addEventListener('click', function() {
-        InterviewStatusInProgress();
+        InterviewStatusInProgress().then(r => showEditorBtn.disabled =  true);
         editorContainer.style.display = 'block';
         editorContainer.style.opacity = '0';
         editorContainer.style.transform = 'translateY(-20px)';
@@ -175,8 +175,8 @@ async function refreshAccordionContent() {
             appreciationsList.innerHTML = appreciations.map(appreciation => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <span class="d-flex justify-content-center align-items-center">
-                        <i class="fas fa-comment-alt me-2 text-primary"></i>
-                        <div class="d-flex justify-content-center align-items-center">
+                        <i style="font-size: 1.5rem;" class="fas fa-comment-alt me-2 text-primary"></i>
+                        <div class="p-4">
                             ${appreciation.comment}
                         </div>
                     </span>
@@ -254,6 +254,7 @@ function initializeReformulateButton() {
 
 async function handleReformulate() {
     const commentEditor = FroalaEditor.INSTANCES[0];
+    const commentTextarea = getElement('froala_editor_comment');
     const scoreInput = getElement('froala_editor_score');
     const reformulateButton = getElement('reformulate');
 
@@ -295,7 +296,10 @@ async function handleReformulate() {
         }
 
         commentEditor.html.set(reformulation.comment);
+        commentTextarea.value = reformulation.comment;
         scoreInput.value = reformulation.score.toString().split('/')[0];
+
+        commentEditor.events.trigger('contentChanged');
 
     } catch (error) {
         console.error('Error:', error);
