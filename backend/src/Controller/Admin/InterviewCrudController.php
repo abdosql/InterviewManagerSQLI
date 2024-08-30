@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\AI\Facade\AIFacade;
 use App\Candidate\Query\FindCandidate;
+use App\Controller\Admin\Abstract\AbstractCustomCrudController;
 use App\Entity\Interview;
 use App\Entity\InterviewStatus;
 use App\Form\Type\FroalaEditorType;
@@ -47,8 +48,9 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use function Symfony\Component\Clock\now;
+use function Zenstruck\Foundry\object;
 
-class InterviewCrudController extends AbstractCrudController
+class InterviewCrudController extends AbstractCustomCrudController
 {
     public function __construct(
         private readonly CommandHandlerInterface $commandHandler,
@@ -66,45 +68,47 @@ class InterviewCrudController extends AbstractCrudController
 
     )
     {
+        parent::__construct($this->adminUrlGenerator);
     }
 
-    /**
-     * @throws NotFoundExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ContainerExceptionInterface
-     * @throws ClientExceptionInterface
-     */
-    public function index(AdminContext $context): Response
-    {
-        $crud = $context->getCrud();
-        $entities = $this->getAllInterviews->findItems();
-        $fields = $this->configureFields(Crud::PAGE_INDEX);
-        $fieldMetadata = [];
-        $entityLabel = $crud->getEntityLabelInSingular();
+//    /**
+//     * @throws NotFoundExceptionInterface
+//     * @throws TransportExceptionInterface
+//     * @throws ServerExceptionInterface
+//     * @throws RedirectionExceptionInterface
+//     * @throws ContainerExceptionInterface
+//     * @throws ClientExceptionInterface
+//     */
+//    public function index(AdminContext $context): Response
+//    {
+//        $crud = $context->getCrud();
+//        $entities = $this->getAllInterviews->findItems();
+//        $fields = $this->configureFields(Crud::PAGE_INDEX);
+//        $fieldMetadata = [];
+//        $entityLabel = $crud->getEntityLabelInSingular();
+//
+//        foreach ($fields as $field) {
+//            if (!$field->getAsDto()->getDisplayedOn()->has('index')) {
+//                continue;
+//            }
+//            $fieldMetadata[] = [
+//                'label' => $field->getAsDto()->getLabel(),
+//                'property' => $field->getAsDto()->getProperty(),
+//            ];
+//        }
+//
+//        $entityName = $crud->getEntityFqcn();
+//        $actions = $crud->getActionsConfig()->getActions();
+////        dd($actions, $entityName);
+//        return $this->render('@EasyAdmin/crud/index.html.twig', [
+//            'entities' => $entities,
+//            'fields' => $fieldMetadata,
+//            'actions' => $actions,
+//            'entityName' => $entityName,
+//            'entityLabel' => $entityLabel,
+//        ]);
+//    }
 
-        foreach ($fields as $field) {
-            if (!$field->getAsDto()->getDisplayedOn()->has('index')) {
-                continue;
-            }
-            $fieldMetadata[] = [
-                'label' => $field->getAsDto()->getLabel(),
-                'property' => $field->getAsDto()->getProperty(),
-            ];
-        }
-
-        $entityName = $crud->getEntityFqcn();
-        $actions = $crud->getActionsConfig()->getActions();
-//        dd($actions, $entityName);
-        return $this->render('@EasyAdmin/crud/index.html.twig', [
-            'entities' => $entities,
-            'fields' => $fieldMetadata,
-            'actions' => $actions,
-            'entityName' => $entityName,
-            'entityLabel' => $entityLabel,
-        ]);
-    }
 
     public function configureCrud(Crud $crud): Crud
     {
@@ -164,8 +168,8 @@ class InterviewCrudController extends AbstractCrudController
 
     public function detail(AdminContext $context): Response
     {
-        $keyValueStore = parent::detail($context);
-//        $entityId = $context->getRequest()->query->get("entityId");
+        $keyValueStore = AbstractCrudController::detail($context);
+        //        $entityId = $context->getRequest()->query->get("entityId");
 //        $interviewInstance = $this->interviewItemQuery->findItem($entityId);
 //        dd($interviewInstance);
 
@@ -414,5 +418,23 @@ class InterviewCrudController extends AbstractCrudController
         }
 
         return new JsonResponse(['aiReformulation' => $response]);
+    }
+
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws ClientExceptionInterface
+     */
+    protected function getAllItems(): array
+    {
+        return $this->getAllInterviews->findItems();
+    }
+
+    protected function getItemById($id): ?object
+    {
+        return null;
     }
 }

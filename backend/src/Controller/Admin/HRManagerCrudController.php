@@ -22,41 +22,41 @@ class HRManagerCrudController extends UserCrudController
         return HRManager::class;
     }
 
-    /**
-     * @throws NotFoundExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ContainerExceptionInterface
-     * @throws ClientExceptionInterface
-     */
-    public function index(AdminContext $context): Response
-    {
-        $crud = $context->getCrud();
-        $entities = $this->getUsersByType->findItems(["dType" => "rh"]);
-        $fields = $this->configureFields(Crud::PAGE_INDEX);
-        $fieldMetadata = [];
-        $entityLabel = $crud->getEntityLabelInSingular();
-
-        foreach ($fields as $field) {
-            if (!$field->getAsDto()->getDisplayedOn()->has('index')) {
-                continue;
-            }
-            $fieldMetadata[] = [
-                'label' => $field->getAsDto()->getLabel(),
-                'property' => $field->getAsDto()->getProperty(),
-            ];
-        }
-
-        $actions = $crud->getActionsConfig()->getActions();
-//        dd($actions, $entityName);
-        return $this->render('@EasyAdmin/crud/index.html.twig', [
-            'entities' => $entities,
-            'fields' => $fieldMetadata,
-            'actions' => $actions,
-            'entityLabel' => $entityLabel,
-        ]);
-    }
+//    /**
+//     * @throws NotFoundExceptionInterface
+//     * @throws TransportExceptionInterface
+//     * @throws ServerExceptionInterface
+//     * @throws RedirectionExceptionInterface
+//     * @throws ContainerExceptionInterface
+//     * @throws ClientExceptionInterface
+//     */
+//    public function index(AdminContext $context): Response
+//    {
+//        $crud = $context->getCrud();
+//        $entities = $this->getUsersByType->findItems(["dType" => "rh"]);
+//        $fields = $this->configureFields(Crud::PAGE_INDEX);
+//        $fieldMetadata = [];
+//        $entityLabel = $crud->getEntityLabelInSingular();
+//
+//        foreach ($fields as $field) {
+//            if (!$field->getAsDto()->getDisplayedOn()->has('index')) {
+//                continue;
+//            }
+//            $fieldMetadata[] = [
+//                'label' => $field->getAsDto()->getLabel(),
+//                'property' => $field->getAsDto()->getProperty(),
+//            ];
+//        }
+//
+//        $actions = $crud->getActionsConfig()->getActions();
+////        dd($actions, $entityName);
+//        return $this->render('@EasyAdmin/crud/index.html.twig', [
+//            'entities' => $entities,
+//            'fields' => $fieldMetadata,
+//            'actions' => $actions,
+//            'entityLabel' => $entityLabel,
+//        ]);
+//    }
     public function configureFields(string $pageName): iterable
     {
         yield from parent::configureFields($pageName);

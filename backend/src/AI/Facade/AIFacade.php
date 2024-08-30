@@ -20,10 +20,12 @@ readonly class AIFacade
         #[Autowire(env: "AI_DEFAULT_MODEL")]
         private string $DefaultModel
     ) {}
+
     public function getAIResponse(string $prompt): array
     {
         $aiService = $this->aiServiceFactory->createService($this->ServiceType);
         $response = $aiService->generateResponse($prompt, $this->DefaultModel);
+
         return $this->collectResponse($response);
     }
 

@@ -9,11 +9,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: InterviewStatusRepository::class)]
 class InterviewStatus
 {
-    public const SCHEDULED = 'scheduled';
-    public const COMPLETED = 'completed';
-    public const CANCELED = 'canceled';
-    public const FAILED = 'failed';
-    public const IN_PROGRESS = 'in_progress';
+    public const SCHEDULED = 'SCHEDULED';
+    public const IS_FAILED = 'IS_FAILED';
+    public const IS_PASSED = 'IS_PASSED';
+    public const IN_PROGRESS = 'IN_PROGRESS';
 
 
     #[ORM\Id]

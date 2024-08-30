@@ -20,8 +20,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 Abstract class UserCrudController extends AbstractCrudController
 {
@@ -36,6 +42,28 @@ Abstract class UserCrudController extends AbstractCrudController
     )
     {}
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws ClientExceptionInterface
+     */
+    protected function getAllItems(): array
+    {
+        return $this->getUsersByType->findItems();
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    protected function getItemById($id): ?object
+    {
+        return $this->findUsereQuery->findItem($id);
+    }
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();

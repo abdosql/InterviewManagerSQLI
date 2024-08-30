@@ -7,9 +7,12 @@
 namespace App\Controller\Admin;
 
 use App\Candidate\Command\CreateCandidateCommand;
+use App\Candidate\Command\DeleteCandidateCommand;
 use App\Candidate\Command\Handler\CommandHandlerInterface;
+use App\Candidate\Command\UpdateCandidateCommand;
 use App\Candidate\Query\FindCandidate;
 use App\Candidate\Query\GetAllCandidates;
+use App\Controller\Admin\Abstract\AbstractCustomCrudController;
 use App\EasyAdmin\Fields\ResumeUploadField;
 use App\Entity\Candidate;
 use App\File\FileUploaderInterface;
@@ -20,8 +23,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -30,7 +31,6 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -39,7 +39,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
-class CandidateCrudController extends AbstractCrudController
+class CandidateCrudController extends AbstractCustomCrudController
 {
 
 
@@ -51,54 +51,56 @@ class CandidateCrudController extends AbstractCrudController
         private readonly MessageBusInterface     $messageBus,
         private readonly FindCandidate           $findCandidateQuery,
         private readonly GetAllCandidates        $allCandidates,
-        private readonly AdminUrlGenerator       $adminUrlGenerator,
+        private readonly AdminUrlGenerator $adminUrlGenerator,
         #[Autowire(env: "BASE_DIR")]
         private readonly string $baseDir
     )
-    {}
+    {
+        parent::__construct($this->adminUrlGenerator);
+    }
 
     public static function getEntityFqcn(): string
     {
         return Candidate::class;
     }
 
-    /**
-     * @throws NotFoundExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ContainerExceptionInterface
-     * @throws ClientExceptionInterface
-     */
-    #[isGranted("ROLE_HR_MANAGER")]
-    public function index(AdminContext $context): Response
-    {
-        $crud = $context->getCrud();
-        $entities = $this->allCandidates->findItems();
-        $fields = $this->configureFields(Crud::PAGE_INDEX);
-        $fieldMetadata = [];
-        $entityLabel = $crud->getEntityLabelInSingular();
-
-        foreach ($fields as $field) {
-            if (!$field->getAsDto()->getDisplayedOn()->has('index')) {
-                continue;
-            }
-            $fieldMetadata[] = [
-                'label' => $field->getAsDto()->getLabel(),
-                'property' => $field->getAsDto()->getProperty(),
-            ];
-        }
-        $entityName = $crud->getEntityFqcn();
-        $actions = $crud->getActionsConfig()->getActions();
-//        dd($actions, $entityName);
-        return $this->render('@EasyAdmin/crud/index.html.twig', [
-            'entities' => $entities,
-            'fields' => $fieldMetadata,
-            'actions' => $actions,
-            'entityName' => $entityName,
-            'entityLabel' => $entityLabel,
-        ]);
-    }
+//    /**
+//     * @throws NotFoundExceptionInterface
+//     * @throws TransportExceptionInterface
+//     * @throws ServerExceptionInterface
+//     * @throws RedirectionExceptionInterface
+//     * @throws ContainerExceptionInterface
+//     * @throws ClientExceptionInterface
+//     */
+//    #[isGranted("ROLE_HR_MANAGER")]
+//    public function index(AdminContext $context): Response
+//    {
+//        $crud = $context->getCrud();
+//        $entities = $this->allCandidates->findItems();
+//        $fields = $this->configureFields(Crud::PAGE_INDEX);
+//        $fieldMetadata = [];
+//        $entityLabel = $crud->getEntityLabelInSingular();
+//
+//        foreach ($fields as $field) {
+//            if (!$field->getAsDto()->getDisplayedOn()->has('index')) {
+//                continue;
+//            }
+//            $fieldMetadata[] = [
+//                'label' => $field->getAsDto()->getLabel(),
+//                'property' => $field->getAsDto()->getProperty(),
+//            ];
+//        }
+//        $entityName = $crud->getEntityFqcn();
+//        $actions = $crud->getActionsConfig()->getActions();
+////        dd($actions, $entityName);
+//        return $this->render('@EasyAdmin/crud/index.html.twig', [
+//            'entities' => $entities,
+//            'fields' => $fieldMetadata,
+//            'actions' => $actions,
+//            'entityName' => $entityName,
+//            'entityLabel' => $entityLabel,
+//        ]);
+//    }
     public function configureFields(string $pageName): iterable
     {
 //        dd($this->candidateService->findDocumentByEntity(1));
@@ -143,34 +145,35 @@ class CandidateCrudController extends AbstractCrudController
 
         return $actions;
     }
+
     /**
      * @throws NotFoundExceptionInterface
      * @throws TransportExceptionInterface
      * @throws ContainerExceptionInterface
      */
-    public function detail(AdminContext $context): Response
-    {
-        $id = $context->getRequest()->query->get('entityId');
-
-        try {
-            $candidate = $this->findCandidateQuery->findItem($id);
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'An error occurred while fetching the candidate: ' . $e->getMessage());
-            return $this->redirect($this->adminUrlGenerator->setAction(Action::INDEX)->generateUrl());
-        }
-
-        if (!$candidate) {
-            $this->addFlash('error', 'Candidate not found.');
-            return $this->redirect($this->adminUrlGenerator->setAction(Action::INDEX)->generateUrl());
-        }
-
-        $context->getEntity()->setInstance($candidate);
-
-        $responseParameters = parent::detail($context);
-        $templateName = "@EasyAdmin/".$responseParameters->get('templateName').".html.twig";
-
-        return $this->render($templateName, $responseParameters->all());
-    }
+//    public function detail(AdminContext $context): Response
+//    {
+//        $id = $context->getRequest()->query->get('entityId');
+//
+//        try {
+//            $candidate = $this->findCandidateQuery->findItem($id);
+//        } catch (\Exception $e) {
+//            $this->addFlash('error', 'An error occurred while fetching the candidate: ' . $e->getMessage());
+//            return $this->redirect($this->adminUrlGenerator->setAction(Action::INDEX)->generateUrl());
+//        }
+//
+//        if (!$candidate) {
+//            $this->addFlash('error', 'Candidate not found.');
+//            return $this->redirect($this->adminUrlGenerator->setAction(Action::INDEX)->generateUrl());
+//        }
+//
+//        $context->getEntity()->setInstance($candidate);
+//
+//        $responseParameters = parent::detail($context);
+//        $templateName = "@EasyAdmin/".$responseParameters->get('templateName').".html.twig";
+//
+//        return $this->render($templateName, $responseParameters->all());
+//    }
     /**
      * @param EntityManagerInterface $entityManager
      * @param $entityInstance
@@ -244,5 +247,28 @@ class CandidateCrudController extends AbstractCrudController
         }catch (TransportException $e){
             throw new \RuntimeException('Failed to dispatch command to message bus.', 0, $e);
         }
+    }
+
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws ClientExceptionInterface
+     */
+    protected function getAllItems(): array
+    {
+        return $this->allCandidates->findItems();
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    protected function getItemById($id): ?object
+    {
+        return $this->findCandidateQuery->findItem($id);
     }
 }

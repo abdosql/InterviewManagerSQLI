@@ -2,13 +2,15 @@
 
 namespace App\Controller\Admin;
 
+use App\Candidate\Query\GetAllCandidates;
+use App\Candidate\Query\ItemsQueryInterface as CandidateItemsQueryInterface;
+use App\Entity\InterviewStatus;
+use App\Interview\Query\GetAllInterviews;
+use App\Interview\Query\ItemsQueryInterface as InterviewItemsQueryInterface;
 use App\Entity\Candidate;
 use App\Entity\Evaluator;
 use App\Entity\HRManager;
 use App\Entity\Interview;
-use App\Persister\EntityPersisterInterface;
-use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -21,9 +23,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DashboardController extends AbstractDashboardController
 {
-    public function __construct()
+    public function __construct(
+        #[Autowire(service: GetAllCandidates::class)]
+        private readonly CandidateItemsQueryInterface $getAllCandidates,
+        #[Autowire(service: GetAllInterviews::class)]
+        private readonly InterviewItemsQueryInterface $getAllInterviews
+    )
     {
-
     }
 
     /**
@@ -36,13 +42,70 @@ class DashboardController extends AbstractDashboardController
     {
         $adminUrlGenerator = $this->container->get(AdminUrlGenerator::class);
         if ($this->isGranted("ROLE_HR_MANAGER")){
-            return $this->redirect($adminUrlGenerator->setController(CandidateCrudController::class)->generateUrl());
+            $interviewStats = $this->getInterviewStats();
+            $candidateStats = $this->getCandidateStats();
+
+            return $this->render('admin/dashboard.html.twig', [
+                'interviewStats' => $interviewStats,
+                'candidateStats' => $candidateStats,
+            ]);
         }
         return $this->redirect($adminUrlGenerator->setController(InterviewCrudController::class)->generateUrl());
 
 
     }
 
+    private function getInterviewStats(): array
+    {
+        $interviews = $this->getAllInterviews->findItems();
+        $statuses = [InterviewStatus::SCHEDULED, InterviewStatus::IS_FAILED, InterviewStatus::IS_PASSED, InterviewStatus::IN_PROGRESS];
+        $stats = array_fill_keys($statuses, 0);
+
+        foreach ($interviews as $interview) {
+            $currentStatus = $interview->getInterviewStatuses()->last()->getStatus();
+            if (isset($stats[$currentStatus])) {
+                $stats[$currentStatus]++;
+            }
+        }
+
+        return $stats;
+    }
+
+    private function getCandidateStats(): array
+    {
+        $candidates = $this->getAllCandidates->findItems();
+        $acceptedCount = 0;
+        $failedCount = 0;
+        $inProgressCount = 0;
+
+        foreach ($candidates as $candidate) {
+            $latestStatus = $this->getLatestInterviewStatus($candidate);
+
+            if ($latestStatus === InterviewStatus::IS_PASSED) {
+                $acceptedCount++;
+            } elseif ($latestStatus === InterviewStatus::IS_FAILED) {
+                $failedCount++;
+            } elseif ($latestStatus === InterviewStatus::IN_PROGRESS || $latestStatus === InterviewStatus::SCHEDULED) {
+                $inProgressCount++;
+            }
+        }
+
+        return [
+            'accepted' => $acceptedCount,
+            'failed' => $failedCount,
+            'inProgress' => $inProgressCount,
+        ];
+    }
+
+    private function getLatestInterviewStatus(Candidate $candidate): ?string
+    {
+        $latestInterview = $candidate->getInterviews()->last();
+        if ($latestInterview) {
+            $latestStatus = $latestInterview->getInterviewStatuses()->last();
+            return $latestStatus ? $latestStatus->getStatus() : null;
+        }
+        return null;
+    }
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()

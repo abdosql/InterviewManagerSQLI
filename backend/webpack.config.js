@@ -12,6 +12,7 @@ Encore
     .addEntry('app', './assets/app.js')
     .addEntry('calendar', './assets/plugins/calendar.js')
     .addEntry('appreciation', './assets/plugins/Appreciation.js')  // Path to your JS file
+    .addEntry('chart', './assets/plugins/chart.js')  // Path to your JS file
     .splitEntryChunks()
     .enableSingleRuntimeChunk()
     .cleanupOutputBeforeBuild()
