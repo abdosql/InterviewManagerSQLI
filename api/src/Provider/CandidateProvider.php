@@ -9,10 +9,13 @@ namespace App\Provider;
 use App\Document\Candidate;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
-readonly class CandidateProvider implements ProviderInterface
+readonly class CandidateProvider extends AbstractProvider implements ProviderInterface
 {
-    public function __construct(private DocumentManager $documentManager)
+
+
+    public function __construct(DocumentManager $documentManager)
     {
+        parent::__construct($documentManager);
     }
 
     public function getByEntityId(int $entityId): Candidate
@@ -23,12 +26,14 @@ readonly class CandidateProvider implements ProviderInterface
     public function getAllOrBy(?array $criteria = null, ?array $orderBy = null, $limit = null, $offset = null): array
     {
         return
-            !($criteria)
-                ?
+            is_array($criteria) ? $this->documentManager
+                ->getRepository(Candidate::class)
+                ->findBy($criteria, $orderBy, $limit, $offset)
+                :
                 $this->documentManager
                     ->getRepository(Candidate::class)
-                    ->findBy($criteria, $orderBy, $limit, $offset)
-                :
-                $this->documentManager->getRepository(Candidate::class)->findAll();
+                    ->findAll()
+            ;
+
     }
 }

@@ -1,0 +1,54 @@
+{# templates/admin/field/pdf_viewer.html.twig #}
+{% if field.value %}
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#pdfModal{{ field.uniqueId }}">
+        View PDF
+    </button>
+
+    <div class="modal fade" id="pdfModal{{ field.uniqueId }}" tabindex="-1" aria-labelledby="pdfModalLabel{{ field.uniqueId }}" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pdfModalLabel{{ field.uniqueId }}">PDF Viewer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="height: 80vh;">
+                    <iframe id="pdf-viewer-{{ field.uniqueId }}" src="about:blank" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{#    <script>#}
+{#        document.addEventListener('DOMContentLoaded', function() {#}
+{#            var modal = document.getElementById('pdfModal{{ field.uniqueId }}');#}
+{#            modal.addEventListener('show.bs.modal', function (event) {#}
+{#                var baseDir = '{{ field.customOptions.get('pdfBaseDir') }}';#}
+{#                var pdfPath = baseDir + '/' + '{{ field.value }}';#}
+{#                var viewer = document.getElementById('pdf-viewer-{{ field.uniqueId }}');#}
+{#                var fullPath = window.location.origin + pdfPath;#}
+{#                console.log( 'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent(fullPath))#}
+{#                viewer.src = 'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent(fullPath);#}
+{#            });#}
+{#        });#}
+{#    </script>#}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var modal = document.getElementById('pdfModal{{ field.uniqueId }}');
+            modal.addEventListener('show.bs.modal', function (event) {
+                var baseDir = '{{ field.customOptions.get('pdfBaseDir') }}';
+                var pdfPath = baseDir + '/' + '{{ field.value }}';
+                var viewer = document.getElementById('pdf-viewer-{{ field.uniqueId }}');
+                var fullPath = window.location.origin + pdfPath;
+
+                // Ensure the path starts with a slash if it doesn't already
+                if (!fullPath.startsWith(window.location.origin + '/')) {
+                    fullPath = window.location.origin + '/' + pdfPath.replace(/^\//, '');
+                }
+
+                viewer.src = fullPath;
+            });
+        });
+    </script>
+{% else %}
+    <span class="badge badge-secondary">No PDF</span>
+{% endif %}

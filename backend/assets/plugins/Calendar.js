@@ -69,6 +69,21 @@ document.addEventListener('DOMContentLoaded', function() {
             select: function(info) {
                 alert('Selected ' + info.startStr + ' to ' + info.endStr);
             },
+            eventDidMount: function(info) {
+                var event = info.event;
+                var now = new Date();
+
+                console.log('Event start time:', event.start);
+                console.log('Now:', now);
+
+                if (event.start.getTime() < now.getTime()) {
+                    info.el.style.backgroundColor = '#cccccc';
+                    info.el.style.borderColor = '#999999';
+                    info.el.style.color = '#666666';
+                    info.el.style.textDecoration = 'line-through';
+                    info.el.style.opacity = '0.7';
+                }
+            },
             eventClick: showInterviewDetails, // Attach the function here
             eventDrop: function(info) {
                 alert('Event dropped on ' + info.event.start.toISOString());
@@ -77,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
             eventResize: function(info) {
                 alert('Event resized to end on ' + info.event.end.toISOString());
                 // Here you can make an AJAX call to save the new end date to your server
-            }
+            },
         });
         calendar.render();
     }

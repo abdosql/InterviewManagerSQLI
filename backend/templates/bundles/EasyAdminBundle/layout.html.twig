@@ -1,0 +1,308 @@
+{% extends '@!EasyAdmin/layout.html.twig' %}
+{% block configured_stylesheets %}
+    {{ parent() }}
+    <style>
+        .dropdown-menu-scrollable {
+            max-height: 300px;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-width: 450px;
+        }
+
+        .dropdown-menu-scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .dropdown-menu-scrollable::-webkit-scrollbar-thumb {
+            background-color: #6c757d;
+            border-radius: 4px;
+        }
+
+        .dropdown-menu-scrollable::-webkit-scrollbar-thumb:hover {
+            background-color: #495057;
+        }
+
+        .dropdown-menu-scrollable::-webkit-scrollbar-track {
+            background-color: #e9ecef;
+        }
+
+        .dropdown-item {
+            white-space: normal;
+            padding: 0.5rem 1rem;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            color: #6c757d;
+        }
+
+        .notification-content {
+            margin-left: 1rem;
+        }
+
+        .notification-title {
+            font-weight: bold;
+        }
+
+        .notification-message, .notification-time {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .di{
+            height: 5rem !important;
+            width: 25rem    ;
+        }
+        .notif{
+            padding: 0 17px
+        }
+    </style>
+{% endblock %}
+{% block head_javascript %}
+    {{ parent() }}
+    <script src="{{ asset('build/app.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            const notificationList = document.querySelector('.notification-list');
+            const notificationCounter = notificationDropdown.querySelector('.badge');
+            const allTab = document.getElementById('all-notifications');
+            const unreadTab = document.getElementById('unread-notifications');
+            const readTab = document.getElementById('read-notifications');
+
+            populateFilteredTabs();
+
+            ['all-tab', 'unread-tab', 'read-tab'].forEach(tabId => {
+                document.getElementById(tabId).addEventListener('shown.bs.tab', populateFilteredTabs);
+            });
+
+            function populateFilteredTabs() {
+                const allNotifications = allTab.querySelectorAll('.notification-item');
+                unreadTab.innerHTML = '<ul class="list-group list-group-flush"></ul>';
+                readTab.innerHTML = '<ul class="list-group list-group-flush"></ul>';
+
+                allNotifications.forEach(notification => {
+                    const clone = notification.cloneNode(true);
+                    if (notification.classList.contains('unread')) {
+                        unreadTab.querySelector('ul').appendChild(clone);
+                    } else {
+                        readTab.querySelector('ul').appendChild(clone);
+                    }
+                });
+            }
+
+            const eventSource = new EventSource("{{ mercure('user_' ~ app.user.getId() , { subscribe: 'user_' ~ app.user.getId() })|escape('js') }}", {
+                withCredentials: true
+            });
+
+            eventSource.onmessage = event => {
+                const data = JSON.parse(event.data);
+
+                const newNotification = document.createElement('li');
+                newNotification.classList.add('list-group-item', 'notification-item', 'unread');
+                newNotification.innerHTML = `
+            <a class="d-flex align-items-center" href="${data.url || '#'}">
+                <div class="flex-shrink-0 me-3 position-relative">
+                    <i class="bi bi-bell-fill fs-4"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                        <span class="visually-hidden">Unread notification</span>
+                    </span>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-bold">${data.title || 'New Notification'}</div>
+                    <div class="small">${data.message || 'You have a new notification'}</div>
+                    <div class="small text-muted">Just now</div>
+                </div>
+            </a>
+        `;
+
+                notificationList.insertBefore(newNotification, notificationList.firstChild);
+
+                let currentCount = parseInt(notificationCounter.textContent, 10);
+                notificationCounter.textContent = currentCount + 1;
+
+                const notificationItems = notificationList.querySelectorAll('.notification-item');
+                if (notificationItems.length > 5) {
+                    notificationList.removeChild(notificationItems[notificationItems.length - 1]);
+                }
+
+                populateFilteredTabs();
+            };
+
+            eventSource.onerror = error => {
+                console.error('Error:', error);
+            };
+
+            document.getElementById('unread').addEventListener('click', function(event) {
+                var notificationId = event.currentTarget.getAttribute('data-id');
+
+                fetch('/api/notifications/' + notificationId + '/mark-read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            {% set unreadCount = unreadCount - 1 %}
+                        } else {
+                            console.error('Error marking notification as read:', data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        })
+
+    </script>
+{% endblock %}
+
+{% block content_top_header %}
+
+    {% block search_wrapper %}
+        <div class="content-search">
+            {% if has_search %}
+                {% block search %}
+                    <form class="form-action-search" method="get">
+                        {% block search_form %}
+                            {% block search_form_filters %}
+                                {% for field, fieldValue in ea.search.appliedFilters %}
+                                    {% if fieldValue is iterable %}
+                                        {% for key, value in fieldValue %}
+                                            {% if value is iterable %}
+                                                {% for index, iterValue in value %}
+                                                    {% if iterValue is iterable %}
+                                                        {% for subIndex, subIterValue in iterValue %}
+                                                            <input type="hidden" name="filters[{{ field }}][{{ key }}][{{ index }}][{{ subIndex }}]" value="{{ subIterValue }}">
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <input type="hidden" name="filters[{{ field }}][{{ key }}][{{ index }}]" value="{{ iterValue }}">
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                <input type="hidden" name="filters[{{ field }}][{{ key }}]" value="{{ value }}">
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <input type="hidden" name="filters[{{ field }}]" value="{{ fieldValue }}">
+                                    {% endif %}
+                                {% endfor %}
+                            {% endblock %}
+                            <input type="hidden" name="crudAction" value="index">
+                            <input type="hidden" name="crudControllerFqcn" value="{{ ea.request.query.get('crudControllerFqcn') }}">
+                            <input type="hidden" name="page" value="1">
+                            <div class="form-group">
+                                <div class="form-widget">
+                                    <i class="fas fa-search content-search-icon"></i>
+                                    <label class="content-search-label" data-value="{{ app.request.get('query') }}">
+                                        <input class="form-control {{ app.request.get('query') is null ? 'is-blank' }}" type="search" name="query" value="{{ app.request.get('query') ?? '' }}" placeholder="{{ t('action.search', ea.i18n.translationParameters, 'EasyAdminBundle')|trans }}" spellcheck="false" autocorrect="off" onInput="this.parentNode.dataset.value=this.value"{% if ea.crud.currentAction == 'index' and ea.crud.autofocusSearch == true %} autofocus="autofocus"{% endif %}>
+                                    </label>
+                                    {% if app.request.get('query') %}
+                                        <a href="{{ ea_url().unset('query') }}" class="content-search-reset">
+                                            <i class="fas fa-fw fa-times"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endblock %}
+                    </form>
+                {% endblock search %}
+            {% endif %}
+        </div>
+    {% endblock search_wrapper %}
+
+    <!-- Notification Dropdown -->
+    <div class="dropdown notif">
+        <a class="position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+            <i class="fa-solid fa-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ unreadCount }}
+        <span class="visually-hidden">unread messages</span>
+        </span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end p-0 dropdown-menu-scrollable" aria-labelledby="notificationDropdown" >
+            <div class="card border-0" style="width: 20rem;">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-notifications" type="button" role="tab" aria-controls="all-notifications" aria-selected="true">All</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="unread-tab" data-bs-toggle="tab" data-bs-target="#unread-notifications" type="button" role="tab" aria-controls="unread-notifications" aria-selected="false">Unread</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="read-tab" data-bs-toggle="tab" data-bs-target="#read-notifications" type="button" role="tab" aria-controls="read-notifications" aria-selected="false">Read</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="all-notifications" role="tabpanel" aria-labelledby="all-tab">
+                            <ul class="list-group list-group-flush notification-list">
+                                {% if notifications %}
+                                    {% for notification in notifications %}
+                                        <li data-id="{{  notification.getId() }}" id="{% if not notification.isRead() %}unread{% endif %}" class="list-group-item notification-item {% if not notification.isRead() %}unread{% endif %}">
+                                            <a class="d-flex align-items-center text-decoration-none" href="{{ notification.getLink() }}">
+                                                <div class="flex-shrink-0 me-3 position-relative">
+                                                    <i class="bi bi-bell-fill fs-4"></i>
+                                                    {% if not notification.isRead() %}
+                                                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                                    <span class="visually-hidden">Unread notification</span>
+                                                </span>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="{% if not notification.isRead() %}fw-bold{% endif %}">New message received</div>
+                                                    <div class="small">{{ notification.getContent() }}</div>
+                                                    <div class="small text-muted">{{ notification.createdAt|ago }} Ago</div>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center pb-2 pt-2">No notifications yet.</div>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="tab-pane fade" id="unread-notifications" role="tabpanel" aria-labelledby="unread-tab">
+                            <!-- Unread notifications will be dynamically populated here -->
+                        </div>
+                        <div class="tab-pane fade" id="read-notifications" role="tabpanel" aria-labelledby="read-tab">
+                            <!-- Read notifications will be dynamically populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{#    <div class="dropdown notifications-menu-wrapper">#}
+{#        <a class="notifications-toggle" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">#}
+{#            <i class="fas fa-bell"></i>#}
+{#            <span id="notification-counter-main" class="badge bg-danger">0</span>#}
+{#        </a>#}
+{#        <ul class="dropdown-menu dropdown-menu-end" id="notification-list-main">#}
+{#            <li class="dropdown-header">Notifications</li>#}
+{#            #}{# Notifications will be inserted here dynamically #}
+{#        </ul>#}
+{#    </div>#}
+    {% block header_custom_menu_wrapper %}
+        <div class="navbar-custom-menu">
+            {% block header_custom_menu %}
+                <div class="dropdown user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
+                    <a class="user-details" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
+                        {{ user_menu_avatar }}
+                        {% if ea.userMenu.isNameDisplayed %}
+                            <span class="user-name">{{ ea.userMenu.name }}</span>
+                        {% endif %}
+                    </a>
+                    {{ user_menu_dropdown }}
+                </div>
+
+            {% endblock header_custom_menu %}
+        </div>
+    {% endblock header_custom_menu_wrapper %}
+
+    {% block settings_dropdown_wrapper %}
+        {{ settings_dropdown }}
+    {% endblock settings_dropdown_wrapper %}
+
+{% endblock content_top_header %}

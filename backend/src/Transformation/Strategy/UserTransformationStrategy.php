@@ -5,6 +5,7 @@ namespace App\Transformation\Strategy;
 use App\Document\UserDocument;
 use App\Entity\Evaluator;
 use App\Entity\HRManager;
+use App\Entity\User;
 use App\Transformation\Strategy\Abstract\AbstractUserTransformationStrategy;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
@@ -27,4 +28,12 @@ class UserTransformationStrategy extends AbstractUserTransformationStrategy
     }
 
 
+    public function transformToEntity(object $document): User
+    {
+        if (!$document instanceof UserDocument){
+            throw new \InvalidArgumentException("Document must be an instance of UserDocument");
+        }
+        return $this->getEntityOrFail($document->getEntityId());
+
+    }
 }

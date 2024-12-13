@@ -6,7 +6,7 @@
 
 namespace App\User\Command\Handler;
 
-use App\Candidate\Command\CommandInterface;
+use App\Appreciation\Command\CommandInterface;
 use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\MessageBusInterface;

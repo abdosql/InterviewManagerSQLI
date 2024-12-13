@@ -55,6 +55,12 @@ RUN docker-php-ext-enable amqp
 # Install Nodejs
 RUN apt install -y nodejs npm
 
+# Install Supervisor
+RUN apt-get update && apt-get install -y supervisor
+
+# Configure Supervisor
+RUN mkdir -p /var/log/supervisor
+COPY ./docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Install MinIO Client (mc)
 RUN wget https://dl.min.io/client/mc/release/linux-amd64/mc && \
@@ -73,5 +79,5 @@ RUN echo '#!/bin/sh\n\
     exec apache2-foreground' > /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 EXPOSE 8585

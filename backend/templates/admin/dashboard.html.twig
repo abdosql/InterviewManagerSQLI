@@ -1,100 +1,106 @@
+{# templates/admin/dashboard.html.twig #}
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
-{% block head_stylesheets %}
-    {{ parent() }}
-    {{ encore_entry_link_tags('calendar') }}
-{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
-{% block content_title %}Dashboard{% endblock %}
+{# ... existing code ... #}
 
-{% block main %}
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase">Scheduled Interviews</h6>
+                            <h2 class="mb-0">{{ interviewStats.SCHEDULED }}</h2>
+                        </div>
+                        <i class="fas fa-calendar fa-3x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase">Passed Interviews</h6>
+                            <h2 class="mb-0">{{ interviewStats.IS_PASSED }}</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase">Failed Interviews</h6>
+                            <h2 class="mb-0">{{ interviewStats.IS_FAILED }}</h2>
+                        </div>
+                        <i class="fas fa-times-circle fa-3x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted text-uppercase">In Progress</h6>
+                            <h2 class="mb-0">{{ interviewStats.IN_PROGRESS }}</h2>
+                        </div>
+                        <i class="fas fa-hourglass-half fa-3x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Interview Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="interviewChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Candidate Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="candidateChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block body_javascript %}
     {{ parent() }}
-    {{ encore_entry_script_tags('calendar') }}
+    {{ encore_entry_script_tags('chart') }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const addInterviewButton = document.getElementById('add-interview');
-            const interviewModal = new bootstrap.Modal(document.getElementById('interviewModal'), {
-                keyboard: false
-            });
+            createChart('interviewChart',
+                [{{ interviewStats.SCHEDULED }}, {{ interviewStats.IS_FAILED }}, {{ interviewStats.IS_PASSED }}, {{ interviewStats.IN_PROGRESS }}],
+                ['Scheduled', 'Failed', 'Passed', 'In Progress'],
+                'Interview Status Distribution'
+            );
 
-            addInterviewButton.addEventListener('click', function() {
-                interviewModal.show();
-            });
-
-            document.getElementById('interviewForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-
-                // Perform an AJAX request to save the interview
-                fetch('/api/interviews', {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Refresh the calendar to show the new interview
-                            const calendar = FullCalendar.getCalendar(calendarEl);
-
-                            // Get the selected candidate's name
-                            const candidateSelect = document.getElementById('interview_candidate');
-                            const candidateName = candidateSelect.options[candidateSelect.selectedIndex].text;
-
-                            // Get the selected evaluators' names
-                            const evaluatorSelect = document.getElementById('interview_evaluator');
-                            const evaluatorNames = Array.from(evaluatorSelect.selectedOptions).map(option => option.text).join(', ');
-
-                            // Create a more detailed event title
-                            const eventTitle = `${formData.get('interview_location')} - ${candidateName}`;
-
-                            calendar.addEvent({
-                                id: data.id,
-                                title: eventTitle,
-                                start: formData.get('interview_date'),
-                                extendedProps: {
-                                    location: formData.get('interview_location'),
-                                    candidate: candidateName,
-                                    evaluators: evaluatorNames
-                                }
-                            });
-
-                            interviewModal.hide();
-                            // Update upcoming interviews list
-                            updateUpcomingInterviews();
-
-                            // Clear the form
-                            this.reset();
-                        } else {
-                            alert('Error saving interview: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while saving the interview.');
-                    });
-            });
+            createChart('candidateChart',
+                [{{ candidateStats.accepted }}, {{ candidateStats.failed }}, {{ candidateStats.inProgress }}],
+                ['Accepted', 'Failed', 'In Progress'],
+                'Candidate Status Distribution'
+            );
         });
-
-        // You might want to add this function to show event details when clicked
-        function showEventDetails(info) {
-            const event = info.event;
-            const props = event.extendedProps;
-            alert(`
-        Interview Details:
-        Location: ${props.location}
-        Candidate: ${props.candidate}
-        Evaluators: ${props.evaluators}
-        Date: ${event.start.toLocaleString()}
-    `);
-        }
-
-        // Make sure to add this event listener to your calendar options
-        // eventClick: showEventDetails
     </script>
 {% endblock %}

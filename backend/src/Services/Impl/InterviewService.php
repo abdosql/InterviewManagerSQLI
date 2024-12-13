@@ -72,7 +72,7 @@ readonly class InterviewService implements DocumentPersistenceServiceInterface, 
 
     public function findDocument($id)
     {
-        // TODO: Implement findDocument() method.
+        return $this->documentManager->getRepository(InterviewDocument::class)->findOneBy(["entityId" => $id]);
     }
 
     public function findAllDocuments(): array

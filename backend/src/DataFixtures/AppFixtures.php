@@ -2,6 +2,8 @@
 
 namespace App\DataFixtures;
 
+use App\Factory\CandidateFactory;
+use App\Factory\EvaluatorFactory;
 use App\Factory\HRManagerFactory;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -11,7 +13,7 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        HRManagerFactory::createOne()->setUsername("abdo")->setRoles(["ROLE_ADMIN", "PUBLIC_ACCESS"]);
+        HRManagerFactory::createOne()->setUsername("abdo")->setRoles(["ROLE_HR_MANAGER", "PUBLIC_ACCESS"]);
 
         $manager->flush();
     }

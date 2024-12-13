@@ -8,5 +8,5 @@ namespace App\Candidate\Query;
 
 interface ItemsQueryInterface
 {
-    public function findItems(array $criteria = null): array;
+    public function findItems(array $criteria = []): array;
 }

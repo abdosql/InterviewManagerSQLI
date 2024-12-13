@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Form;
+namespace App\Form\Type;
 
 use App\Entity\Candidate;
 use App\Entity\Evaluator;
@@ -20,7 +20,7 @@ class InterviewType extends AbstractType
             ->add('interview_location', TextType::class, [
                 'attr' => [
                     'class' => 'form-control mb-3',
-                    'placeholder' => 'Location'
+                    'placeholder' => 'Location',
                 ],
                 'label' => 'Interview Location',
                 'label_attr' => ['class' => 'form-label fw-bold'],

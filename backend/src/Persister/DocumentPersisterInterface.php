@@ -2,7 +2,6 @@
 
 namespace App\Persister;
 
-use MongoDB\BSON\Document;
 
 interface DocumentPersisterInterface
 {

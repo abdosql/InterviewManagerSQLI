@@ -6,15 +6,15 @@
 
 namespace App\Interview\Command;
 
-use App\Candidate\Command\CommandInterface;
+use App\Appreciation\Command\CommandInterface;
 use App\Services\DatabasePersistence\EntityPersistenceServiceInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 readonly abstract class AbstractCommand implements CommandInterface
 {
     public function __construct(
-        private readonly EntityPersistenceServiceInterface $service,
-        private readonly MessageBusInterface $messageBus,
+        private EntityPersistenceServiceInterface $service,
+        private MessageBusInterface      $messageBus,
     )
     {
 

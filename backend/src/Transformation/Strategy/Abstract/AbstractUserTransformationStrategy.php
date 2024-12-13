@@ -8,12 +8,14 @@ use App\Document\UserDocument;
 use App\Entity\Evaluator;
 use App\Entity\HRManager;
 use App\Entity\User;
+use App\Services\Impl\UserService;
 use App\Transformation\TransformToDocumentStrategyInterface;
+use App\Transformation\TransformToEntityStrategyInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-abstract class AbstractUserTransformationStrategy implements TransformToDocumentStrategyInterface
+abstract class AbstractUserTransformationStrategy implements TransformToDocumentStrategyInterface, TransformToEntityStrategyInterface
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
+    public function __construct(private readonly UserService $userService)
     {
     }
     /**
@@ -34,11 +36,7 @@ abstract class AbstractUserTransformationStrategy implements TransformToDocument
     }
     public function getEntityOrFail(int $entityId): User
     {
-        $entity = $this->entityManager->getRepository(User::class)->find($entityId);
-        if (null === $entity) {
-            throw new \RuntimeException("User not found with id: $entityId");
-        }
-        return $entity;
+        return $this->userService->findEntity($entityId);
     }
     public function transformEvaluatorEntityToDocument(User $user): EvaluatorDocument
     {
@@ -47,7 +45,9 @@ abstract class AbstractUserTransformationStrategy implements TransformToDocument
         }
         $document = new EvaluatorDocument();
         $this->transformCommonFields($user, $document);
-        $document->setSpecialization($user->getSpecialization());
+        $document->
+            setSpecialization($user->getSpecialization())
+        ;
 
         return $document;
     }

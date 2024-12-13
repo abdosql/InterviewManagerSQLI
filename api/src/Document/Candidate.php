@@ -4,13 +4,13 @@ namespace App\Document;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Provider\Data\CandidateDataProvider;
-use App\Repository\CandidateRepository;
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 #[ApiResource(provider: CandidateDataProvider::class)]
-#[MongoDB\Document(collection: "candidates", repositoryClass: CandidateRepository::class)]
+#[MongoDB\Document(collection: "candidates", repositoryClass: UserRepository::class)]
 class Candidate extends Person
 {
     #[MongoDB\Id]

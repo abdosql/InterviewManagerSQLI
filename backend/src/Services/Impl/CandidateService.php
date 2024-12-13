@@ -16,7 +16,7 @@ use Doctrine\ODM\MongoDB\MongoDBException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-final class CandidateService implements DocumentPersistenceServiceInterface, EntityPersistenceServiceInterface
+final readonly class CandidateService implements DocumentPersistenceServiceInterface, EntityPersistenceServiceInterface
 {
     public function __construct(
         #[Autowire(service: CandidateDocumentPersister::class)]
@@ -66,9 +66,9 @@ final class CandidateService implements DocumentPersistenceServiceInterface, Ent
         $this->documentPersister->delete($candidateDocument);
     }
 
-    public function findDocument($id)
+    public function findDocument($id): CandidateDocument
     {
-        // TODO: Implement findDocument() method.
+        return $this->documentManager->getRepository(CandidateDocument::class)->findOneBy(["entityId" => $id]);
     }
 
     public function findAllDocuments(): array

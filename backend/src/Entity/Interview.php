@@ -17,10 +17,10 @@ class Interview
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $interview_date = null;
+    private ?\DateTimeInterface $interviewDate = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $interview_location = null;
+    private ?string $interviewLocation = null;
 
     #[ORM\ManyToOne(inversedBy: 'interviews')]
     #[ORM\JoinColumn(nullable: false)]
@@ -28,12 +28,12 @@ class Interview
 
     #[ORM\ManyToOne(inversedBy: 'interviews')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?HRManager $hr_manager = null;
+    private ?HRManager $hrManager = null;
 
     /**
      * @var Collection<int, Appreciation>
      */
-    #[ORM\OneToMany(targetEntity: Appreciation::class, mappedBy: 'interview')]
+    #[ORM\OneToMany(targetEntity: Appreciation::class, mappedBy: 'interview', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $appreciations;
 
     /**
@@ -42,10 +42,18 @@ class Interview
     #[ORM\ManyToMany(targetEntity: Evaluator::class, mappedBy: 'interviews')]
     private Collection $evaluators;
 
+    /**
+     * @var Collection<int, InterviewStatus>
+     */
+    #[ORM\OneToMany(targetEntity: InterviewStatus::class, mappedBy: 'interview', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $interviewStatuses;
+
+
     public function __construct()
     {
         $this->appreciations = new ArrayCollection();
         $this->evaluators = new ArrayCollection();
+        $this->interviewStatuses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -55,24 +63,24 @@ class Interview
 
     public function getInterviewDate(): ?\DateTimeInterface
     {
-        return $this->interview_date;
+        return $this->interviewDate;
     }
 
-    public function setInterviewDate(\DateTimeInterface $interview_date): static
+    public function setInterviewDate(\DateTimeInterface $interviewDate): static
     {
-        $this->interview_date = $interview_date;
+        $this->interviewDate = $interviewDate;
 
         return $this;
     }
 
     public function getInterviewLocation(): ?string
     {
-        return $this->interview_location;
+        return $this->interviewLocation;
     }
 
-    public function setInterviewLocation(string $interview_location): static
+    public function setInterviewLocation(string $interviewLocation): static
     {
-        $this->interview_location = $interview_location;
+        $this->interviewLocation = $interviewLocation;
 
         return $this;
     }
@@ -91,12 +99,12 @@ class Interview
 
     public function getHrManager(): ?HRManager
     {
-        return $this->hr_manager;
+        return $this->hrManager;
     }
 
-    public function setHrManager(?HRManager $hr_manager): static
+    public function setHrManager(?HRManager $hrManager): static
     {
-        $this->hr_manager = $hr_manager;
+        $this->hrManager = $hrManager;
 
         return $this;
     }
@@ -157,4 +165,35 @@ class Interview
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, InterviewStatus>
+     */
+    public function getInterviewStatuses(): Collection
+    {
+        return $this->interviewStatuses;
+    }
+
+    public function addInterviewStatus(InterviewStatus $interviewStatus): static
+    {
+        if (!$this->interviewStatuses->contains($interviewStatus)) {
+            $this->interviewStatuses->add($interviewStatus);
+            $interviewStatus->setInterview($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInterviewStatus(InterviewStatus $interviewStatus): static
+    {
+        if ($this->interviewStatuses->removeElement($interviewStatus)) {
+            // set the owning side to null (unless already changed)
+            if ($interviewStatus->getInterview() === $this) {
+                $interviewStatus->setInterview(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

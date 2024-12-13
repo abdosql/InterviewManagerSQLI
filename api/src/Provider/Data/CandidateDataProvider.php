@@ -9,12 +9,16 @@ namespace App\Provider\Data;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Document\Candidate;
+use App\Provider\CandidateProvider;
 use App\Provider\ProviderInterface as CandidateProviderInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 readonly class CandidateDataProvider implements ProviderInterface
 {
-
-    public function __construct(private CandidateProviderInterface $candidateProvider)
+    public function __construct(
+        #[Autowire(service: CandidateProvider::class)]
+        private CandidateProviderInterface $candidateProvider
+    )
     {
     }
 
@@ -24,13 +28,14 @@ readonly class CandidateDataProvider implements ProviderInterface
         if ($resourceClass !== Candidate::class) {
             throw new \RuntimeException(\sprintf('Unsupported resource class: %s', $resourceClass));
         }
-
         if (isset($uriVariables['id'])) {
             return $this->candidateProvider->getByEntityId((int)$uriVariables['id']);
         } else {
             $criteria = $context['filters'] ?? [];
 
-            return !empty($criteria) ? $this->candidateProvider->getAllOrBy($criteria) : $this->candidateProvider->getAllOrBy();
+            return !empty($criteria)
+                ? $this->candidateProvider->getAllOrBy($criteria)
+                : $this->candidateProvider->getAllOrBy();
         }
     }
 }

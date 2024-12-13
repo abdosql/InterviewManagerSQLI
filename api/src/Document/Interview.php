@@ -2,11 +2,29 @@
 
 namespace App\Document;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use App\Provider\Data\InterviewDataProvider;
+use App\Repository\InterviewRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
-#[MongoDB\Document(collection: "interviews")]
+#[ApiResource(
+
+    operations: [
+        new GetCollection(provider: InterviewDataProvider::class),
+        new Get(provider: InterviewDataProvider::class),
+        new GetCollection(
+            uriTemplate: '/interviews/upcoming',
+            description: 'Retrieve upcoming interviews',
+            name: 'api_interviews_upcoming_get_collection'
+        ),
+    ],
+    provider: InterviewDataProvider::class
+)]
+#[MongoDB\Document(collection: "interviews", repositoryClass: InterviewRepository::class)]
 class Interview
 {
     #[MongoDB\Id]
@@ -27,16 +45,19 @@ class Interview
     #[MongoDB\ReferenceOne(targetDocument: HRManager::class, inversedBy: "interviews")]
     private ?HRManager $hrManager;
 
-    #[MongoDB\ReferenceMany(targetDocument: Appreciation::class, mappedBy: "interview")]
+    #[MongoDB\ReferenceMany(targetDocument: Appreciation::class, cascade: ["persist", "remove"], mappedBy: "interview")]
     private ArrayCollection $appreciations;
-
-//    #[MongoDB\Field(type: "int")]
-//    protected ?int $entityId;
+    #[MongoDB\ReferenceMany(targetDocument: InterviewStatus::class, cascade: ["persist", "remove"], mappedBy: 'interview')]
+    private Collection $interviewStatuses;
+    #[MongoDB\Field(type: "int")]
+    private ?int $entityId;
 
     public function __construct()
     {
         $this->appreciations = new ArrayCollection();
         $this->evaluators = new ArrayCollection();
+        $this->interviewStatuses = new ArrayCollection();
+
     }
 
     public function getId(): ?string
@@ -133,13 +154,39 @@ class Interview
         }
         return $this;
     }
-//    public function getEntityId():?int
-//    {
-//        return $this->entityId;
-//    }
-//    public function setEntityId(?int $entityId): self
-//    {
-//        $this->entityId = $entityId;
-//        return $this;
-//    }
+    public function getEntityId():?int
+    {
+        return $this->entityId;
+    }
+    public function setEntityId(?int $entityId): self
+    {
+        $this->entityId = $entityId;
+        return $this;
+    }
+
+    public function getInterviewStatuses(): Collection
+    {
+        return $this->interviewStatuses;
+    }
+
+    public function addInterviewStatus(InterviewStatus $interviewStatus): self
+    {
+        if (!$this->interviewStatuses->contains($interviewStatus)) {
+            $this->interviewStatuses[] = $interviewStatus;
+            $interviewStatus->setInterview($this);
+        }
+        return $this;
+    }
+
+    public function removeInterviewStatus(InterviewStatus $interviewStatus): self
+    {
+        if ($this->interviewStatuses->removeElement($interviewStatus)) {
+            if ($interviewStatus->getInterview() === $this) {
+                $interviewStatus->setInterview(null);
+            }
+        }
+        return $this;
+    }
+
+
 }

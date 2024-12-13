@@ -6,32 +6,79 @@
 
 namespace App\Transformation\Strategy;
 
+
+use App\Document\AppreciationDocument;
 use App\Document\InterviewDocument;
+use App\Document\InterviewStatusDocument;
 use App\Entity\Interview;
+use App\Services\Impl\CandidateService;
+use App\Services\Impl\InterviewService;
+use App\Services\Impl\UserService;
 use App\Transformation\TransformToDocumentStrategyInterface;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Transformation\TransformToEntityStrategyInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag("app.transform_to_entity_strategy", ['type' => 'interview'])]
 #[AutoconfigureTag("app.transform_to_document_strategy", ['type' => 'interview'])]
-readonly class InterviewTransformationStrategy implements TransformToDocumentStrategyInterface
+readonly class InterviewTransformationStrategy implements TransformToDocumentStrategyInterface, TransformToEntityStrategyInterface
 {
-    public function __construct(private EntityManagerInterface $entityManager)
+    public function __construct(private InterviewService $interviewService, private UserService $userService, private CandidateService $candidateService)
     {
     }
     public function transformToDocument(int $entityId): InterviewDocument
     {
-        $entity = $this->entityManager->getRepository(Interview::class)->find($entityId);
-        if (null === $entity) {
-            throw new \RuntimeException("Interview not found with id: $entityId");
+        $entity = $this->interviewService->findEntity($entityId);
+        $hrManagerDocument = $this->userService->findDocument($entity->getHrManager()->getId());
+        $candidateDocument = $this->candidateService->findDocument($entity->getCandidate()->getId());
+        $interviewDocument = new InterviewDocument();
+        foreach ($entity->getInterviewStatuses() as $interviewStatus){
+            $interviewStatusDocument = new InterviewStatusDocument();
+            $interviewStatusDocument
+                ->setStatus($interviewStatus->getStatus())
+                ->setEntityId($interviewStatus->getId())
+                ->setStatusDate($interviewStatus->getStatusDate())
+                ->setInterview($interviewDocument)
+            ;
+            $interviewDocument->addInterviewStatus($interviewStatusDocument);
         }
 
-        $interviewDocument = new InterviewDocument();
+        // Transform Appreciations
+        foreach ($entity->getAppreciations() as $appreciation) {
+            $appreciationDocument = new AppreciationDocument();
+            $appreciationDocument
+                ->setComment($appreciation->getComment())
+                ->setScore($appreciation->getScore())
+                ->setEntityId($appreciation->getId())
+                ->setInterview($interviewDocument);
+            $interviewDocument->addAppreciation($appreciationDocument);
+        }
+
+
         $interviewDocument
             ->setInterviewDate($entity->getInterviewDate())
             ->setInterviewLocation($entity->getInterviewLocation())
-            ->setEntityId($entity->getId());
+            ->setEntityId($entity->getId())
+            ->setHrManager($hrManagerDocument)
+            ->setCandidate($candidateDocument)
         ;
+        foreach ($entity->getEvaluators() as $evaluator)
+        {
+            $evaluatorDocument = $this->userService->findDocument($evaluator->getId());
+            $interviewDocument->addEvaluator($evaluatorDocument);
+        }
         return $interviewDocument;
+    }
+
+    /**
+     * @param object $document
+     * @return Interview
+     */
+    public function transformToEntity(object $document): Interview
+    {
+        if (!$document instanceof InterviewDocument){
+            throw new \InvalidArgumentException("Document must be an instance of InterviewDocument");
+        }
+
+        return $this->interviewService->findEntity($document->getEntityId());
     }
 }

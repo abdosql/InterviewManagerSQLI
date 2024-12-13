@@ -16,7 +16,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class CandidateHandler
+readonly class CandidateHandler
 {
     public function __construct(
         private DataTransformationAdapter $transformationAdapter,

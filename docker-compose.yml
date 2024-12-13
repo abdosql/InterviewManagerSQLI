@@ -37,6 +37,7 @@ services:
             - ./docker/server/apache/sites-enabled:/etc/apache2/sites-enabled
             - ./docker/server/php/php.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
             - ./docker/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+            - ./docker/supervisor/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
         depends_on:
             - sql-database
         networks:
@@ -139,11 +140,35 @@ services:
         networks:
             - inner_net
 
+    mercure:
+        image: dunglas/mercure
+        environment:
+            DEBUG: "debug"
+            SERVER_NAME: ':80'
+            # Uncomment and set this if you have a specific transport URL
+            # MERCURE_TRANSPORT_URL: "bolt://mercure.db"
+            MERCURE_PUBLISHER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+            MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeThisMercureHubJWTSecretKey!'
+            # Configure CORS settings
+            MERCURE_EXTRA_DIRECTIVES: |-
+                cors_origins "http://localhost:9595"
+                cors_allow_credentials true
+                anonymous
+        ports:
+            - "3000:80"
+        networks:
+            - inner_net
+        restart: unless-stopped
+
+
+
 volumes:
     mysql_admin_data:
     mongodb_data:
     mysql_data:
     minio-data:
-
+#    mercure_data:
+#    caddy_data:
+#    caddy_config:
 networks:
     inner_net:

@@ -16,8 +16,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
 readonly class DeleteInterviewCommand extends AbstractCommand
 {
 
-    public function __construct(private Interview $interview,
-                                private InterviewService $interviewService,
+    public function __construct(private Interview             $interview,
+                                private InterviewService      $interviewService,
                                 private MessageBusInterface $messageBus,
     )
     {
