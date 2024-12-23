@@ -89,3 +89,9 @@ services:
                     key: '%env(MINIO_ACCESS_KEY)%'
                     secret: '%env(MINIO_SECRET_KEY)%'
                 use_path_style_endpoint: true
+    # Message Bus Configuration
+    messenger.transport.symfony_serializer:
+        class: Symfony\Component\Messenger\Transport\Serialization\PhpSerializer
+
+    Symfony\Component\Messenger\MessageBusInterface $commandBus: '@command.bus'
+    Symfony\Component\Messenger\MessageBusInterface $eventBus: '@event.bus'

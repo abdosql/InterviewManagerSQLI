@@ -1,18 +1,38 @@
 # config/packages/messenger.yaml
 framework:
     messenger:
+        default_bus: command.bus
+        failure_transport: failed
+
         transports:
-            async: '%env(MESSENGER_TRANSPORT_DSN)%'
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: messenger.transport.symfony_serializer
+                options:
+                    exchange:
+                        name: messages
+                        type: fanout  # Changed from direct to fanout to match existing exchange
+                    queues:
+                        messages: ~
+                    auto_setup: true
+            failed:
+                dsn: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
+
+        buses:
+            command.bus:
+                middleware:
+                    - doctrine_transaction
+            event.bus:
+                default_middleware: allow_no_handlers
+
         routing:
+            'App\Message\Interview\InterviewCreatedMessage': async
+            'App\Message\Interview\InterviewDeletedMessage': async
+            'App\Message\Interview\InterviewStatusAddMessage': async
             'App\Message\Candidate\CandidateCreatedMessage': async
             'App\Message\Candidate\CandidateUpdatedMessage': async
             'App\Message\Candidate\CandidateDeletedMessage': async
-
             'App\Message\User\UserCreatedMessage': async
             'App\Message\User\UserUpdatedMessage': async
             'App\Message\User\UserDeletedMessage': async
-
-            'App\Message\Interview\InterviewCreatedMessage': async
-
-
